@@ -2,10 +2,6 @@ import { Routes, Route } from "react-router-dom"
 import TopNavi from "./components/common/TopNavi"
 import Home from "./components/common/Home"
 import NotFoundMenu from "./components/error/NotFoundMenu"
-import BoardComp from "./components/board/BoardComp"
-import ImageComp from "./components/image/ImageComp"
-import MemberComp from "./components/member/MemberComp"
-import PacsComp from "./components/pacs/PacsComp"
 
 function App() {
 
@@ -18,10 +14,6 @@ function App() {
       {/* 라이팅 - 메뉴별 */}
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/board/*" element={<BoardComp />} />
-          <Route path="/image/*" element={<ImageComp />} />
-          <Route path="/pacs/*" element={<PacsComp />} />
-          <Route path="/member/*" element={<MemberComp />} />
           <Route path="*" element={<NotFoundMenu />} />
         </Routes>
       </div>
