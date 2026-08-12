@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
+import com.springboot.caretrace.api.medicalstaff.entity.MedicalStaffDetails;
+import com.springboot.caretrace.api.medicalstaff.service.MedicalStaffDetailsService;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
@@ -25,7 +27,8 @@ import java.util.List;
 // JWT : JSON Web Token - 토큰 관리 프로그램.
 public class JwtTokenProvider {
 
-//    private final MemberDetailsService memberDetailsService;
+    // 의료진 사용자 인증 정보를 조회하는 선우 파트 서비스
+    private final MedicalStaffDetailsService medicalStaffDetailsService;
 
     // application.properties에 springboot.jwt.secret 항목으로 세팅되어 있는 값을 가져다 사용한다.
     // 아래 초기값을 덮어 쓰기를 한다.
@@ -92,16 +95,18 @@ public class JwtTokenProvider {
         return info;
     }
 
-//    // 사용자 인증 정보를 반환하는 메서드
-//    public Authentication getAuthentication(String token) {
-//        log.info("[getAuthentication] 토큰 인증 정보 조회 시작");
-//        MemberDetails memberDetails = memberDetailsService.loadMemberById(this.getId(token));
-//        log.info("[getAuthentication] 토큰 인증 정보 조회 완료. MemberDetails.id : {}",
-//                memberDetails.getId());
-//        // 두번째 파라메터의 "" 는 인증에 대한 처리 -> 로그인 처리가 되어 있고 토큰도 검증 완료가 된 상태
-//        return new UsernamePasswordAuthenticationToken
-//                (memberDetails, "", memberDetails.getAuthorities());
-//    }
+    // 사용자 인증 정보를 반환하는 메서드
+    public Authentication getAuthentication(String token) {
+        log.info("[getAuthentication] 의료진 토큰 인증 정보 조회 시작");
+        MedicalStaffDetails medicalStaffDetails = medicalStaffDetailsService
+                .loadMedicalStaffByLoginId(this.getId(token));
+
+        return new UsernamePasswordAuthenticationToken(
+                medicalStaffDetails,
+                "",
+                medicalStaffDetails.getAuthorities()
+        );
+    }
 
     // 클라이언트 -> 서버로 정보가 전달되는데 이때 request 객체가 받는다. 헤더가 포함되어 있다.
     // 토큰을 헤더에 담아서 전달한다.
@@ -121,8 +126,7 @@ public class JwtTokenProvider {
                     .parseClaimsJws(token);
             // ! 붙여서 : true - 유효한 토큰, false - 만료된 토큰
             // .before(new Date()) 만료 날짜가 현재 날짜 이전에 있다.
-//            return !claims.getBody().getExpiration().before(new Date());
-            return true;
+            return !claims.getBody().getExpiration().before(new Date());
         } catch (Exception e){
             log.error("[validateToken] 토큰 유효 체크 예외 발생 - 위조나 변조");
             return false;

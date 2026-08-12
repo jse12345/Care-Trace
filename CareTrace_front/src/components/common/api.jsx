@@ -1,47 +1,54 @@
 import axios from "axios";
 
-// axios 객체로 기본 URL을 세팅하여 api 객체 생성 - 실제적인 통신을 담당
+// 백엔드 API 통신 공용 객체
 const api = axios.create({
-    baseURL: "http://10.15.21.205",
+  baseURL:
+    import.meta.env.VITE_API_BASE_URL
+    || "http://10.15.21.205",
 });
 
-// 비동기 통신을 요청하기 전에 자동으로 실행되는 처리문
+// 모든 API 요청에 JWT 토큰 자동 추가
 api.interceptors.request.use(
-    (config) => {
+  (config) => {
+    const token = localStorage.getItem("token");
 
-        // 저장되어 있는 토큰을 가져온다.
-        const token = localStorage.getItem("token");
-
-        // 토큰이 있으면 X-AUTH-TOKEN 헤더에 세팅
-        if (token) {
-            config.headers["X-AUTH-TOKEN"] = token;
-        }
-
-        return config;
-    },
-    // 통신 실패로 catch 처리로 이동
-    (error) => Promise.reject(error)
-);
-
-// 비동기 통신을 요청한 후에 처리되는 처리문
-api.interceptors.response.use(
-
-    (response) => response,
-
-    (error) => {
-
-        // 인증 실패 시 실행되는 조건문 - 토큰 없음, 토큰 만료, 잘못된 토큰 등
-        if (error.response?.status === 401) {
-
-            localStorage.removeItem("token");
-
-            window.location.href = "/member/login";
-        }
-
-        // 통신 실패로 catch 처리로 이동
-        return Promise.reject(error);
+    if (token) {
+      config.headers["X-AUTH-TOKEN"] = token;
     }
 
+    return config;
+  },
+  (error) => Promise.reject(error),
+);
+
+// API 응답 공통 처리
+api.interceptors.response.use(
+  (response) => response,
+
+  (error) => {
+    const status = error.response?.status;
+    const requestUrl = error.config?.url || "";
+
+    // 로그인 요청 자체가 실패한 경우에는
+    // 로그인 화면에서 오류 메시지를 표시하도록 그대로 전달
+    const isLoginRequest = requestUrl.includes(
+      "/medical-staff/login.do",
+    );
+
+    // 토큰 없음, 토큰 만료, 잘못된 토큰
+    if (status === 401 && !isLoginRequest) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("login");
+
+      if (window.location.pathname !== "/medical-staff/login") {
+        window.location.href = "/medical-staff/login";
+      }
+    }
+
+    // 403은 로그인 실패가 아니라 권한 부족이므로
+    // 토큰을 삭제하지 않고 각 화면에서 처리
+    return Promise.reject(error);
+  },
 );
 
 export default api;

@@ -1,122 +1,124 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import {
+  Navigate,
+  Route,
+  Routes,
+} from "react-router-dom";
 
-function App() {
-  const [count, setCount] = useState(0)
+import Home from "./components/common/Home";
+import TopNavi from "./components/common/TopNavi";
+import NotFoundMenu from "./components/error/NotFoundMenu";
+import MedicalStaffComp from "./components/medicalstaff/MedicalStaffComp";
+import MedicalStaffLogin from "./components/medicalstaff/MedicalStaffLogin";
 
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+import "./App.css";
 
-      <div className="ticks"></div>
+function getAuthenticationInformation() {
+  const token = localStorage.getItem("token");
+  const loginData = localStorage.getItem("login");
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+  if (!token || !loginData) {
+    return {
+      isLoggedIn: false,
+      isAdmin: false,
+    };
+  }
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+  try {
+    const login = JSON.parse(loginData);
+
+    return {
+      isLoggedIn: true,
+      isAdmin:
+        login?.roles?.includes("ROLE_ADMIN"),
+    };
+  } catch {
+    localStorage.removeItem("token");
+    localStorage.removeItem("login");
+
+    return {
+      isLoggedIn: false,
+      isAdmin: false,
+    };
+  }
 }
 
-export default App
+// 관리자 전용 화면 보호
+function AdminRoute({ children }) {
+  const { isLoggedIn, isAdmin } =
+    getAuthenticationInformation();
+
+  if (!isLoggedIn) {
+    return (
+      <Navigate
+        to="/medical-staff/login"
+        replace
+      />
+    );
+  }
+
+  if (!isAdmin) {
+
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+}
+
+// 로그인한 사용자가 다시 로그인 화면에 접근하는 것 방지
+function MedicalLoginRoute() {
+  const { isLoggedIn, isAdmin } =
+    getAuthenticationInformation();
+
+  if (isLoggedIn && isAdmin) {
+    return (
+      <Navigate
+        to="/medical-staff/list"
+        replace
+      />
+    );
+  }
+
+  if (isLoggedIn) {
+    return <Navigate to="/" replace />;
+  }
+
+  return <MedicalStaffLogin />;
+}
+
+function App() {
+  return (
+    <div className="caretrace-app">
+      <TopNavi />
+
+      <main className="app-main">
+        <Routes>
+          <Route
+            path="/"
+            element={<Home />}
+          />
+
+          <Route
+            path="/medical-staff/login"
+            element={<MedicalLoginRoute />}
+          />
+
+          <Route
+            path="/medical-staff/*"
+            element={
+              <AdminRoute>
+                <MedicalStaffComp />
+              </AdminRoute>
+            }
+          />
+
+          <Route
+            path="*"
+            element={<NotFoundMenu />}
+          />
+        </Routes>
+      </main>
+    </div>
+  );
+}
+
+export default App;

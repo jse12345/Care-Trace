@@ -7,36 +7,65 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.Map;
 
-// 자동 생성되는 어노테이션
 @RestControllerAdvice
 @Log4j2
 public class CustomExceptionHandler {
 
-    // 예외가 발생되면 처리(어노테니션으로 지정)되는 메서드 작성
-    @ExceptionHandler(value = RuntimeException.class)
-    public ResponseEntity<Map<String, String>>
-    handleException(RuntimeException e, HttpServletRequest request){
+    // 의료진·진료과 기능에서 발생한 400, 404, 409 오류 처리
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<Map<String, String>> handleResponseStatusException(
+            ResponseStatusException e,
+            HttpServletRequest request
+    ) {
+        log.error(
+                "ResponseStatusException 발생, URL: {}, 상태: {}, 메시지: {}",
+                request.getRequestURI(),
+                e.getStatusCode(),
+                e.getReason()
+        );
 
-        // 전달되는 데이터(서버->클라이언트)의 정보가 저장
-        HttpHeaders resposeHeaders = new HttpHeaders(); // header + body
-//        HttpStatus httpStatus = HttpStatus.BAD_REQUEST; // 400 번 오류
-        HttpStatus httpStatus =  HttpStatus.INTERNAL_SERVER_ERROR; // 500 번 오류
+        Map<String, String> map = new HashMap<>();
+        map.put("error type", e.getStatusCode().toString());
+        map.put("code", String.valueOf(e.getStatusCode().value()));
+        map.put(
+                "message",
+                e.getReason() != null ? e.getReason() : e.getMessage()
+        );
 
-        log.error("Advice 내 handleException 호출, {}, {}", request.getRequestURI(),
-                e.getMessage());
-        log.info(resposeHeaders.toString());
-
-        // 예외가 발생되면 전달되는 정보를 Map
-        Map<String , String > map = new HashMap<>();
-        map.put("error type", httpStatus.getReasonPhrase());
-        map.put("code", httpStatus.value() + "");
-        map.put("message", e.getMessage());
-
-        return new ResponseEntity<>(map, resposeHeaders, httpStatus);
+        return ResponseEntity
+                .status(e.getStatusCode())
+                .body(map);
     }
 
+    // 기존 서버 오류 처리
+    @ExceptionHandler(value = RuntimeException.class)
+    public ResponseEntity<Map<String, String>> handleException(
+            RuntimeException e,
+            HttpServletRequest request
+    ) {
+        HttpHeaders responseHeaders = new HttpHeaders();
+        HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+
+        log.error(
+                "Advice 내 handleException 호출, {}, {}",
+                request.getRequestURI(),
+                e.getMessage()
+        );
+
+        Map<String, String> map = new HashMap<>();
+        map.put("error type", httpStatus.getReasonPhrase());
+        map.put("code", String.valueOf(httpStatus.value()));
+        map.put("message", e.getMessage());
+
+        return new ResponseEntity<>(
+                map,
+                responseHeaders,
+                httpStatus
+        );
+    }
 }

@@ -1,7 +1,11 @@
 import { useNavigate } from "react-router-dom";
 
 // 컴포넌트에서 Spring Boot에서 넘어오는 pageObject를 
-const PageNation = ({pageObject}) => {
+const PageNation = ({
+  pageObject,
+  listPath = "/board/list",
+  extraParams = {},
+}) => {
 
   const navigate = useNavigate();
 
@@ -17,22 +21,28 @@ const PageNation = ({pageObject}) => {
     console.log("page=",page);
 
     // 페이지와 검색 정보를 포함시켜서 리스트를 다시 부르기
-    navigate("/board/list?page=" + page
+    const extraQuery = Object.entries(extraParams)
+      .filter(([, value]) => value !== null && value !== undefined && value !== "")
+      .map(([key, value]) => "&" + encodeURIComponent(key) + "=" + encodeURIComponent(value))
+      .join("");
+
+    navigate(listPath + "?page=" + page
       + "&perPageNum=" + pageObject.perPageNum
-      + "&key=" + pageObject.key
-      + "&word=" + pageObject.word
+      + "&key=" + encodeURIComponent(pageObject.key || "")
+      + "&word=" + encodeURIComponent(pageObject.word || "")
+      + extraQuery
     );
   }
 
   // 맨 앞 페이지(1페이지) 이동 코드 작성
   liTag.push(
-      <li className={(pageObject.page==1)?"page-item disabled":"page-item"}>
+      <li key="first" className={(pageObject.page==1)?"page-item disabled":"page-item"}>
         <a className="page-link" href="#" onClick={(event)=>handleClick(event, 1)}>&lt;&lt;</a>
       </li>
   );
   // 시작페이지의 이전 페이지
   liTag.push(
-      <li className={(pageObject.startPage==1)?"page-item disabled":"page-item"}>
+      <li key="previous" className={(pageObject.startPage==1)?"page-item disabled":"page-item"}>
         <a className="page-link" href="#"
          onClick={(event)=>handleClick(event, pageObject.startPage - 1)}>&lt;</a>
       </li>
@@ -41,7 +51,7 @@ const PageNation = ({pageObject}) => {
   // 페이지 클릭 버튼
   for(let i=pageObject.startPage; i <= pageObject.endPage; i++){
     liTag.push(
-      <li className={(pageObject.page == i)?"page-item disabled":"page-item"}>
+      <li key={i} className={(pageObject.page == i)?"page-item disabled":"page-item"}>
         <a className="page-link" href="#"
          onClick={(event)=>handleClick(event,i)}>{i}</a>
       </li>
@@ -50,7 +60,7 @@ const PageNation = ({pageObject}) => {
 
   // 끝 페이지의 다음 페이지
   liTag.push(
-      <li className={(pageObject.totalPage > pageObject.endPage)?"page-item":"page-item disabled"}>
+      <li key="next" className={(pageObject.totalPage > pageObject.endPage)?"page-item":"page-item disabled"}>
         <a className="page-link" href="#"
          onClick={(event)=>handleClick(event,pageObject.endPage + 1)}>&gt;</a>
       </li>
@@ -58,7 +68,7 @@ const PageNation = ({pageObject}) => {
 
   // 마지막 페이지 가기
   liTag.push(
-      <li className={(pageObject.totalPage > pageObject.page)?"page-item":"page-item disabled"}>
+      <li key="last" className={(pageObject.totalPage > pageObject.page)?"page-item":"page-item disabled"}>
         <a className="page-link" href="#"
           onClick={(event)=>handleClick(event,pageObject.totalPage)}>&gt;&gt;</a>
       </li>

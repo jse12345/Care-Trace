@@ -1,6 +1,5 @@
 package com.springboot.caretrace.config.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -20,77 +19,207 @@ public class SecurityConfiguration {
 
     private final JwtTokenProvider jwtTokenProvider;
 
-    // 생성자를 이용한 세팅
-    @Autowired
-    public SecurityConfiguration(JwtTokenProvider jwtTokenProvider){
+    public SecurityConfiguration(
+            JwtTokenProvider jwtTokenProvider
+    ) {
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
-    @Bean // 리턴되는 객체(SecurityFilterChain)를 등록해서 사용한다.
-    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception{
+    @Bean
+    public SecurityFilterChain filterChain(
+            HttpSecurity httpSecurity
+    ) throws Exception {
+
         httpSecurity
-                .csrf(AbstractHttpConfigurer::disable) //CSRF 보호 기능을 끄는 설정
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .sessionManagement(
-                        httpSecuritySessionManagementConfigurer ->
-                                httpSecuritySessionManagementConfigurer.sessionCreationPolicy(
-                                        SessionCreationPolicy.STATELESS)) // session을 사용하지 않는다.
-                //사용자 이름(username)과 비밀번호(password)를 HTTP 헤더에 담아 보내는 가장 기본적인 인증 방식 사용안함.
-                // JWT으로 사용한다.
+                // JWT 방식이므로 CSRF 비활성화
+                .csrf(AbstractHttpConfigurer::disable)
+
+                // React 프론트엔드와 통신하기 위한 CORS 설정
+                .cors(cors ->
+                        cors.configurationSource(
+                                corsConfigurationSource()
+                        )
+                )
+
+                // 세션을 사용하지 않는 JWT 인증 방식
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(
+                                SessionCreationPolicy.STATELESS
+                        )
+                )
+
+                // HTTP Basic 인증 비활성화
                 .httpBasic(AbstractHttpConfigurer::disable)
+
+                // URL별 접근 권한 설정
                 .authorizeHttpRequests(authorize ->
                         authorize
-                            // 인증(Authentication) 없이 모든 사용자의 접근을 허용 - permitAll()
-                            // OPTIONS 요청 - 실제적인 get, post, push, delete 전송을 하기 전에
-                            //       사전에 통신이 가능한지 점검하는 요청을 보통 전부 허용한다.
-                            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                            .requestMatchers("/swagger",
-                                    "/swagger-ui.html", "/swagger-ui/**", "/api-docs",
-                                    "/api-docs/**", "/v3/api-docs/**" ).permitAll()
-                            .requestMatchers(HttpMethod.GET, "/product/**").permitAll()
-                            .requestMatchers("/member/login.do", "/member/write.do").permitAll()
-                            .requestMatchers(HttpMethod.GET, "/product/**").permitAll()
-                            .requestMatchers("/board/**", "/image/list.do", "/image/view.do").permitAll()
-                            .requestMatchers("/image/write.do", "/image/update.do", "/image/delete.do").hasRole("USER")
-                            .requestMatchers("/pacs/**").permitAll()
-                            .requestMatchers("/upload/**").permitAll()
-                            .requestMatchers("/txt/**").permitAll()
-                            .requestMatchers("**exception**").permitAll()
-                            // 앞에서 정의한 URL을 제외한 모든 요청은 ADMIN 역할(Role)을 가진 사용자만
-                            // 접근할 수 있도록 하는 인가(Authorization) 규칙
-                            // 접근하는 사용자의 권한이 ADMIN인지 알기 위해서 토큰은 확인한다.
-                            .anyRequest().hasRole("ADMIN")
+                                // 사전 요청 허용
+                                .requestMatchers(
+                                        HttpMethod.OPTIONS,
+                                        "/**"
+                                )
+                                .permitAll()
+
+                                // Swagger 문서 접근 허용
+                                .requestMatchers(
+                                        "/swagger",
+                                        "/swagger-ui.html",
+                                        "/swagger-ui/**",
+                                        "/api-docs",
+                                        "/api-docs/**",
+                                        "/v3/api-docs/**"
+                                )
+                                .permitAll()
+
+                                // 공통 오류 응답 허용
+                                .requestMatchers("/error")
+                                .permitAll()
+
+                                // 의료진 로그인은 인증 없이 접근
+                                .requestMatchers(
+                                        HttpMethod.POST,
+                                        "/medical-staff/login.do"
+                                )
+                                .permitAll()
+
+                                /*
+                                 * 의료진 및 진료과 관리
+                                 * 관리자만 등록·조회·수정·삭제 가능
+                                 */
+                                .requestMatchers(
+                                        "/medical-staff/**",
+                                        "/department/**"
+                                )
+                                .hasRole("ADMIN")
+
+                                /*
+                                 * 다른 팀 기능의 조회 요청
+                                 *
+                                 * 관리자:
+                                 * 모든 의료정보 조회 가능
+                                 *
+                                 * 일반 의료진:
+                                 * 환자·영상·병변·협진 정보 조회 가능
+                                 *
+                                 * 조회자:
+                                 * 조회 기능만 가능
+                                 */
+                                .requestMatchers(
+                                        HttpMethod.GET,
+                                        "/**"
+                                )
+                                .hasAnyRole(
+                                        "ADMIN",
+                                        "MEDICAL_STAFF",
+                                        "VIEWER"
+                                )
+
+                                /*
+                                 * 다른 팀 기능의 등록 요청
+                                 *
+                                 * 관리자와 일반 의료진만 가능
+                                 * 조회자는 등록할 수 없음
+                                 */
+                                .requestMatchers(
+                                        HttpMethod.POST,
+                                        "/**"
+                                )
+                                .hasAnyRole(
+                                        "ADMIN",
+                                        "MEDICAL_STAFF"
+                                )
+
+                                /*
+                                 * 다른 팀 기능의 전체 수정 요청
+                                 */
+                                .requestMatchers(
+                                        HttpMethod.PUT,
+                                        "/**"
+                                )
+                                .hasAnyRole(
+                                        "ADMIN",
+                                        "MEDICAL_STAFF"
+                                )
+
+                                /*
+                                 * 다른 팀 기능의 일부 수정 요청
+                                 */
+                                .requestMatchers(
+                                        HttpMethod.PATCH,
+                                        "/**"
+                                )
+                                .hasAnyRole(
+                                        "ADMIN",
+                                        "MEDICAL_STAFF"
+                                )
+
+                                /*
+                                 * 다른 팀 기능의 삭제 요청
+                                 */
+                                .requestMatchers(
+                                        HttpMethod.DELETE,
+                                        "/**"
+                                )
+                                .hasAnyRole(
+                                        "ADMIN",
+                                        "MEDICAL_STAFF"
+                                )
+
+                                // 위에서 분류되지 않은 요청도 로그인 필요
+                                .anyRequest()
+                                .authenticated()
                 )
-                // 스프링 시큐리티에서 기본으로 제공하고 있는 로그임 폼을 비활성화한다.
+
+                // 기본 로그인 폼 비활성화
                 .formLogin(AbstractHttpConfigurer::disable)
-                // 토큰 처리를 앞에 다음 사용자 로그인(아이디, 비밀번호 확인 필터)
-                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
-                        UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling((exceptionHanling) ->
-                        exceptionHanling
-                                .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
-                                .accessDeniedHandler(new CustomAccessDeniedHandler()));
+
+                // JWT 인증 필터 등록
+                .addFilterBefore(
+                        new JwtAuthenticationFilter(
+                                jwtTokenProvider
+                        ),
+                        UsernamePasswordAuthenticationFilter.class
+                )
+
+                // 인증·권한 오류 처리
+                .exceptionHandling(exceptionHandling ->
+                        exceptionHandling
+                                .authenticationEntryPoint(
+                                        new CustomAuthenticationEntryPoint()
+                                )
+                                .accessDeniedHandler(
+                                        new CustomAccessDeniedHandler()
+                                )
+                );
 
         return httpSecurity.build();
-
     }
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+    public CorsConfigurationSource
+    corsConfigurationSource() {
 
-        CorsConfiguration configuration = new CorsConfiguration();
+        CorsConfiguration configuration =
+                new CorsConfiguration();
 
         configuration.setAllowedOrigins(
                 List.of(
                         "http://localhost:5173",
-                        // 특정 IP만 접근 허용 - 보안 상태가 좋아 진다. :: react 서버
                         "http://127.0.0.1:5173",
                         "http://10.15.21.205:5173"
                 )
         );
 
         configuration.setAllowedMethods(
-                List.of("GET","POST","PUT","DELETE","OPTIONS")
+                List.of(
+                        "GET",
+                        "POST",
+                        "PUT",
+                        "PATCH",
+                        "DELETE",
+                        "OPTIONS"
+                )
         );
 
         configuration.setAllowedHeaders(
@@ -102,9 +231,11 @@ public class SecurityConfiguration {
         UrlBasedCorsConfigurationSource source =
                 new UrlBasedCorsConfigurationSource();
 
-        source.registerCorsConfiguration("/**", configuration);
+        source.registerCorsConfiguration(
+                "/**",
+                configuration
+        );
 
         return source;
     }
-
 }
