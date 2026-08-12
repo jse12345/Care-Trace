@@ -4,7 +4,7 @@ import axios from "axios";
 const api = axios.create({
   baseURL:
     import.meta.env.VITE_API_BASE_URL
-    || "http://10.15.21.205",
+    || "http://localhost:8081",
 });
 
 // 모든 API 요청에 JWT 토큰 자동 추가

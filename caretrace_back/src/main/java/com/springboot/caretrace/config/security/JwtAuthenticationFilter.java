@@ -37,7 +37,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // 토큰 처리
         // request 안에 header에 있는 토큰 가져오기
         String token = jwtTokenProvider.resolveToken(request);
-        log.info("[doFilterInternal] token 값 추출 완료. token : {}", token);
+        log.debug(
+                "[doFilterInternal] token 헤더 확인 완료. tokenPresent: {}",
+                token != null
+        );
 
         log.info("[doFilterInternal] token 값 유효성 체크 시작");
         if(token != null && jwtTokenProvider.validateToken(token)){

@@ -131,7 +131,7 @@ function Home() {
                   className="clinical-primary-link"
                   href="/medical-staff/login"
                 >
-                  의료진 로그인
+                  포털 로그인
                 </a>
               )}
 
