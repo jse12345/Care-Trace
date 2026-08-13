@@ -16,6 +16,7 @@ public class ConsultationOpinionVO {
     private Long opinionId;
     private Long caseId;
     private Long staffId;
+    private String staffName;
     private Long parentOpinionId;
     private OpinionType opinionType;
     private String opinionContent;

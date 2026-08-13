@@ -6,11 +6,10 @@ import api from "../common/api";
 function ConsultationList() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const caseId = searchParams.get("caseId"); // 특정 증례 번호
+  const caseId = searchParams.get("caseId") || searchParams.get("case_id");
   const [opinions, setOpinions] = useState([]);
   const [pageObject, setPageObject] = useState(null);
   
-  // 검색 필터 상태
   const [filters, setFilters] = useState({
     opinionType: searchParams.get("opinionType") || "",
     status: searchParams.get("status") || "",
@@ -19,7 +18,7 @@ function ConsultationList() {
   useEffect(() => {
     let active = true;
     const params = Object.fromEntries(searchParams.entries());
-    // is_deleted가 'n'인 데이터만 서버에서 필터링하여 전달한다고 가정
+    
     api.get("/consultation/list.do", { params })
       .then(({ data }) => {
         if (!active) return;
@@ -86,27 +85,40 @@ function ConsultationList() {
                 </tr>
               </thead>
               <tbody>
-                {opinions.map((op) => (
-                  <tr key={op.opinionId}>
-                    <td className="code-cell">{op.opinionType}</td>
-                    <td>{op.staffName}</td>
-                    <td className="description-cell">{op.opinionContent}</td>
-                    <td>
-                      <span className={`status-badge ${op.status.toLowerCase()}`}>
-                        {op.status}
-                      </span>
-                    </td>
-                    <td>{new Date(op.createdAt).toLocaleDateString()}</td>
-                    <td className="action-buttons">
-                      <button 
-                        className="detail-button" 
-                        onClick={() => navigate(`/consultation/view?opinionId=${op.opinionId}`)}
-                      >
-                        상세
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {opinions.map((op) => {
+                  const opId = op.opinionId || op.opinion_id;
+                  const type = op.opinionType || op.opinion_type;
+                  const content = op.opinionContent || op.opinion_content;
+                  const date = op.createdAt || op.created_at;
+                  
+                  return (
+                    <tr key={opId}>
+                      {/* 1. 구분(Type) 뱃지 적용: type-badge와 badge-request/response 조합 */}
+                      <td className="code-cell">
+                        <span className={`type-badge badge-${type?.toLowerCase()}`}>
+                          {type}
+                        </span>
+                      </td>
+                      <td>{op.staffName || "이름 없음"}</td>
+                      <td className="description-cell">{content}</td>
+                      {/* 2. 상태(Status) 뱃지 적용: status-badge와 badge-open/answered/closed 조합 */}
+                      <td>
+                        <span className={`status-badge badge-${op.status?.toLowerCase()}`}>
+                          {op.status}
+                        </span>
+                      </td>
+                      <td>{date ? new Date(date).toLocaleDateString() : ""}</td>
+                      <td className="action-buttons">
+                        <button 
+                          className="detail-button" 
+                          onClick={() => navigate(`/consultation/view?opinionId=${opId}`)}
+                        >
+                          상세
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
                 {!opinions.length && <tr><td colSpan="6" className="empty-cell">등록된 협진 의견이 없습니다.</td></tr>}
               </tbody>
             </table>

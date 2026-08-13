@@ -36,13 +36,13 @@ public class ConsultationOpinionRestController {
         return ResponseEntity.status(HttpStatus.OK).body(map);
     }
 
-    @PostMapping("/request.do")
+    @PostMapping("/write.do")
     public ResponseEntity<ConsultationOpinionVO> writeRequest(@RequestBody ConsultationOpinionVO vo) {
-        log.info("[writeRequest] 데이터: {}", vo);
+        log.info("[write] 데이터: {}", vo);
         return ResponseEntity.status(HttpStatus.CREATED).body(service.writeRequest(vo));
     }
 
-    @PostMapping("/response.do")
+    @PostMapping("/reply.do")
     public ResponseEntity<ConsultationOpinionVO> writeResponse(@RequestBody ConsultationOpinionVO vo) {
         log.info("[writeResponse] 데이터: {}", vo);
         return ResponseEntity.status(HttpStatus.CREATED).body(service.writeResponse(vo));
@@ -52,5 +52,11 @@ public class ConsultationOpinionRestController {
     public ResponseEntity<String> delete(@RequestBody ConsultationOpinionVO vo) {
         service.delete(vo.getOpinionId());
         return ResponseEntity.status(HttpStatus.OK).body("정상적으로 철회(삭제)되었습니다.");
+    }
+
+    @GetMapping("/view.do")
+    public ResponseEntity<ConsultationOpinionVO> view(@RequestParam("opinionId") Long opinionId) {
+        ConsultationOpinionVO opinion = service.view(opinionId);
+        return ResponseEntity.ok(opinion);
     }
 }

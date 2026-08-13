@@ -21,9 +21,9 @@ function TreatmentReportWrite() {
   const submit = async (event) => {
     event.preventDefault();
     try {
-      await api.post("/treatment-report/write.do", form);
+      await api.post("/treatment-response/write.do", form);
       alert("치료 반응 보고서가 임시저장(DRAFT) 상태로 등록되었습니다.");
-      navigate("/medical-staff/treatment-report/list");
+      navigate("/medical-staff/treatment-response/list");
     } catch (error) {
       setErrorMessage(error.response?.data?.message || "등록 중 오류가 발생했습니다.");
     }

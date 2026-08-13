@@ -11,4 +11,5 @@ public interface ConsultationOpinionService {
     ConsultationOpinionVO writeRequest(ConsultationOpinionVO vo);
     ConsultationOpinionVO writeResponse(ConsultationOpinionVO vo);
     Long delete(Long opinionId);
+    ConsultationOpinionVO view(Long opinionId);
 }

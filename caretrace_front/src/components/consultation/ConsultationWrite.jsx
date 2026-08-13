@@ -5,10 +5,14 @@ import api from "../common/api";
 function ConsultationWrite() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const caseId = searchParams.get("caseId");
+  const caseId = searchParams.get("caseId") || searchParams.get("case_id");
+
+  // TODO: 실제 환경에서는 로그인된 의료진 세션 정보를 가져와야 합니다.
+  const currentStaffId = 1; 
 
   const [form, setForm] = useState({
     caseId: caseId,
+    staffId: currentStaffId, // 누락된 필수 컬럼 추가
     opinionType: "REQUEST",
     opinionContent: "",
   });
@@ -18,7 +22,6 @@ function ConsultationWrite() {
   const submit = async (event) => {
     event.preventDefault();
     try {
-      // 서버에서 status를 'OPEN'으로 기본 삽입 처리
       await api.post("/consultation/write.do", form);
       alert("협진 요청이 등록되었습니다.");
       navigate(`/consultation/list?caseId=${caseId}`);
@@ -41,7 +44,7 @@ function ConsultationWrite() {
           <form onSubmit={submit}>
             <div className="form-grid">
               <label className="full-width">
-                요견 내용
+                의견 내용 {/* 오타 수정 (요견 -> 의견) */}
                 <textarea 
                   name="opinionContent" 
                   value={form.opinionContent} 
