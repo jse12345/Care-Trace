@@ -11,7 +11,7 @@ function TreatmentReportView() {
 
   useEffect(() => {
     let active = true;
-    api.get("/treatment-report/view.do", { params: { reportId } })
+    api.get("/treatment-response/view.do", { params: { reportId } })
       .then(({ data }) => { if (active) setReport(data); })
       .catch(() => { if (active) setErrorMessage("데이터를 불러오는 중 오류가 발생했습니다."); });
     return () => { active = false; };
@@ -20,9 +20,9 @@ function TreatmentReportView() {
   const handleDelete = async () => {
     if (!window.confirm("이 보고서를 삭제하시겠습니까? (Archived 상태로 변경됩니다)")) return;
     try {
-      await api.post("/treatment-report/delete.do", { reportId });
+      await api.post("/treatment-response/delete.do", { reportId });
       alert("보고서가 성공적으로 삭제 처리되었습니다.");
-      navigate("/medical-staff/treatment-report/list");
+      navigate("/medical-staff/treatment-response/list");
     } catch (error) {
       setErrorMessage(error.response?.data?.message || "삭제 중 오류가 발생했습니다.");
     }
@@ -50,9 +50,9 @@ function TreatmentReportView() {
             </div>
           )}
           <div className="form-actions">
-            <button className="edit-button" onClick={() => navigate(`/medical-staff/treatment-report/update?reportId=${reportId}`)}>수정/확정하기</button>
+            <button className="edit-button" onClick={() => navigate(`/medical-staff/treatment-response/update?reportId=${reportId}`)}>수정/확정하기</button>
             <button className="delete-button" onClick={handleDelete}>삭제(철회)</button>
-            <button className="secondary-button" onClick={() => navigate("/medical-staff/treatment-report/list")}>목록</button>
+            <button className="secondary-button" onClick={() => navigate("/medical-staff/treatment-response/list")}>목록</button>
           </div>
         </section>
       </div>

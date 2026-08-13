@@ -556,3 +556,55 @@
     display: none;
   }
 }
+
+.type-badge, .status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 12px;
+  border-radius: 999px; /* .module-state의 둥근 모서리 차용 */
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  min-width: 76px;
+  text-transform: uppercase;
+}
+
+/* --- 1. 구분 (Type) --- */
+/* REQUEST (요청): 기본 회색 톤 (.module-state 기본 스타일 차용) */
+.badge-request {
+  background: #f1f4f7;
+  color: #687990;
+  border: 1px solid #d8e5ed;
+}
+
+/* RESPONSE (응답): 활성화된 청록색 톤 (.workflow-card.available 차용) */
+.badge-response {
+  background: #dff5f1;
+  color: #146f70;
+  border: 1px solid #9edbd4;
+}
+
+
+/* --- 2. 상태 (Status) --- */
+/* OPEN (대기중): 부드러운 하늘색 바탕 (.nav-link hover 스타일 차용) */
+.badge-open {
+  background: #eef7f7;
+  color: var(--clinical-blue);
+  border: 1px solid #bfe5e1;
+}
+
+/* ANSWERED (답변완료): 직관적인 강조색 (.clinical-primary-link 차용) */
+.badge-answered {
+  background: var(--clinical-blue);
+  color: #fff;
+  border: 1px solid var(--clinical-blue);
+  box-shadow: 0 4px 10px rgb(23 107 135 / 15%); /* 은은한 그림자 추가 */
+}
+
+/* CLOSED (종료/철회): 비활성화된 느낌 (.account-chip 차용) */
+.badge-closed {
+  background: #f8fafc;
+  color: #7a8798;
+  border: 1px solid #d8e4ec;
+}
