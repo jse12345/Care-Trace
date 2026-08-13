@@ -9,7 +9,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping
@@ -21,13 +24,43 @@ public class ImageCompareSetController {
 
     @GetMapping("/pacs/list.do")
     public ResponseEntity<?> getPacsStudyList() {
-        log.info("[PACS Study List Proxy] 오르탕크 목록 조회 요청");
+        log.info("[PACS Study List] 오르탕크 연동 및 상세 조회 시작");
         try {
             String orthancUrl = "http://localhost:8042/studies";
             RestTemplate restTemplate = new RestTemplate();
 
-            Object[] studies = restTemplate.getForObject(orthancUrl, Object[].class);
-            return ResponseEntity.status(HttpStatus.OK).body(studies);
+            // 1. 오르탕크에서 모든 Study ID 목록(문자열 배열)을 가져옴
+            String[] studyIds = restTemplate.getForObject(orthancUrl, String[].class);
+
+            List<Map<String, Object>> studyList = new ArrayList<>();
+
+            if (studyIds != null) {
+                // 2. 각각의 Study ID로 오르탕크에 상세 정보를 다시 요청해서 필요한 데이터만 추출
+                for (String studyId : studyIds) {
+                    String detailUrl = "http://localhost:8042/studies/" + studyId;
+                    try {
+                        Map<String, Object> detail = restTemplate.getForObject(detailUrl, Map.class);
+                        if (detail != null) {
+                            Map<String, Object> patientMain = (Map<String, Object>) detail.get("PatientMainDicomTags");
+                            Map<String, Object> studyMain = (Map<String, Object>) detail.get("MainDicomTags");
+
+                            Map<String, Object> studyInfo = new HashMap<>();
+                            studyInfo.put("id", studyId);
+                            studyInfo.put("studyInstanceUID", studyMain != null ? studyMain.get("StudyInstanceUID") : studyId);
+                            studyInfo.put("patientId", patientMain != null ? patientMain.get("PatientID") : "Unknown");
+                            studyInfo.put("patientName", patientMain != null ? patientMain.get("PatientName") : "Unknown");
+                            studyInfo.put("studyDate", studyMain != null ? studyMain.get("StudyDate") : "-");
+                            studyInfo.put("studyDescription", studyMain != null ? studyMain.get("StudyDescription") : "-");
+
+                            studyList.add(studyInfo);
+                        }
+                    } catch (Exception innerE) {
+                        log.error("개별 Study 조회 실패 (ID: " + studyId + "): ", innerE);
+                    }
+                }
+            }
+
+            return ResponseEntity.status(HttpStatus.OK).body(studyList);
         } catch (Exception e) {
             log.error("오르탕크 PACS 연동 오류: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("오르탕크 서버 통신 실패");

@@ -1,5 +1,5 @@
 import { Routes, Route } from "react-router-dom"; 
-import CompareSetList from "./CompareSetList";
+import CompareSetList from "./comparesetList";
 import CompareSetForm from "./CompareSetForm";
 import NotFoundPage from "../error/NotFoundPage";
 
