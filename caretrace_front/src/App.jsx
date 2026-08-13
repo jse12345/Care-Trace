@@ -11,6 +11,7 @@ import MedicalStaffComp from "./components/medicalstaff/MedicalStaffComp";
 import MedicalStaffLogin from "./components/medicalstaff/MedicalStaffLogin";
 import ConsultationComp from "./components/consultation/ConsultationComp";
 import TreatmentReportComp from "./components/treatmentreport/TreatmentReportComp";
+import CompareSetComp from "./components/compareSet/CompareSetComp";
 import LesionComp from "./components/lesion/LesionComp";
 
 import "./App.css";
@@ -129,7 +130,8 @@ function App() {
               </AdminRoute>
             }
           />
-
+          <Route path="/compare-set/*" element={<CompareSetComp />} />
+          <Route path="/CompareSet/*" element={<CompareSetComp />} />
           <Route 
             path="/consultation/*" 
             element={<ConsultationComp />} 
