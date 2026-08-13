@@ -29,7 +29,8 @@ const modules = [
     title: "병변·측정 기록",
     description:
       "병변 위치와 크기, 시기별 변화 이력을 기록합니다.",
-    available: false,
+    available: true,
+    path: "/lesion/list",
   },
   {
     number: "05",

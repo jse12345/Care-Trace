@@ -11,6 +11,7 @@ import MedicalStaffComp from "./components/medicalstaff/MedicalStaffComp";
 import MedicalStaffLogin from "./components/medicalstaff/MedicalStaffLogin";
 import ConsultationComp from "./components/consultation/ConsultationComp";
 import TreatmentReportComp from "./components/treatmentreport/TreatmentReportComp";
+import LesionComp from "./components/lesion/LesionComp";
 
 import "./App.css";
 
@@ -61,6 +62,22 @@ function AdminRoute({ children }) {
   if (!isAdmin) {
 
     return <Navigate to="/" replace />;
+  }
+
+  return children;
+}
+
+// 로그인만 필요하고 관리자 권한은 필요 없는 화면 보호(병변·측정 기록은 일반 의료진도 사용)
+function RequireLogin({ children }) {
+  const { isLoggedIn } = getAuthenticationInformation();
+
+  if (!isLoggedIn) {
+    return (
+      <Navigate
+        to="/medical-staff/login"
+        replace
+      />
+    );
   }
 
   return children;
@@ -118,9 +135,18 @@ function App() {
             element={<ConsultationComp />} 
           />
 
-          <Route 
-            path="/treatmentreport/*" 
-            element={<TreatmentReportComp />} 
+          <Route
+            path="/treatmentreport/*"
+            element={<TreatmentReportComp />}
+          />
+
+          <Route
+            path="/lesion/*"
+            element={
+              <RequireLogin>
+                <LesionComp />
+              </RequireLogin>
+            }
           />
 
           <Route

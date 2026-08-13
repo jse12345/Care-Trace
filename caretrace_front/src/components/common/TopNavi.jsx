@@ -129,6 +129,17 @@ function TopNavi() {
                 </li>
               </>
             )}
+
+            {isLoggedIn && (
+              <li className="nav-item">
+                <a
+                  href="/lesion/list"
+                  className="nav-link"
+                >
+                  병변·측정 기록
+                </a>
+              </li>
+            )}
           </ul>
 
           <ul className="navbar-nav ms-auto account-group">

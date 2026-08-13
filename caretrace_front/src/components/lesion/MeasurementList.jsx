@@ -1,0 +1,137 @@
+import { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import PageNation from "../common/PageNation";
+import api from "../common/api";
+
+function MeasurementList() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const lesionId = searchParams.get("lesionId");
+
+  const [measurements, setMeasurements] = useState([]);
+  const [pageObject, setPageObject] = useState(null);
+  const [changeRateByMeasurementId, setChangeRateByMeasurementId] = useState({});
+  const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    if (!lesionId) return;
+    let active = true;
+    const params = Object.fromEntries(searchParams.entries());
+
+    // 목록(페이징)과 추세(변화율)를 병렬 호출해서 화면에서 merge
+    Promise.all([
+      api.get("/lesion-measurement/list.do", { params }),
+      api.get("/lesion-measurement/trend.do", { params: { lesionId } }),
+    ])
+      .then(([listRes, trendRes]) => {
+        if (!active) return;
+        setMeasurements(listRes.data.list || []);
+        setPageObject(listRes.data.pageObject || null);
+
+        const map = {};
+        (trendRes.data.list || []).forEach((item) => {
+          map[item.measurementId] = item;
+        });
+        setChangeRateByMeasurementId(map);
+      })
+      .catch(() => {
+        if (active) setErrorMessage("측정값 목록을 불러오지 못했습니다.");
+      });
+
+    return () => { active = false; };
+  }, [lesionId, searchParams]);
+
+  if (!lesionId) {
+    return (
+      <main className="lesion-page">
+        <div className="lesion-container">
+          <p className="lesion-description">lesionId가 없습니다. 병변 상세 화면에서 접근해 주세요.</p>
+        </div>
+      </main>
+    );
+  }
+
+  return (
+    <main className="lesion-page">
+      <div className="lesion-container">
+        <header className="lesion-header">
+          <div>
+            <p className="lesion-eyebrow">CareTrace</p>
+            <h1 className="lesion-title">측정값 목록</h1>
+            <p className="lesion-description">시기별로 등록된 병변 측정값을 확인합니다.</p>
+          </div>
+          <div className="lesion-header-actions">
+            <button className="lesion-primary-button" onClick={() => navigate(`/lesion/measurement/capture?lesionId=${lesionId}`)}>
+              + 측정값 등록
+            </button>
+            <button className="lesion-secondary-button" onClick={() => navigate(`/lesion/measurement/trend?lesionId=${lesionId}`)}>
+              변화 추세 보기
+            </button>
+            <button className="lesion-secondary-button" onClick={() => navigate(`/lesion/view?lesionId=${lesionId}`)}>
+              병변 상세로
+            </button>
+          </div>
+        </header>
+
+        {errorMessage && <div className="lesion-error-message">{errorMessage}</div>}
+
+        <section className="lesion-list-card">
+          <p className="lesion-table-summary">총 {pageObject?.totalRow || 0}건</p>
+          <div className="lesion-table-wrapper">
+            <table className="lesion-table">
+              <thead>
+                <tr>
+                  <th>측정 일시</th>
+                  <th>ROI 유형</th>
+                  <th>장축(mm)</th>
+                  <th>단축(mm)</th>
+                  <th>면적(mm²)</th>
+                  <th>변화율</th>
+                  <th>관리</th>
+                </tr>
+              </thead>
+              <tbody>
+                {measurements.map((measurement) => {
+                  const trend = changeRateByMeasurementId[measurement.measurementId];
+                  return (
+                    <tr key={measurement.measurementId}>
+                      <td>{measurement.measuredAt?.replace("T", " ").slice(0, 16)}</td>
+                      <td>{measurement.roiType}</td>
+                      <td>{measurement.longAxisMm ?? "-"}</td>
+                      <td>{measurement.shortAxisMm ?? "-"}</td>
+                      <td>{measurement.areaMm2 ?? "-"}</td>
+                      <td>
+                        {trend?.baseline
+                          ? "기준값"
+                          : trend?.changeRatePercent != null
+                            ? `${trend.changeRatePercent > 0 ? "+" : ""}${trend.changeRatePercent}%`
+                            : "-"}
+                      </td>
+                      <td className="lesion-action-buttons">
+                        <button className="lesion-detail-button" onClick={() => navigate(`/lesion/measurement/view?measurementId=${measurement.measurementId}`)}>상세</button>
+                        <button className="lesion-edit-button" onClick={() => navigate(`/lesion/measurement/capture?lesionId=${lesionId}&measurementId=${measurement.measurementId}`)}>수정</button>
+                        <button className="lesion-delete-button" onClick={() => navigate(`/lesion/measurement/delete?measurementId=${measurement.measurementId}&lesionId=${lesionId}`)}>삭제</button>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {!measurements.length && (
+                  <tr><td colSpan="7" className="lesion-empty-cell">등록된 측정값이 없습니다.</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+          {pageObject && (
+            <PageNation
+              pageObject={pageObject}
+              listPath="/lesion/measurement/list"
+              extraParams={{ lesionId }}
+            />
+          )}
+        </section>
+      </div>
+    </main>
+  );
+}
+
+export default MeasurementList;
