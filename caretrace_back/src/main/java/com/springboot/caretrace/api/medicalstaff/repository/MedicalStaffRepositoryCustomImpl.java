@@ -32,7 +32,7 @@ public class MedicalStaffRepositoryCustomImpl
     ) {
         return queryFactory
                 .selectFrom(medicalStaff)
-                .join(medicalStaff.department()).fetchJoin()
+                .join(medicalStaff.department).fetchJoin()
                 .where(search(
                         pageObject,
                         departmentNo,
@@ -70,7 +70,7 @@ public class MedicalStaffRepositoryCustomImpl
     public MedicalStaff getMedicalStaff(Long staffNo) {
         return queryFactory
                 .selectFrom(medicalStaff)
-                .join(medicalStaff.department()).fetchJoin()
+                .join(medicalStaff.department).fetchJoin()
                 .where(
                         medicalStaff.staffNo.eq(staffNo),
                         medicalStaff.isDeleted.eq("N")
@@ -105,7 +105,7 @@ public class MedicalStaffRepositoryCustomImpl
         if (departmentNo != null) {
             builder.and(
                     medicalStaff
-                            .department()
+                            .department
                             .departmentNo
                             .eq(departmentNo)
             );
