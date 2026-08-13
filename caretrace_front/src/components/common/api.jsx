@@ -2,9 +2,7 @@ import axios from "axios";
 
 // 백엔드 API 통신 공용 객체
 const api = axios.create({
-  baseURL:
-    import.meta.env.VITE_API_BASE_URL
-    || "http://localhost:8081",
+    baseURL: "http://localhost"
 });
 
 // 모든 API 요청에 JWT 토큰 자동 추가

@@ -9,6 +9,8 @@ import TopNavi from "./components/common/TopNavi";
 import NotFoundMenu from "./components/error/NotFoundMenu";
 import MedicalStaffComp from "./components/medicalstaff/MedicalStaffComp";
 import MedicalStaffLogin from "./components/medicalstaff/MedicalStaffLogin";
+import ConsultationComp from "./components/consultation/ConsultationComp";
+import TreatmentReportComp from "./components/treatmentreport/TreatmentReportComp";
 
 import "./App.css";
 
@@ -109,6 +111,16 @@ function App() {
                 <MedicalStaffComp />
               </AdminRoute>
             }
+          />
+
+          <Route 
+            path="/consultation/*" 
+            element={<ConsultationComp />} 
+          />
+
+          <Route 
+            path="/treatmentreport/*" 
+            element={<TreatmentReportComp />} 
           />
 
           <Route
