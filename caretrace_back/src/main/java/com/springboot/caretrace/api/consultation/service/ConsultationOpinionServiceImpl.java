@@ -9,8 +9,6 @@ import com.springboot.caretrace.api.consultation.vo.ConsultationOpinionVO;
 import com.springboot.caretrace.api.patient.repository.QPatientRepository;
 import com.springboot.caretrace.page.PageObject;
 
-// 👇 [추가된 임포트] 타 도메인 Repository 및 Entity, Map 변환용
-import com.springboot.caretrace.api.patient.repository.QPatientRepository;
 import com.springboot.caretrace.api.patientcase.repository.QPatientCaseRepository;
 import com.springboot.caretrace.api.patientcase.entity.PatientCase;
 import java.util.HashMap;
