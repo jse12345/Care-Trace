@@ -10,4 +10,6 @@ public interface PatientCaseRepositoryCustom {
             String keyword,
             String status
     );
+
+    PatientCaseVO findPatientCaseDetail(Long caseId);
 }

@@ -340,7 +340,7 @@ const PatientCaseList = () => {
                                             </button>
 
                                             <span className="patient-code">
-                                                환자번호 {item.patientId}
+                                                환자번호 {item.patientCode}
                                             </span>
 
                                         </td>

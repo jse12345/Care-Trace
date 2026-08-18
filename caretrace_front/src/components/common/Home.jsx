@@ -15,7 +15,8 @@ const modules = [
     title: "환자 추적 관찰",
     description:
       "환자별 추적 케이스와 시기별 검사 이력을 관리합니다.",
-    available: false,
+    available: true,
+    path: "/patients",
   },
   {
     number: "03",

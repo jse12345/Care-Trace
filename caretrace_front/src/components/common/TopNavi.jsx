@@ -132,6 +132,22 @@ function TopNavi() {
 
             {isLoggedIn && (
               <>
+               <li className="nav-item">
+                <a
+                  href="/patients"
+                  className="nav-link"
+                >
+                  환자 목록
+                </a>
+              </li>
+              <li className="nav-item">
+                <a
+                  href="/patient-cases"
+                  className="nav-link"
+                >
+                  환자 추적 관찰 목록
+                </a>
+              </li>
               <li className="nav-item">
                 <a
                   href="/lesion/list"

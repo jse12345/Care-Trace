@@ -35,19 +35,18 @@ public class PatientCaseServiceImpl
     @Transactional(readOnly = true)
     public PatientCaseVO getPatientCase(Long caseId) {
 
-        PatientCase patientCase =
+        PatientCaseVO vo =
                 patientCaseRepository
-                        .findByCaseIdAndIsDeleted(
-                                caseId,
-                                "N"
-                        )
-                        .orElseThrow(() ->
-                                new IllegalArgumentException(
-                                        "환자 케이스를 찾을 수 없습니다."
-                                )
-                        );
+                        .findPatientCaseDetail(caseId);
 
-        return toVO(patientCase);
+        if (vo == null) {
+
+            throw new IllegalArgumentException(
+                    "환자 케이스를 찾을 수 없습니다."
+            );
+        }
+
+        return vo;
     }
 
     @Override

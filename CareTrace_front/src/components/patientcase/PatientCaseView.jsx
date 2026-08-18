@@ -180,11 +180,22 @@ const PatientCaseView = () => {
                     <div className="detail-row">
 
                         <div className="detail-label">
-                            환자 번호
+                            환자
                         </div>
 
                         <div className="detail-value">
-                            {patientCase.patientId}
+
+                            <strong>
+                                {patientCase.patientName ||
+                                    `환자 ${patientCase.patientId}`}
+                            </strong>
+
+                            {patientCase.patientCode && (
+                                <span className="patient-code">
+                                    {" "}({patientCase.patientCode})
+                                </span>
+                            )}
+
                         </div>
 
                     </div>

@@ -4,6 +4,7 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.springboot.caretrace.api.medicalstaff.entity.QMedicalStaff;
+import com.springboot.caretrace.api.patient.entity.QPatient;
 import com.springboot.caretrace.api.patientcase.entity.QPatientCase;
 import com.springboot.caretrace.api.patientcase.vo.PatientCaseVO;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,9 @@ public class PatientCaseRepositoryCustomImpl
 
         QPatientCase patientCase =
                 QPatientCase.patientCase;
+
+        QPatient patient =
+                QPatient.patient;
 
         QMedicalStaff medicalStaff =
                 QMedicalStaff.medicalStaff;
@@ -64,6 +68,12 @@ public class PatientCaseRepositoryCustomImpl
                                             )
                             )
                             .or(
+                                    patient.patientName
+                                            .containsIgnoreCase(
+                                                    searchKeyword
+                                            )
+                            )
+                            .or(
                                     medicalStaff.staffName
                                             .containsIgnoreCase(
                                                     searchKeyword
@@ -78,7 +88,17 @@ public class PatientCaseRepositoryCustomImpl
                                 PatientCaseVO.class,
 
                                 patientCase.caseId,
+
                                 patientCase.patientId,
+
+                                // 환자 정보
+                                patient.patientCode
+                                        .as("patientCode"),
+
+                                patient.patientName
+                                        .as("patientName"),
+
+                                // 의료진 정보
                                 patientCase.staffNo,
 
                                 medicalStaff.staffName
@@ -97,7 +117,14 @@ public class PatientCaseRepositoryCustomImpl
                 )
                 .from(patientCase)
 
-                // 담당 의료진 JOIN
+                // 환자 JOIN
+                .join(patient)
+                .on(
+                        patientCase.patientId
+                                .eq(patient.patientId)
+                )
+
+                // 의료진 JOIN
                 .join(medicalStaff)
                 .on(
                         patientCase.staffNo
@@ -111,5 +138,77 @@ public class PatientCaseRepositoryCustomImpl
                 )
 
                 .fetch();
+    }
+
+
+    @Override
+    public PatientCaseVO findPatientCaseDetail(
+            Long caseId
+    ) {
+
+        QPatientCase patientCase =
+                QPatientCase.patientCase;
+
+        QPatient patient =
+                QPatient.patient;
+
+        QMedicalStaff medicalStaff =
+                QMedicalStaff.medicalStaff;
+
+        return queryFactory
+                .select(
+                        Projections.fields(
+                                PatientCaseVO.class,
+
+                                patientCase.caseId,
+
+                                patientCase.patientId,
+
+                                // 환자 정보
+                                patient.patientCode
+                                        .as("patientCode"),
+
+                                patient.patientName
+                                        .as("patientName"),
+
+                                // 의료진 정보
+                                patientCase.staffNo,
+
+                                medicalStaff.staffName
+                                        .as("staffName"),
+
+                                patientCase.diagnosis,
+                                patientCase.bodyPart,
+                                patientCase.caseStatus,
+                                patientCase.startDate,
+                                patientCase.endDate,
+                                patientCase.memo,
+                                patientCase.createdAt,
+                                patientCase.updatedAt,
+                                patientCase.isDeleted
+                        )
+                )
+                .from(patientCase)
+
+                // 환자 JOIN
+                .join(patient)
+                .on(
+                        patientCase.patientId
+                                .eq(patient.patientId)
+                )
+
+                // 의료진 JOIN
+                .join(medicalStaff)
+                .on(
+                        patientCase.staffNo
+                                .eq(medicalStaff.staffNo)
+                )
+
+                .where(
+                        patientCase.caseId.eq(caseId),
+                        patientCase.isDeleted.eq("N")
+                )
+
+                .fetchOne();
     }
 }
