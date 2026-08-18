@@ -331,6 +331,19 @@ const PatientCaseView = () => {
 
                 <div className="case-detail-buttons">
 
+                    {/* 환자 상세로 이동 */}
+                    <button
+                        className="patient-view-button large"
+                        onClick={() =>
+                            navigate(
+                                `/patients/${patientCase.patientId}`
+                            )
+                        }
+                    >
+                        환자 정보
+                    </button>
+
+                    {/* 케이스 수정 */}
                     <button
                         className="edit-button large"
                         onClick={() =>
@@ -342,6 +355,7 @@ const PatientCaseView = () => {
                         수정
                     </button>
 
+                    {/* 케이스 목록 */}
                     <button
                         className="view-button large"
                         onClick={() =>
