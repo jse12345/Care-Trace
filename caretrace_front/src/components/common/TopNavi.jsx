@@ -131,6 +131,7 @@ function TopNavi() {
             )}
 
             {isLoggedIn && (
+              <>
               <li className="nav-item">
                 <a
                   href="/lesion/list"
@@ -139,6 +140,15 @@ function TopNavi() {
                   병변·측정 기록
                 </a>
               </li>
+              <li className="nav-item">
+                <a
+                  href="/consultation/list"
+                  className="nav-link"
+                >
+                  협진 목록
+                </a>
+              </li>
+              </>
             )}
           </ul>
 

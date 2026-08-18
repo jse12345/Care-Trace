@@ -25,12 +25,14 @@ public class ConsultationOpinionRestController {
     @GetMapping("/list.do")
     public ResponseEntity<Map<String, Object>> list(
             HttpServletRequest request,
-            @RequestParam(required = true) Long caseId,
+            @RequestParam(required = false) Long caseId,
             @RequestParam(required = false) OpinionType type,
             @RequestParam(required = false) OpinionStatus status
     ) throws Exception {
         PageObject pageObject = PageObject.getInstance(request);
         Map<String, Object> map = new HashMap<>();
+
+        // caseId가 null일 경우 전체 조회를 수행하도록 Service로 넘김
         map.put("list", service.list(pageObject, caseId, type, status));
         map.put("pageObject", pageObject);
         return ResponseEntity.status(HttpStatus.OK).body(map);
