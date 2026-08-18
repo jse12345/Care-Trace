@@ -4,6 +4,7 @@ import com.springboot.caretrace.api.patientcase.entity.PatientCase;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
+import java.util.List;
 
 public interface QPatientCaseRepository
         extends JpaRepository<PatientCase, Long>,
@@ -13,4 +14,6 @@ public interface QPatientCaseRepository
             Long caseId,
             String isDeleted
     );
+    List<PatientCase> findByPatientIdAndIsDeletedOrderByCaseIdDesc(Long patientId, String isDeleted);
+
 }

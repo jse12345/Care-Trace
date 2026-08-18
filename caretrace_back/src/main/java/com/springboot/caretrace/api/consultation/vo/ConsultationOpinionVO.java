@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ConsultationOpinionVO {
+    private String patientName;
     private Long opinionId;
     private Long caseId;
     private Long staffId;

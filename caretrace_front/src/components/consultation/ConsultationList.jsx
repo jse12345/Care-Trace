@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams, useLocation } from "react-router-dom"; // useLocation 추가
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import PageNation from "../common/PageNation";
 import api from "../common/api";
 
 function ConsultationList() {
   const navigate = useNavigate();
-  const location = useLocation(); // 현재 URL 경로 및 쿼리스트링 정보를 가져오기 위함
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const caseId = searchParams.get("caseId") || searchParams.get("case_id");
   const [groupedOpinions, setGroupedOpinions] = useState([]);
@@ -20,7 +20,6 @@ function ConsultationList() {
     let active = true;
     const params = Object.fromEntries(searchParams.entries());
     
-    // [수정] 한 페이지에 5개씩 불러오도록 파라미터 강제 추가
     if (!params.perPageNum) params.perPageNum = 5;
 
     api.get("/consultation/list.do", { params })
@@ -29,46 +28,77 @@ function ConsultationList() {
         
         const rawList = data.list || [];
 
-        // 1. DB 중복 데이터 제거 (opinionId 기준)
         const uniqueList = Array.from(
           new Map(rawList.map(item => [item.opinionId || item.opinion_id, item])).values()
         );
 
-        // 2. 카드 UI를 위한 데이터 그룹화 및 중복 렌더링 방지 버그 수정본
+// [기존의 그룹화 로직 부분을 아래 코드로 교체해 주세요]
         const groupedData = [];
         const handledIds = new Set();
 
-        const parentIdsInPage = new Set(
-          uniqueList
-            .filter(item => (item.opinionType || item.opinion_type) === 'REQUEST' || !(item.parentOpinionId || item.parent_opinion_id))
-            .map(item => item.opinionId || item.opinion_id)
-        );
+        // 1. 전체 목록(uniqueList)을 Map으로 만들어 ID로 빠른 조회가 가능하게 함
+        const opinionMap = new Map();
+        uniqueList.forEach(item => {
+          const id = item.opinionId || item.opinion_id;
+          opinionMap.set(id, { ...item, responses: [] });
+        });
+
+        // 2. 각 아이템을 최상위 원글(Root) 하위로 완벽하게 조립하는 함수 (재귀적 탐색)
+        const rootMap = new Map(); // 원글 ID별로 자식들을 관리
 
         uniqueList.forEach(item => {
           const id = item.opinionId || item.opinion_id;
           if (handledIds.has(id)) return;
 
-          const opType = item.opinionType || item.opinion_type;
-          const parentId = item.parentOpinionId || item.parent_opinion_id;
+          let current = item;
+          let parentId = current.parentOpinionId || current.parent_opinion_id;
 
-          if (opType === 'REQUEST' || !parentId) {
-            handledIds.add(id);
+          // 부모가 존재한다면 최상위 부모(Root)가 누구인지 끝까지 거슬러 올라감
+          while (parentId && opinionMap.has(parentId)) {
+            current = opinionMap.get(parentId);
+            parentId = current.parentOpinionId || current.parent_opinion_id;
+          }
 
-            const children = uniqueList.filter(child => {
-              const childParentId = child.parentOpinionId || child.parent_opinion_id;
-              return childParentId === id;
-            });
+          const rootId = current.opinionId || current.opinion_id;
 
-            // 자식 답변들은 과거순(먼저 쓴 글이 위로)으로 정렬하여 대화 흐름을 자연스럽게 만듦
-            children.sort((a, b) => new Date(a.createdAt || a.created_at) - new Date(b.createdAt || b.created_at));
-            children.forEach(child => handledIds.add(child.opinionId || child.opinion_id));
-            
-            groupedData.push({ ...item, responses: children });
-          } 
-          else if (opType === 'RESPONSE' && parentId && !parentIdsInPage.has(parentId)) {
+          // 만약 최상위 원글이 현재 페이지 목록에 존재한다면 하나의 스레드로 묶어줌
+          if (opinionMap.has(rootId)) {
+            if (!rootMap.has(rootId)) {
+              rootMap.set(rootId, opinionMap.get(rootId));
+            }
+          } else {
+            // 최상위 원글이 현재 페이지에 아예 없다면 단독 응답으로 처리
             handledIds.add(id);
             groupedData.push({ ...item, isStandaloneResponse: true, responses: [] });
           }
+        });
+
+        // 3. 최상위 원글(Root)마다 딸려 있는 모든 하위 답변(대댓글 포함)들을 평탄화하여 수집
+        rootMap.forEach((rootItem, rootId) => {
+          handledIds.add(rootId);
+          
+          const collectDescendants = (targetParentId, acc) => {
+            uniqueList.forEach(child => {
+              const childParentId = child.parentOpinionId || child.parent_opinion_id;
+              const childId = child.opinionId || child.opinion_id;
+              if (childParentId === targetParentId && !handledIds.has(childId)) {
+                handledIds.add(childId);
+                acc.push(child);
+                collectDescendants(childId, acc);
+              }
+            });
+          };
+
+          const allDescendants = [];
+          collectDescendants(rootId, allDescendants);
+
+          // 작성일 과거순(먼저 쓴 것이 위로) 정렬
+          allDescendants.sort((a, b) => new Date(a.createdAt || a.created_at) - new Date(b.createdAt || b.created_at));
+
+          groupedData.push({
+            ...rootItem,
+            responses: allDescendants
+          });
         });
 
         setGroupedOpinions(groupedData);
@@ -89,7 +119,7 @@ function ConsultationList() {
     if (caseId) params.set("caseId", caseId);
     if (filters.type) params.set("type", filters.type);
     if (filters.status) params.set("status", filters.status);
-    params.set("perPageNum", "5"); // 검색 시에도 5개 유지
+    params.set("perPageNum", "5"); 
     navigate(`/consultation/list?${params.toString()}`);
   };
 
@@ -110,7 +140,11 @@ function ConsultationList() {
               {caseId ? "해당 증례에 대한 협진 진행 경과를 한눈에 파악할 수 있습니다." : "전체 협진 요청 및 응답 내역을 확인합니다."}
             </p>
           </div>
-          <button className="primary-button" onClick={() => navigate(caseId ? `/consultation/write?caseId=${caseId}` : '#')} disabled={!caseId}>
+          {/* [수정 1] disabled 제거 및 url 직접 라우팅 처리 */}
+          <button 
+            className="primary-button" 
+            onClick={() => navigate(caseId ? `/consultation/write?caseId=${caseId}` : '/consultation/write')}
+          >
             + 협진 요청
           </button>
         </header>
@@ -147,10 +181,10 @@ function ConsultationList() {
                 >
                   <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f1f3f5', paddingBottom: '12px', marginBottom: '16px' }}>
                     <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                      {/* [수정] 전체 목록일 때만 Case ID 표시 */}
-                      {!caseId && group.caseId && (
+                      {/* [수정 2] Case ID 대신 환자 이름 노출 (백엔드에서 patientName을 보내준다고 가정, 없을 경우 Case ID 폴백) */}
+                      {!caseId && (
                         <span style={{ backgroundColor: '#e9ecef', color: '#495057', padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 'bold' }}>
-                          Case ID: {group.caseId}
+                          {group.patientName ? `${group.patientName} 환자` : `Case ID: ${group.caseId}`}
                         </span>
                       )}
                       {group.isStandaloneResponse && <span style={{ color: '#0056b3', fontWeight: 'bold' }}>[단독 응답]</span>}
@@ -158,7 +192,8 @@ function ConsultationList() {
                       <span className={`status-badge badge-${group.status?.toLowerCase()}`}>{group.status}</span>
                     </div>
                     <div style={{ fontSize: '0.9rem', color: '#6c757d', display: 'flex', gap: '16px' }}>
-                      <span><strong>작성자:</strong> {group.staffName || "이름 없음"}</span>
+                      {/* [수정 3] "작성자:" 텍스트 삭제. 응답(RESPONSE)과 형식 통일 */}
+                      <span>{group.staffName || "이름 없음"}</span>
                       <span>{date ? new Date(date).toLocaleDateString() : ""}</span>
                     </div>
                   </div>
@@ -168,7 +203,6 @@ function ConsultationList() {
                   </div>
 
                   <div className="card-actions" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: group.responses?.length ? '24px' : '0' }}>
-                    {/* [수정] 상세 보기 버튼 클릭 시 현재 URL 상태를 같이 넘겨줌 */}
                     <button 
                       className="detail-button" 
                       onClick={() => navigate(`/consultation/view?opinionId=${id}`, { state: { returnUrl: location.pathname + location.search } })}
@@ -197,6 +231,7 @@ function ConsultationList() {
                                   <span className={`status-badge badge-${res.status?.toLowerCase()}`}>{res.status}</span>
                                 </div>
                                 <div style={{ fontSize: '0.85rem', color: '#6c757d', display: 'flex', gap: '12px' }}>
+                                  {/* [수정 3] 여기도 작성자 이름만 노출되도록 유지 */}
                                   <span>{res.staffName || "이름 없음"}</span>
                                   <span>{resDate ? new Date(resDate).toLocaleDateString() : ""}</span>
                                 </div>
@@ -205,7 +240,6 @@ function ConsultationList() {
                                 {resContent}
                               </div>
                               <div style={{ textAlign: 'right' }}>
-                                {/* [수정] 자식 글 상세 보기 시에도 동일하게 리턴 URL 넘김 */}
                                 <button 
                                   className="secondary-button" 
                                   style={{ padding: '6px 12px', fontSize: '0.85rem' }} 

@@ -9,10 +9,19 @@ import com.springboot.caretrace.api.consultation.entity.OpinionType;
 import com.springboot.caretrace.api.consultation.entity.QConsultationOpinion;
 import com.springboot.caretrace.api.consultation.vo.ConsultationOpinionVO;
 import com.springboot.caretrace.api.medicalstaff.entity.QMedicalStaff;
+import com.springboot.caretrace.api.patient.entity.QPatient;
+import com.springboot.caretrace.api.patient.repository.PatientRepositoryCustomImpl;
+import com.springboot.caretrace.api.patientcase.entity.QPatientCase;
 import com.springboot.caretrace.page.PageObject;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import java.util.List;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
+import static com.springboot.caretrace.api.patient.entity.QPatient.patient;
+import static com.springboot.caretrace.api.patientcase.entity.QPatientCase.patientCase;
 
 @Repository
 @RequiredArgsConstructor
@@ -23,9 +32,37 @@ public class ConsultationOpinionRepositoryCustomImpl implements ConsultationOpin
 
     private final QConsultationOpinion opinion = QConsultationOpinion.consultationOpinion;
     private final QMedicalStaff staff = QMedicalStaff.medicalStaff;
+    private final PatientRepositoryCustomImpl patientRepositoryCustomImpl;
 
     @Override
     public List<ConsultationOpinionVO> getList(PageObject pageObject, Long caseId, OpinionType type, OpinionStatus status) {
+
+        // 1단계: 사용자의 검색 조건(caseId, 상태, 구분 등)에 맞는 데이터의 ID만 5개(페이징) 찾아옵니다.
+        List<ConsultationOpinion> targetList = queryFactory
+                .selectFrom(opinion)
+                .where(search(caseId, type, status))
+                .orderBy(opinion.createdAt.desc())
+                .limit(pageObject.getPerPageNum())
+                .offset(pageObject.getLimit())
+                .fetch();
+
+        if (targetList.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // 2단계: 찾아온 5개의 글이 속한 "원글(부모) ID"를 모두 수집하여 Set에 담습니다. (중복 제거)
+        Set<Long> familyIds = new HashSet<>();
+        for (ConsultationOpinion op : targetList) {
+            if (op.getParentOpinionId() == null) {
+                // 본인이 원글(REQUEST)인 경우 본인의 ID를 담음
+                familyIds.add(op.getOpinionId());
+            } else {
+                // 본인이 답글(RESPONSE)인 경우 부모의 ID를 담음
+                familyIds.add(op.getParentOpinionId());
+            }
+        }
+
+        // 3단계: 수집된 '원글 ID'들을 바탕으로 관련된 원글 + 모든 답글을 한 번에 조회해서 반환합니다.
         return queryFactory
                 .select(Projections.fields(ConsultationOpinionVO.class,
                         opinion.opinionId,
@@ -36,15 +73,23 @@ public class ConsultationOpinionRepositoryCustomImpl implements ConsultationOpin
                         opinion.status,
                         opinion.createdAt,
                         opinion.updatedAt,
-                        staff.staffNo.as("staffId"),   // medical_staff 테이블의 번호
-                        staff.staffName.as("staffName") // JOIN을 통해 가져온 의료진 이름
+                        staff.staffNo.as("staffId"),
+                        staff.staffName.as("staffName"),
+                        patient.patientName.as("patientName")
                 ))
                 .from(opinion)
                 .leftJoin(staff).on(opinion.staffId.eq(staff.staffNo))
-                .where(search(caseId, type, status))
+                .leftJoin(patientCase).on(opinion.caseId.eq(patientCase.caseId))
+                .leftJoin(patient).on(patientCase.patientId.eq(patient.patientId))
+                .where(
+                        // 삭제되지 않은 데이터만 가져오도록 필터링
+                        opinion.isDeleted.eq("n"),
+                        // 수집된 원글이거나 OR 그 원글을 부모로 두는 답글인 경우 모두 포함
+                        opinion.opinionId.in(familyIds)
+                                .or(opinion.parentOpinionId.in(familyIds))
+                )
+                // 프론트엔드 전달을 위해 최신순 정렬
                 .orderBy(opinion.createdAt.desc())
-                .limit(pageObject.getPerPageNum())
-                .offset(pageObject.getLimit())
                 .fetch();
     }
 

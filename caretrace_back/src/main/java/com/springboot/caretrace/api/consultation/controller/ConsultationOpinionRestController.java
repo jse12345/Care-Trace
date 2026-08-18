@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -61,4 +62,19 @@ public class ConsultationOpinionRestController {
         ConsultationOpinionVO opinion = service.view(opinionId);
         return ResponseEntity.ok(opinion);
     }
+
+    // 1. 환자 검색 API (/consultation/search-patient.do?keyword=홍길동)
+    @GetMapping("/search-patient.do")
+    public ResponseEntity<List<Map<String, Object>>> searchPatientForConsultation(@RequestParam String keyword) {
+        log.info("[searchPatientForConsultation] 검색 키워드: {}", keyword);
+        return ResponseEntity.ok(service.searchPatientsForConsultation(keyword));
+    }
+
+    // 2. 특정 환자의 증례 목록 조회 API (/consultation/search-case.do?patientId=1)
+    @GetMapping("/search-case.do")
+    public ResponseEntity<List<Map<String, Object>>> searchCaseForConsultation(@RequestParam Long patientId) {
+        log.info("[searchCaseForConsultation] 조회할 환자 ID: {}", patientId);
+        return ResponseEntity.ok(service.getCasesForConsultation(patientId));
+    }
+
 }

@@ -6,7 +6,17 @@ import com.springboot.caretrace.api.consultation.entity.OpinionType;
 import com.springboot.caretrace.api.consultation.repository.ConsultationOpinionRepositoryCustom;
 import com.springboot.caretrace.api.consultation.repository.QConsultationOpinionRepository;
 import com.springboot.caretrace.api.consultation.vo.ConsultationOpinionVO;
+import com.springboot.caretrace.api.patient.repository.QPatientRepository;
 import com.springboot.caretrace.page.PageObject;
+
+// 👇 [추가된 임포트] 타 도메인 Repository 및 Entity, Map 변환용
+import com.springboot.caretrace.api.patient.repository.QPatientRepository;
+import com.springboot.caretrace.api.patientcase.repository.QPatientCaseRepository;
+import com.springboot.caretrace.api.patientcase.entity.PatientCase;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
@@ -25,10 +35,12 @@ public class ConsultationOpinionServiceImpl implements ConsultationOpinionServic
     private final ConsultationOpinionRepositoryCustom repositoryCustom;
     private final QConsultationOpinionRepository jpaRepository;
 
+    private final QPatientRepository patientRepository;
+    private final QPatientCaseRepository patientCaseRepository;
+
     @Override
     public List<ConsultationOpinionVO> list(PageObject pageObject, Long caseId, OpinionType type, OpinionStatus status) {
         pageObject.setTotalRow(repositoryCustom.getCount(pageObject, caseId, type, status));
-        // 이미 Repository에서 VO로 변환되어 넘어오므로 바로 반환합니다.
         return repositoryCustom.getList(pageObject, caseId, type, status);
     }
 
@@ -75,7 +87,48 @@ public class ConsultationOpinionServiceImpl implements ConsultationOpinionServic
         return 1L;
     }
 
-    // 상태 업데이트용 영속성 엔티티 조회를 위해 기본 JpaRepository의 findById 사용
+    @Override
+    public ConsultationOpinionVO view(Long opinionId) {
+        ConsultationOpinionVO vo = repositoryCustom.getOpinion(opinionId);
+        if (vo == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 협진 의견을 찾을 수 없습니다.");
+        }
+        return vo;
+    }
+
+    // 다른 도메인(환자, 증례) 데이터를 읽어오는 메서드 구현부
+
+    @Override
+    public List<Map<String, Object>> searchPatientsForConsultation(String keyword) {
+        return patientRepository.searchPatients(keyword).stream()
+                .map(p -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("patientId", p.getPatientId());
+                    map.put("patientName", p.getPatientName());
+                    map.put("birthDate", p.getBirthDate());
+                    return map;
+                }).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Map<String, Object>> getCasesForConsultation(Long patientId) {
+        // QPatientCaseRepository에 1줄 추가하신 그 메서드 활용
+        List<PatientCase> cases = patientCaseRepository.findByPatientIdAndIsDeletedOrderByCaseIdDesc(patientId, "N");
+
+        return cases.stream()
+                .map(c -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("caseId", c.getCaseId());
+                    map.put("diagnosisName", c.getDiagnosis()); // PatientCase 엔티티의 진단명 필드
+                    map.put("visitDate", c.getStartDate());     // PatientCase 엔티티의 추적 시작일 필드
+                    return map;
+                }).collect(Collectors.toList());
+    }
+
+    // =========================================================================
+    // 내부 헬퍼 메서드들
+    // =========================================================================
+
     private ConsultationOpinion findActiveOpinion(Long opinionId) {
         if (opinionId == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "원 의견 번호가 필요합니다.");
 
@@ -110,15 +163,5 @@ public class ConsultationOpinionServiceImpl implements ConsultationOpinionServic
     private String requiredString(String value) {
         if (value == null || value.isBlank()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "필수 입력값이 누락되었습니다.");
         return value.trim();
-    }
-    @Override
-    public ConsultationOpinionVO view(Long opinionId) {
-        ConsultationOpinionVO vo = repositoryCustom.getOpinion(opinionId);
-
-        if (vo == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 협진 의견을 찾을 수 없습니다.");
-        }
-
-        return vo;
     }
 }
