@@ -10,41 +10,72 @@ const PatientView = () => {
 
     const [patient, setPatient] = useState(null);
 
+    const [patientCases, setPatientCases] = useState([]);
+
     useEffect(() => {
 
-        const getPatient = async () => {
+    const getPatient = async () => {
 
-            try {
+        try {
 
-                const token = localStorage.getItem("token");
+            const token = localStorage.getItem("token");
 
-                console.log("환자 상세 조회 ID:", patientId);
-                console.log("환자 상세 조회 토큰:", token);
+            console.log("환자 상세 조회 ID:", patientId);
+            console.log("환자 상세 조회 토큰:", token);
 
-                const response = await axios.get(
-                    `${API_BASE_URL}/patients/${patientId}`,
-                    {
-                        headers: {
-                            "X-AUTH-TOKEN": token
-                        }
+            // 환자 정보 조회
+            const patientResponse = await axios.get(
+                `${API_BASE_URL}/patients/${patientId}`,
+                {
+                    headers: {
+                        "X-AUTH-TOKEN": token
                     }
-                );
+                }
+            );
 
-                console.log("환자 상세 조회 결과:", response.data);
+            console.log(
+                "환자 상세 조회 결과:",
+                patientResponse.data
+            );
 
-                setPatient(response.data);
+            setPatient(patientResponse.data);
 
-            } catch (error) {
 
-                console.error("환자 조회 실패", error);
-                alert("환자 정보를 불러올 수 없습니다.");
+            // 해당 환자의 추적 관찰 케이스 조회
+            const caseResponse = await axios.get(
+                `${API_BASE_URL}/patient-cases/patient/${patientId}`,
+                {
+                    headers: {
+                        "X-AUTH-TOKEN": token
+                    }
+                }
+            );
 
-            }
-        };
+            console.log(
+                "환자 케이스 조회 결과:",
+                caseResponse.data
+            );
 
-        getPatient();
+            setPatientCases(caseResponse.data);
 
-    }, [patientId]);
+        } catch (error) {
+
+            console.error(
+                "환자 정보 또는 케이스 조회 실패",
+                error
+            );
+
+            alert(
+                "환자 정보를 불러올 수 없습니다."
+            );
+
+        }
+
+    };
+
+    getPatient();
+
+}, [patientId]);
 
 
     if (!patient) {
@@ -67,6 +98,23 @@ const PatientView = () => {
         }
 
         return "기타";
+    };
+
+    const getCaseStatus = (status) => {
+
+        if (status === "FOLLOW_UP") {
+            return "추적 관찰";
+        }
+
+        if (status === "TREATMENT") {
+            return "치료 중";
+        }
+
+        if (status === "COMPLETED") {
+            return "종료";
+        }
+
+        return status || "-";
     };
 
 
@@ -354,6 +402,154 @@ const PatientView = () => {
                             병변 측정 기록은 추적 관찰 케이스에서
                             관리할 수 있습니다.
                         </p>
+
+                    </div>
+
+                                </div>
+
+
+                {/* =========================================
+                    추적 관찰 케이스
+                ========================================= */}
+
+                <div className="patient-detail-section">
+
+                    <div className="patient-detail-section-title">
+
+                        <span className="patient-section-number">
+                            03
+                        </span>
+
+                        <div>
+
+                            <h3>
+                                추적 관찰 케이스
+                            </h3>
+
+                            <p>
+                                해당 환자의 추적 관찰 및 치료 케이스입니다.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div className="patient-case-header">
+
+                        <strong>
+                            총 {patientCases.length}건
+                        </strong>
+
+                        <button
+                            className="patient-case-add-button"
+                            onClick={() =>
+                                navigate(
+                                    `/patient-cases/write?patientId=${patient.patientId}`
+                                )
+                            }
+                        >
+                            + 케이스 등록
+                        </button>
+
+                    </div>
+
+
+                    <div className="patient-case-table-wrap">
+
+                        <table className="patient-case-table">
+
+                            <thead>
+
+                                <tr>
+                                    <th>케이스 번호</th>
+                                    <th>진단명</th>
+                                    <th>병변 부위</th>
+                                    <th>상태</th>
+                                    <th>추적 시작일</th>
+                                    <th>추적 종료일</th>
+                                    <th>관리</th>
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                                {patientCases.length === 0 ? (
+
+                                    <tr>
+
+                                        <td
+                                            colSpan="7"
+                                            className="patient-case-empty"
+                                        >
+                                            등록된 추적 관찰 케이스가 없습니다.
+                                        </td>
+
+                                    </tr>
+
+                                ) : (
+
+                                    patientCases.map((item) => (
+
+                                        <tr key={item.caseId}>
+
+                                            <td>
+                                                {item.caseId}
+                                            </td>
+
+                                            <td>
+                                                {item.diagnosis}
+                                            </td>
+
+                                            <td>
+                                                {item.bodyPart || "-"}
+                                            </td>
+
+                                            <td>
+
+                                                <span
+                                                    className={`case-status case-status-${item.caseStatus}`}
+                                                >
+                                                    {getCaseStatus(
+                                                        item.caseStatus
+                                                    )}
+                                                </span>
+
+                                            </td>
+
+                                            <td>
+                                                {item.startDate || "-"}
+                                            </td>
+
+                                            <td>
+                                                {item.endDate || "-"}
+                                            </td>
+
+                                            <td>
+
+                                                <button
+                                                    className="patient-case-view-button"
+                                                    onClick={() =>
+                                                        navigate(
+                                                            `/patient-cases/${item.caseId}`
+                                                        )
+                                                    }
+                                                >
+                                                    보기
+                                                </button>
+
+                                            </td>
+
+                                        </tr>
+
+                                    ))
+
+                                )}
+
+                            </tbody>
+
+                        </table>
 
                     </div>
 

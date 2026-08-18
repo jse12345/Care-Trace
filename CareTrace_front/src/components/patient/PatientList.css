@@ -621,3 +621,740 @@
     }
 
 }
+
+/* =========================================
+   Patient 공통
+========================================= */
+
+.patient-page {
+    min-height: 100vh;
+    background: #f7f9fc;
+
+    /* 상단 네비게이션바와 겹치지 않도록 */
+    padding: 110px 60px 60px;
+
+    box-sizing: border-box;
+}
+
+
+/* =========================================
+   페이지 상단
+========================================= */
+
+.patient-page-header {
+    max-width: 1200px;
+    margin: 0 auto 30px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.patient-page-label {
+    margin: 0 0 8px;
+
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+
+    color: #6b7cff;
+}
+
+.patient-page-header h1 {
+    margin: 0;
+
+    font-size: 34px;
+    font-weight: 700;
+
+    color: #202632;
+}
+
+.patient-page-description {
+    margin: 10px 0 0;
+
+    font-size: 14px;
+
+    color: #7c8493;
+}
+
+
+/* 목록 버튼 */
+
+.patient-back-button {
+    height: 42px;
+
+    padding: 0 18px;
+
+    border: 1px solid #e0e5ed;
+    border-radius: 8px;
+
+    background: #ffffff;
+
+    color: #4d5665;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.patient-back-button:hover {
+    background: #f1f4f8;
+}
+
+
+/* =========================================
+   메인 카드
+========================================= */
+
+.patient-detail-card {
+    max-width: 1200px;
+
+    margin: 0 auto;
+
+    background: #ffffff;
+
+    border: 1px solid #e7ebf1;
+
+    border-radius: 16px;
+
+    box-shadow: 0 8px 30px rgba(30, 45, 70, 0.06);
+
+    overflow: hidden;
+}
+
+
+/* =========================================
+   환자 카드 헤더
+========================================= */
+
+.patient-detail-header {
+    padding: 30px 34px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.patient-profile {
+    display: flex;
+    align-items: center;
+
+    gap: 16px;
+}
+
+.patient-profile-icon {
+    width: 52px;
+    height: 52px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 12px;
+
+    background: #eef1ff;
+
+    color: #6574e8;
+
+    font-size: 26px;
+    font-weight: 500;
+}
+
+.patient-detail-label {
+    display: block;
+
+    margin-bottom: 4px;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    letter-spacing: 1.2px;
+
+    color: #8992a3;
+}
+
+.patient-profile h2 {
+    margin: 0;
+
+    font-size: 24px;
+
+    color: #202632;
+}
+
+.patient-profile p {
+    margin: 5px 0 0;
+
+    font-size: 13px;
+
+    color: #8a92a0;
+}
+
+
+/* 상태 */
+
+.patient-status {
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+
+    padding: 8px 13px;
+
+    border-radius: 20px;
+
+    background: #f0faf4;
+
+    color: #3b9b63;
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.status-dot {
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: #43b86b;
+}
+
+
+/* =========================================
+   구분선
+========================================= */
+
+.patient-divider {
+    height: 1px;
+
+    background: #edf0f4;
+}
+
+
+/* =========================================
+   Section
+========================================= */
+
+.patient-detail-section {
+    padding: 32px 34px;
+}
+
+.patient-detail-section + .patient-detail-section {
+    border-top: 1px solid #edf0f4;
+}
+
+
+/* 섹션 제목 */
+
+.patient-detail-section-title {
+    display: flex;
+    align-items: flex-start;
+
+    gap: 14px;
+
+    margin-bottom: 25px;
+}
+
+.patient-section-number {
+    min-width: 30px;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    color: #6877e9;
+
+    padding-top: 3px;
+}
+
+.patient-detail-section-title h3 {
+    margin: 0;
+
+    font-size: 18px;
+    font-weight: 700;
+
+    color: #252b36;
+}
+
+.patient-detail-section-title p {
+    margin: 6px 0 0;
+
+    font-size: 13px;
+
+    color: #8b93a1;
+}
+
+
+/* =========================================
+   환자 기본 정보
+========================================= */
+
+.patient-detail-grid {
+    display: grid;
+
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 1px;
+
+    background: #e9edf2;
+
+    border: 1px solid #e9edf2;
+
+    border-radius: 10px;
+
+    overflow: hidden;
+}
+
+.patient-detail-item {
+    min-height: 82px;
+
+    padding: 18px 20px;
+
+    background: #ffffff;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    box-sizing: border-box;
+}
+
+.patient-detail-item span {
+    margin-bottom: 8px;
+
+    font-size: 12px;
+
+    color: #8b93a1;
+}
+
+.patient-detail-item strong {
+    font-size: 15px;
+
+    color: #303744;
+}
+
+
+/* =========================================
+   시스템 정보
+========================================= */
+
+.patient-system-info {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 20px;
+}
+
+.patient-system-info > div {
+    padding: 18px 20px;
+
+    border: 1px solid #e8ecf2;
+
+    border-radius: 10px;
+
+    background: #fafbfc;
+}
+
+.patient-system-info span {
+    display: block;
+
+    margin-bottom: 8px;
+
+    font-size: 12px;
+
+    color: #8b93a1;
+}
+
+.patient-system-info strong {
+    font-size: 14px;
+
+    color: #394150;
+}
+
+
+/* =========================================
+   안내 박스
+========================================= */
+
+.patient-info-box {
+    margin: 0 34px 32px;
+
+    padding: 18px 20px;
+
+    display: flex;
+
+    gap: 14px;
+
+    border: 1px solid #e2e7ff;
+
+    border-radius: 10px;
+
+    background: #f7f8ff;
+}
+
+.patient-info-icon {
+    width: 26px;
+    height: 26px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #e7eaff;
+
+    color: #6877e9;
+
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.patient-info-box strong {
+    display: block;
+
+    margin-bottom: 5px;
+
+    font-size: 14px;
+
+    color: #404a5b;
+}
+
+.patient-info-box p {
+    margin: 0;
+
+    font-size: 13px;
+    line-height: 1.6;
+
+    color: #7d8695;
+}
+
+
+/* =========================================
+   케이스 헤더
+========================================= */
+
+.patient-case-header {
+    display: flex;
+
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 14px;
+}
+
+.patient-case-header strong {
+    font-size: 14px;
+
+    color: #454d5a;
+}
+
+.patient-case-add-button {
+    height: 36px;
+
+    padding: 0 14px;
+
+    border: 0;
+    border-radius: 7px;
+
+    background: #6877e9;
+
+    color: white;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.patient-case-add-button:hover {
+    background: #5665d8;
+}
+
+
+/* =========================================
+   케이스 테이블
+========================================= */
+
+.patient-case-table-wrap {
+    width: 100%;
+
+    overflow-x: auto;
+
+    border: 1px solid #e6eaf0;
+
+    border-radius: 10px;
+}
+
+.patient-case-table {
+    width: 100%;
+
+    border-collapse: collapse;
+
+    font-size: 13px;
+}
+
+.patient-case-table thead {
+    background: #f8f9fb;
+}
+
+.patient-case-table th {
+    height: 46px;
+
+    padding: 0 14px;
+
+    border-bottom: 1px solid #e6eaf0;
+
+    color: #727b8b;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    text-align: left;
+
+    white-space: nowrap;
+}
+
+.patient-case-table td {
+    height: 54px;
+
+    padding: 0 14px;
+
+    border-bottom: 1px solid #edf0f4;
+
+    color: #414957;
+
+    white-space: nowrap;
+}
+
+.patient-case-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.patient-case-table tbody tr:hover {
+    background: #fafbfe;
+}
+
+
+/* =========================================
+   케이스 상태
+========================================= */
+
+.case-status {
+    display: inline-flex;
+
+    align-items: center;
+
+    padding: 5px 9px;
+
+    border-radius: 15px;
+
+    font-size: 11px;
+    font-weight: 600;
+}
+
+
+/* 추적 관찰 */
+
+.case-status-FOLLOW_UP {
+    background: #eef1ff;
+
+    color: #5969d9;
+}
+
+
+/* 치료 중 */
+
+.case-status-TREATMENT {
+    background: #fff5df;
+
+    color: #c78a2c;
+}
+
+
+/* 종료 */
+
+.case-status-COMPLETED {
+    background: #f0f1f3;
+
+    color: #737b87;
+}
+
+
+/* =========================================
+   케이스 보기 버튼
+========================================= */
+
+.patient-case-view-button {
+    padding: 6px 11px;
+
+    border: 1px solid #dfe4ec;
+
+    border-radius: 6px;
+
+    background: #ffffff;
+
+    color: #596272;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+.patient-case-view-button:hover {
+    background: #f3f5f8;
+}
+
+
+/* 데이터 없음 */
+
+.patient-case-empty {
+    height: 100px !important;
+
+    text-align: center;
+
+    color: #9aa1ad !important;
+}
+
+
+/* =========================================
+   하단 버튼
+========================================= */
+
+.patient-detail-actions {
+    padding: 22px 34px;
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 10px;
+
+    border-top: 1px solid #edf0f4;
+
+    background: #fafbfc;
+}
+
+.patient-cancel-button,
+.patient-submit-button {
+    height: 42px;
+
+    padding: 0 20px;
+
+    border-radius: 7px;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+.patient-cancel-button {
+    border: 1px solid #dce1e8;
+
+    background: #ffffff;
+
+    color: #596272;
+}
+
+.patient-submit-button {
+    border: none;
+
+    background: #6877e9;
+
+    color: #ffffff;
+}
+
+.patient-submit-button:hover {
+    background: #5665d8;
+}
+
+
+/* =========================================
+   로딩
+========================================= */
+
+.patient-loading {
+    min-height: 100vh;
+
+    padding-top: 150px;
+
+    box-sizing: border-box;
+
+    text-align: center;
+
+    color: #7e8795;
+
+    font-size: 14px;
+}
+
+
+/* =========================================
+   반응형
+========================================= */
+
+@media (max-width: 900px) {
+
+    .patient-page {
+        padding: 100px 25px 40px;
+    }
+
+    .patient-page-header {
+        align-items: flex-start;
+
+        flex-direction: column;
+
+        gap: 20px;
+    }
+
+    .patient-detail-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .patient-system-info {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+@media (max-width: 600px) {
+
+    .patient-page {
+        padding: 90px 15px 30px;
+    }
+
+    .patient-detail-header {
+        padding: 25px 20px;
+
+        align-items: flex-start;
+
+        flex-direction: column;
+
+        gap: 20px;
+    }
+
+    .patient-detail-section {
+        padding: 25px 20px;
+    }
+
+    .patient-detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .patient-info-box {
+        margin: 0 20px 25px;
+    }
+
+    .patient-detail-actions {
+        padding: 18px 20px;
+    }
+
+}

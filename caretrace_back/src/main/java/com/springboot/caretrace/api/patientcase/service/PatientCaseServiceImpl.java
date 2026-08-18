@@ -193,4 +193,17 @@ public class PatientCaseServiceImpl
                 .isDeleted(patientCase.getIsDeleted())
                 .build();
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PatientCaseVO> getPatientCasesByPatientId(
+            Long patientId
+    ) {
+
+        return patientCaseRepository
+                .findByPatientId(patientId)
+                .stream()
+                .map(this::toVO)
+                .toList();
+    }
 }

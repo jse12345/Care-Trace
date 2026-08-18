@@ -21,4 +21,5 @@ public interface PatientCaseService {
     );
 
     void deletePatientCase(Long caseId);
+    List<PatientCaseVO> getPatientCasesByPatientId(Long patientId);
 }

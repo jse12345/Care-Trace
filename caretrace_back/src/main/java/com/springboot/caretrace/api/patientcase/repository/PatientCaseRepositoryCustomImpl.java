@@ -5,6 +5,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.springboot.caretrace.api.medicalstaff.entity.QMedicalStaff;
 import com.springboot.caretrace.api.patient.entity.QPatient;
+import com.springboot.caretrace.api.patientcase.entity.PatientCase;
 import com.springboot.caretrace.api.patientcase.entity.QPatientCase;
 import com.springboot.caretrace.api.patientcase.vo.PatientCaseVO;
 import lombok.RequiredArgsConstructor;
@@ -210,5 +211,22 @@ public class PatientCaseRepositoryCustomImpl
                 )
 
                 .fetchOne();
+    }
+
+    @Override
+    public List<PatientCase> findByPatientId(Long patientId) {
+
+        QPatientCase patientCase = QPatientCase.patientCase;
+
+        return queryFactory
+                .selectFrom(patientCase)
+                .where(
+                        patientCase.patientId.eq(patientId),
+                        patientCase.isDeleted.eq("N")
+                )
+                .orderBy(
+                        patientCase.startDate.desc()
+                )
+                .fetch();
     }
 }

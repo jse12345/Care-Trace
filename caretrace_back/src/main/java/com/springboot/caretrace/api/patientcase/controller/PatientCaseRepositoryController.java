@@ -77,4 +77,16 @@ public class PatientCaseRepositoryController {
 
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/patient/{patientId}")
+    public ResponseEntity<List<PatientCaseVO>> getPatientCasesByPatientId(
+            @PathVariable Long patientId
+    ) {
+
+        return ResponseEntity.ok(
+                patientCaseService.getPatientCasesByPatientId(
+                        patientId
+                )
+        );
+    }
 }
