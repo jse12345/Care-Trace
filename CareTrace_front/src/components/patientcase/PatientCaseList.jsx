@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { API_BASE_URL } from "../common/api";
 
 const PatientCaseList = () => {
 
@@ -17,7 +18,7 @@ const PatientCaseList = () => {
             const token = localStorage.getItem("token");
 
             const response = await axios.get(
-                "http://localhost:80/patient-cases",
+                `${API_BASE_URL}/patient-cases`,
                 {
                     params: {
                         keyword: keyword,
@@ -62,7 +63,7 @@ const PatientCaseList = () => {
             const token = localStorage.getItem("token");
 
             await axios.delete(
-                `http://localhost:80/patient-cases/${caseId}`,
+                `${API_BASE_URL}/patient-cases/${caseId}`,
                 {
                     headers: {
                         "X-AUTH-TOKEN": token

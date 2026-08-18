@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { API_BASE_URL } from "../common/api";
 
 const PatientCaseWrite = () => {
 
@@ -30,7 +31,7 @@ const PatientCaseWrite = () => {
 
                 // 환자 목록 조회
                 const patientResponse = await axios.get(
-                    "http://localhost:80/patients",
+                    `${API_BASE_URL}/patients`,
                     {
                         headers: {
                             "X-AUTH-TOKEN": token
@@ -42,7 +43,7 @@ const PatientCaseWrite = () => {
 
                 // 의료진 목록 조회
                 const staffResponse = await axios.get(
-                    "http://localhost:80/medical-staff/list.do",
+                    `${API_BASE_URL}/medical-staff/list.do`,
                     {
                         headers: {
                             "X-AUTH-TOKEN": token
@@ -105,7 +106,7 @@ const PatientCaseWrite = () => {
             const token = localStorage.getItem("token");
 
             await axios.post(
-                "http://localhost:80/patient-cases",
+                `${API_BASE_URL}/patient-cases`,
                 {
                     ...form,
                     patientId: Number(form.patientId),

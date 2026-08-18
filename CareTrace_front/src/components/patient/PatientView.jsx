@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
+import { API_BASE_URL } from "../common/api";
 
 const PatientView = () => {
 
@@ -21,7 +22,7 @@ const PatientView = () => {
                 console.log("환자 상세 조회 토큰:", token);
 
                 const response = await axios.get(
-                    `http://localhost:80/patients/${patientId}`,
+                    `${API_BASE_URL}/patients/${patientId}`,
                     {
                         headers: {
                             "X-AUTH-TOKEN": token

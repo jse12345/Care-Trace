@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
+import { API_BASE_URL } from "../common/api";
 
 const PatientCaseView = () => {
 
@@ -18,7 +19,7 @@ const PatientCaseView = () => {
                 const token = localStorage.getItem("token");
 
                 const response = await axios.get(
-                    `http://localhost:80/patient-cases/${caseId}`,
+                    `${API_BASE_URL}/patient-cases/${caseId}`,
                     {
                         headers: {
                             "X-AUTH-TOKEN": token

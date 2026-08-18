@@ -1,8 +1,16 @@
 import axios from "axios";
 
+// 백엔드 API 서버 주소
+// VITE_API_BASE_URL이 설정되어 있으면 그 값을 쓰고,
+// 없으면 브라우저가 접속한 hostname을 그대로 사용해
+// 다른 IP(LAN)에서 접속해도 같은 PC의 백엔드로 요청이 가도록 함
+export const API_BASE_URL =
+    import.meta.env.VITE_API_BASE_URL ||
+    `${window.location.protocol}//${window.location.hostname}`;
+
 // 백엔드 API 통신 공용 객체
 const api = axios.create({
-    baseURL: "http://localhost"
+    baseURL: API_BASE_URL
 });
 
 // 모든 API 요청에 JWT 토큰 자동 추가

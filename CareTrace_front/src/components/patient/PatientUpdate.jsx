@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
+import { API_BASE_URL } from "../common/api";
 
 const PatientUpdate = () => {
 
@@ -26,7 +27,7 @@ const PatientUpdate = () => {
                 const token = localStorage.getItem("token");
 
                 const response = await axios.get(
-                    `http://localhost:80/patients/${patientId}`,
+                    `${API_BASE_URL}/patients/${patientId}`,
                     {
                         headers: {
                             "X-AUTH-TOKEN": token
@@ -98,7 +99,7 @@ const PatientUpdate = () => {
             const token = localStorage.getItem("token");
 
             await axios.put(
-                `http://localhost:80/patients/${patientId}`,
+                `${API_BASE_URL}/patients/${patientId}`,
                 form,
                 {
                     headers: {

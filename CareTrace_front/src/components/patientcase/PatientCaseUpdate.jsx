@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
+import { API_BASE_URL } from "../common/api";
 
 const PatientCaseUpdate = () => {
 
@@ -37,7 +38,7 @@ const PatientCaseUpdate = () => {
                 ] = await Promise.all([
 
                     axios.get(
-                        `http://localhost:80/patient-cases/${caseId}`,
+                        `${API_BASE_URL}/patient-cases/${caseId}`,
                         {
                             headers: {
                                 "X-AUTH-TOKEN": token
@@ -46,7 +47,7 @@ const PatientCaseUpdate = () => {
                     ),
 
                     axios.get(
-                        "http://localhost:80/patients",
+                        `${API_BASE_URL}/patients`,
                         {
                             headers: {
                                 "X-AUTH-TOKEN": token
@@ -55,7 +56,7 @@ const PatientCaseUpdate = () => {
                     ),
 
                     axios.get(
-                        "http://localhost:80/medical-staff",
+                        `${API_BASE_URL}/medical-staff`,
                         {
                             headers: {
                                 "X-AUTH-TOKEN": token
@@ -143,7 +144,7 @@ const PatientCaseUpdate = () => {
             const token = localStorage.getItem("token");
 
             await axios.put(
-                `http://localhost:80/patient-cases/${caseId}`,
+                `${API_BASE_URL}/patient-cases/${caseId}`,
                 {
                     ...form,
                     patientId: Number(form.patientId),

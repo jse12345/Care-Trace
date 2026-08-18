@@ -11,7 +11,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/patients")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173")
 public class PatientRepositoryController {
 
     private final PatientService patientService;
