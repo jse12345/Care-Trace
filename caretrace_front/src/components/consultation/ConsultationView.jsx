@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom"; // 중복 import 제거 및 병합
 import api from "../common/api";
 
 function ConsultationView() {
   const navigate = useNavigate();
+  const location = useLocation(); // 이전 페이지에서 넘긴 state(returnUrl)를 받기 위해 추가
   const [searchParams] = useSearchParams();
   const queryOpinionId = searchParams.get("opinionId") || searchParams.get("opinion_id");
   
@@ -24,6 +25,14 @@ function ConsultationView() {
       .catch(() => setErrorMessage("협진 의견을 불러오는 중 오류가 발생했습니다."));
   };
 
+  // [수정] 이전 목록 화면으로 돌아가는 공통 함수
+  const goBackToList = () => {
+    // location.state에 returnUrl이 있으면 해당 경로로, 없으면 기본 목록 경로로 이동
+    const cId = opinion?.caseId || opinion?.case_id;
+    const returnUrl = location.state?.returnUrl || (cId ? `/consultation/list?caseId=${cId}` : "/consultation/list");
+    navigate(returnUrl);
+  };
+
   const handleResponseSubmit = async (event) => {
     event.preventDefault();
     try {
@@ -32,7 +41,7 @@ function ConsultationView() {
         parentOpinionId: opinion.opinionId || opinion.opinion_id,
         opinionType: "RESPONSE",
         opinionContent: responseContent,
-        staffId: currentStaffId // 누락되었던 작성자 ID 추가
+        staffId: currentStaffId
       });
       alert("응답이 등록되었습니다.");
       fetchOpinion();
@@ -46,13 +55,11 @@ function ConsultationView() {
     if(!window.confirm("이 협진 의견을 철회(삭제) 하시겠습니까?")) return;
     
     try {
-      // 삭제 요청용 파라미터 전달
       const opId = opinion.opinionId || opinion.opinion_id;
-      const cId = opinion.caseId || opinion.case_id;
       
       await api.post("/consultation/delete.do", { opinionId: opId });
       alert("협진 의견이 철회되었습니다.");
-      navigate(`/consultation/list?caseId=${cId}`);
+      goBackToList(); // [수정] 삭제 후에도 기존 검색/페이징 상태가 유지된 목록으로 돌아감
     } catch (error) {
       setErrorMessage(error.response?.data?.message || "철회 중 오류가 발생했습니다.");
     }
@@ -60,12 +67,9 @@ function ConsultationView() {
 
   if (!opinion) return <div className="department-container">로딩 중...</div>;
 
-  // 데이터 바인딩 Fallback
   const opType = opinion.opinionType || opinion.opinion_type;
   const opContent = opinion.opinionContent || opinion.opinion_content;
   const createdAt = opinion.createdAt || opinion.created_at;
-  
-  // 백엔드에서 넘어온 작성자 ID 추출
   const authorId = opinion.staffId || opinion.staff_id;
 
   return (
@@ -74,7 +78,8 @@ function ConsultationView() {
         <section className="form-card">
           <div className="form-card-header">
             <h2>협진 의견 상세</h2>
-            <button className="close-button" onClick={() => navigate(-1)}>×</button>
+            {/* [수정] 단순 뒤로가기(-1) 대신 goBackToList 사용 */}
+            <button className="close-button" onClick={goBackToList}>×</button>
           </div>
           
           {errorMessage && <div className="error-message">{errorMessage}</div>}
@@ -82,12 +87,10 @@ function ConsultationView() {
           <div className="detail-grid">
             <div className="detail-item">
               <span>의견 구분</span>
-              {/* 구분 뱃지 클래스 적용 */}
               <span className={`type-badge badge-${opType?.toLowerCase()}`}>{opType}</span>
             </div>
             <div className="detail-item">
               <span>상태</span>
-              {/* 상태 뱃지 클래스 적용 */}
               <span className={`status-badge badge-${opinion.status?.toLowerCase()}`}>{opinion.status}</span>
             </div>
             <div className="detail-item"><span>작성자</span><strong>{opinion.staffName || "이름 없음"}</strong></div>
@@ -119,11 +122,11 @@ function ConsultationView() {
           )}
 
           <div className="form-actions">
-            {/* 현재 로그인한 사용자와 작성자가 일치할 때만 철회 버튼 렌더링 */}
             {authorId === currentStaffId && (
               <button className="delete-button" onClick={handleDelete}>철회(삭제)</button>
             )}
-            <button className="secondary-button" onClick={() => navigate(`/consultation/list?caseId=${opinion.caseId || opinion.case_id}`)}>목록으로</button>
+            {/* [수정] 목록으로 버튼 클릭 시 goBackToList 사용 */}
+            <button className="secondary-button" onClick={goBackToList}>목록으로</button>
           </div>
         </section>
       </div>
