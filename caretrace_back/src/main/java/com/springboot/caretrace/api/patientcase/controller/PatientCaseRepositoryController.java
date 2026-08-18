@@ -1,7 +1,7 @@
-package com.springboot.caretrace.patientcase.controller;
+package com.springboot.caretrace.api.patientcase.controller;
 
-import com.springboot.caretrace.patientcase.service.PatientCaseService;
-import com.springboot.caretrace.patientcase.vo.PatientCaseVO;
+import com.springboot.caretrace.api.patientcase.service.PatientCaseService;
+import com.springboot.caretrace.api.patientcase.vo.PatientCaseVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

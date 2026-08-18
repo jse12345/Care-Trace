@@ -1,4 +1,4 @@
-package com.springboot.caretrace.patient.vo;
+package com.springboot.caretrace.api.patient.vo;
 
 import lombok.*;
 

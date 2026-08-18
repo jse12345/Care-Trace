@@ -1,8 +1,8 @@
-package com.springboot.caretrace.patientcase.service;
+package com.springboot.caretrace.api.patientcase.service;
 
-import com.springboot.caretrace.patientcase.entity.PatientCase;
-import com.springboot.caretrace.patientcase.repository.QPatientCaseRepository;
-import com.springboot.caretrace.patientcase.vo.PatientCaseVO;
+import com.springboot.caretrace.api.patientcase.entity.PatientCase;
+import com.springboot.caretrace.api.patientcase.repository.QPatientCaseRepository;
+import com.springboot.caretrace.api.patientcase.vo.PatientCaseVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

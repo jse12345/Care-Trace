@@ -1,6 +1,6 @@
-package com.springboot.caretrace.patientcase.repository;
+package com.springboot.caretrace.api.patientcase.repository;
 
-import com.springboot.caretrace.patientcase.entity.PatientCase;
+import com.springboot.caretrace.api.patientcase.entity.PatientCase;
 import com.springboot.caretrace.patientcase.entity.QPatientCase;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;

@@ -1,6 +1,6 @@
-package com.springboot.caretrace.patient.service;
+package com.springboot.caretrace.api.patient.service;
 
-import com.springboot.caretrace.patient.vo.PatientVO;
+import com.springboot.caretrace.api.patient.vo.PatientVO;
 
 import java.util.List;
 

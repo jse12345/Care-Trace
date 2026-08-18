@@ -1,6 +1,6 @@
-package com.springboot.caretrace.patientcase.repository;
+package com.springboot.caretrace.api.patientcase.repository;
 
-import com.springboot.caretrace.patientcase.entity.PatientCase;
+import com.springboot.caretrace.api.patientcase.entity.PatientCase;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

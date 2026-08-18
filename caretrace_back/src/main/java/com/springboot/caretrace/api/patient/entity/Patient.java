@@ -1,4 +1,4 @@
-package com.springboot.caretrace.patient.entity;
+package com.springboot.caretrace.api.patient.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
