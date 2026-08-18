@@ -1,0 +1,623 @@
+/* =========================================================
+   CareTrace - Patient List
+   ========================================================= */
+
+.patient-page {
+    min-height: 100vh;
+
+    /*
+     * Nav bar가 fixed라면 콘텐츠가 가려지지 않도록
+     * 위쪽에 충분한 공간을 확보
+     */
+    padding: 120px 60px 80px;
+
+    background:
+        radial-gradient(
+            circle at 90% 10%,
+            rgba(38, 171, 183, 0.08),
+            transparent 30%
+        ),
+        #f4f8fa;
+
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   상단 Header
+   ========================================================= */
+
+.patient-header {
+    max-width: 1320px;
+    margin: 0 auto 28px;
+
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 30px;
+}
+
+.patient-eyebrow {
+    margin: 0 0 10px;
+
+    color: #087b9b;
+
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.patient-header h1 {
+    margin: 0;
+
+    color: #123653;
+
+    font-size: 42px;
+    font-weight: 800;
+    letter-spacing: -1.5px;
+}
+
+.patient-description {
+    margin: 14px 0 0;
+
+    color: #70859a;
+
+    font-size: 15px;
+    line-height: 1.7;
+}
+
+
+/* 환자 등록 버튼 */
+
+.patient-register-btn {
+    flex-shrink: 0;
+
+    padding: 14px 22px;
+
+    border: none;
+    border-radius: 12px;
+
+    background: #123b5a;
+    color: white;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+}
+
+.patient-register-btn:hover {
+    background: #0b2e48;
+    transform: translateY(-2px);
+}
+
+
+/* =========================================================
+   검색 카드
+   ========================================================= */
+
+.patient-search-card {
+    max-width: 1320px;
+    margin: 0 auto 24px;
+
+    padding: 24px 28px;
+
+    background: white;
+
+    border: 1px solid #dce8ee;
+    border-radius: 18px;
+
+    box-shadow: 0 8px 25px rgba(22, 56, 80, 0.05);
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 30px;
+}
+
+.search-title {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.search-icon {
+    width: 42px;
+    height: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 12px;
+
+    background: #edf7f8;
+    color: #087f96;
+
+    font-size: 24px;
+}
+
+.search-title h3 {
+    margin: 0 0 4px;
+
+    color: #173b58;
+
+    font-size: 16px;
+}
+
+.search-title p {
+    margin: 0;
+
+    color: #8798a8;
+
+    font-size: 12px;
+}
+
+.search-area {
+    flex: 1;
+
+    max-width: 600px;
+
+    display: flex;
+    gap: 10px;
+}
+
+.search-area input {
+    flex: 1;
+
+    height: 46px;
+
+    padding: 0 16px;
+
+    border: 1px solid #d6e2e8;
+    border-radius: 10px;
+
+    background: #f9fbfc;
+
+    color: #173b58;
+
+    font-size: 14px;
+
+    outline: none;
+
+    box-sizing: border-box;
+}
+
+.search-area input:focus {
+    border-color: #2a9daf;
+    background: white;
+
+    box-shadow: 0 0 0 3px rgba(42, 157, 175, 0.08);
+}
+
+.search-area input::placeholder {
+    color: #a5b3be;
+}
+
+.search-btn {
+    height: 46px;
+
+    padding: 0 22px;
+
+    border: none;
+    border-radius: 10px;
+
+    background: #178da1;
+    color: white;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.search-btn:hover {
+    background: #117b8e;
+}
+
+
+/* =========================================================
+   환자 목록 카드
+   ========================================================= */
+
+.patient-list-card {
+    max-width: 1320px;
+    margin: 0 auto;
+
+    background: white;
+
+    border: 1px solid #dce8ee;
+    border-radius: 20px;
+
+    box-shadow: 0 10px 30px rgba(22, 56, 80, 0.05);
+
+    overflow: hidden;
+}
+
+.list-header {
+    padding: 26px 30px 22px;
+
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+
+    border-bottom: 1px solid #edf2f5;
+}
+
+.section-label {
+    margin: 0 0 7px;
+
+    color: #0b7d96;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    letter-spacing: 1.8px;
+}
+
+.list-header h2 {
+    margin: 0;
+
+    color: #173b58;
+
+    font-size: 24px;
+    font-weight: 800;
+}
+
+.patient-count {
+    padding: 8px 14px;
+
+    border-radius: 20px;
+
+    background: #eef7f8;
+
+    color: #658191;
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.patient-count span {
+    margin-right: 4px;
+
+    color: #087f96;
+
+    font-size: 16px;
+    font-weight: 800;
+}
+
+
+/* =========================================================
+   테이블
+   ========================================================= */
+
+.patient-table-wrapper {
+    width: 100%;
+
+    overflow-x: auto;
+}
+
+.patient-table {
+    width: 100%;
+
+    border-collapse: collapse;
+
+    table-layout: fixed;
+}
+
+.patient-table thead {
+    background: #f5f9fa;
+}
+
+.patient-table th {
+    height: 54px;
+
+    color: #698090;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    text-align: center;
+
+    border-bottom: 1px solid #dce7ec;
+}
+
+.patient-table td {
+    height: 68px;
+
+    padding: 0 12px;
+
+    color: #4e6577;
+
+    font-size: 13px;
+
+    text-align: center;
+
+    border-bottom: 1px solid #edf2f5;
+
+    box-sizing: border-box;
+}
+
+.patient-row {
+    transition: background 0.15s ease;
+}
+
+.patient-row:hover {
+    background: #f8fcfc;
+}
+
+.patient-number {
+    color: #94a5b1 !important;
+    font-weight: 600;
+}
+
+.patient-code {
+    display: inline-block;
+
+    padding: 6px 10px;
+
+    border-radius: 7px;
+
+    background: #f0f5f7;
+
+    color: #527084;
+
+    font-family: monospace;
+
+    font-size: 12px;
+}
+
+
+/* 환자명 */
+
+.patient-name-btn {
+    padding: 0;
+
+    border: none;
+
+    background: transparent;
+
+    color: #123f5f;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+.patient-name-btn:hover {
+    color: #168ca0;
+
+    text-decoration: underline;
+}
+
+
+/* =========================================================
+   성별 Badge
+   ========================================================= */
+
+.gender-badge {
+    display: inline-flex;
+
+    min-width: 34px;
+    height: 26px;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 8px;
+
+    border-radius: 20px;
+
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.gender-badge.male {
+    background: #eef5fb;
+    color: #46769d;
+}
+
+.gender-badge.female {
+    background: #f8f1f5;
+    color: #9a6481;
+}
+
+.gender-badge.other {
+    background: #f1f4f5;
+    color: #687c87;
+}
+
+
+/* =========================================================
+   관리 버튼
+   ========================================================= */
+
+.action-buttons {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 6px;
+}
+
+.action-buttons button {
+    padding: 7px 10px;
+
+    border-radius: 7px;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: 0.15s;
+}
+
+.view-btn {
+    border: 1px solid #cfe5e9;
+
+    background: #f0f8f9;
+    color: #147c8d;
+}
+
+.view-btn:hover {
+    background: #e2f2f4;
+}
+
+.update-btn {
+    border: 1px solid #d7e1e7;
+
+    background: white;
+    color: #607887;
+}
+
+.update-btn:hover {
+    background: #f4f7f8;
+}
+
+.delete-btn {
+    border: 1px solid #efd9d9;
+
+    background: white;
+    color: #b46a6a;
+}
+
+.delete-btn:hover {
+    background: #fff3f3;
+}
+
+
+/* =========================================================
+   데이터 없음
+   ========================================================= */
+
+.empty-row td {
+    height: 330px;
+}
+
+.empty-content {
+    display: flex;
+
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+}
+
+.empty-icon {
+    width: 52px;
+    height: 52px;
+
+    margin-bottom: 6px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 16px;
+
+    background: #edf7f8;
+    color: #168ca0;
+
+    font-size: 25px;
+}
+
+.empty-content strong {
+    color: #4f6776;
+
+    font-size: 14px;
+}
+
+.empty-content span {
+    color: #9aaab4;
+
+    font-size: 12px;
+}
+
+.empty-content button {
+    margin-top: 12px;
+
+    padding: 9px 15px;
+
+    border: none;
+    border-radius: 8px;
+
+    background: #153c5a;
+    color: white;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+.empty-content button:hover {
+    background: #0c3049;
+}
+
+
+/* =========================================================
+   반응형
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    .patient-page {
+        padding: 110px 25px 60px;
+    }
+
+    .patient-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .patient-header h1 {
+        font-size: 34px;
+    }
+
+    .patient-search-card {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .search-area {
+        max-width: none;
+    }
+
+    .patient-table {
+        min-width: 950px;
+    }
+
+}
+
+@media (max-width: 600px) {
+
+    .patient-page {
+        padding: 100px 15px 40px;
+    }
+
+    .patient-header h1 {
+        font-size: 30px;
+    }
+
+    .patient-description {
+        font-size: 13px;
+    }
+
+    .search-area {
+        flex-direction: column;
+    }
+
+    .search-btn {
+        width: 100%;
+    }
+
+}

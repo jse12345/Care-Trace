@@ -13,6 +13,14 @@ import ConsultationComp from "./components/consultation/ConsultationComp";
 import TreatmentReportComp from "./components/treatmentreport/TreatmentReportComp";
 import CompareSetComp from "./components/compareSet/CompareSetComp";
 import LesionComp from "./components/lesion/LesionComp";
+import PatientList from "./components/patient/PatientList";
+import PatientView from "./components/patient/PatientView";
+import PatientWrite from "./components/patient/PatientWrite";
+import PatientUpdate from "./components/patient/PatientUpdate";
+import PatientCaseList from "./components/patientcase/PatientCaseList";
+import PatientCaseView from "./components/patientcase/PatientCaseView";
+import PatientCaseWrite from "./components/patientcase/PatientCaseWrite";
+import PatientCaseUpdate from "./components/patientcase/PatientCaseUpdate";
 
 import "./App.css";
 
@@ -155,6 +163,33 @@ function App() {
             path="*"
             element={<NotFoundMenu />}
           />
+
+          <Route path="/patients" element={<PatientList />} />
+          <Route path="/patients/write" element={<PatientWrite />} />
+          <Route path="/patients/:patientId" element={<PatientView />} />
+          <Route path="/patients/:patientId/update" element={<PatientUpdate />} />
+
+          <Route
+              path="/patient-cases"
+              element={<PatientCaseList />}
+          />
+
+          <Route
+              path="/patient-cases/write"
+              element={<PatientCaseWrite />}
+          />
+
+          <Route
+              path="/patient-cases/:caseId"
+              element={<PatientCaseView />}
+          />
+
+          <Route
+              path="/patient-cases/:caseId/update"
+              element={<PatientCaseUpdate />}
+          />
+
+
         </Routes>
       </main>
     </div>
