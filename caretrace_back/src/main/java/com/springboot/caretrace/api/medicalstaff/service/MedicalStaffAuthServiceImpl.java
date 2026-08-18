@@ -63,6 +63,7 @@ public class MedicalStaffAuthServiceImpl
                 .toList();
 
         String token = jwtTokenProvider.createToken(
+                medicalStaff.getStaffNo(),
                 medicalStaff.getLoginId(),
                 medicalStaff.getStaffName(),
                 roles

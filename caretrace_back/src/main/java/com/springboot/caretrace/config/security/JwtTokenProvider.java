@@ -58,23 +58,40 @@ public class JwtTokenProvider {
     }
 
     // 토큰을 만드는 메서드 - 정상적인 로그인이 처리되고 (토근이 없으면) 실행
-    public String createToken(String id, String name, List<String> roles){
+    public String createToken(
+            Long staffNo,
+            String id,
+            String name,
+            List<String> roles
+    ) {
         log.info("[createToken] 토큰 생성 시작");
-        log.info("[createToken] 토큰에 저장할 데이터 : id, name, roles");
+        log.info(
+                "[createToken] 토큰에 저장할 데이터 : staffNo, id, name, roles"
+        );
+
         Claims claims = Jwts.claims().setSubject(id);
-        claims.put("name",name);
-        claims.put("roles",roles);
+
+        // 의료진 번호 추가
+        claims.put("staffNo", staffNo);
+        claims.put("name", name);
+        claims.put("roles", roles);
+
         Date now = new Date();
 
-        // Key key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
         String token = Jwts.builder()
-                .setClaims(claims) // 사용자 정보
-                .setIssuedAt(now) // 토큰 시작 시간 = 발급 시간
-                // 토큰의 유효 시간 tokenValidMillisecond - 1000*60*60(1시간)
-                .setExpiration(new Date(now.getTime() + tokenValidMillisecond))
-//                .signWith(SignatureAlgorithm.HS256, secretKey) // 전자 서명 - 256 비트(=32바이트)
-                .signWith(key, SignatureAlgorithm.HS256) // 전자 서명 - 256 비트(=32바이트)
-                .compact(); // 토큰 정보를 문자열로 만든다.
+                .setClaims(claims)
+                .setIssuedAt(now)
+                .setExpiration(
+                        new Date(
+                                now.getTime()
+                                        + tokenValidMillisecond
+                        )
+                )
+                .signWith(
+                        key,
+                        SignatureAlgorithm.HS256
+                )
+                .compact();
 
         log.info("[createToken] 토큰 생성 완료");
         return token;
