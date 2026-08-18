@@ -25,10 +25,10 @@ public class PatientCaseServiceImpl
     ) {
 
         return patientCaseRepository
-                .searchPatientCases(keyword, status)
-                .stream()
-                .map(this::toVO)
-                .toList();
+                .searchPatientCases(
+                        keyword,
+                        status
+                );
     }
 
     @Override

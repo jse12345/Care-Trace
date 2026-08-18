@@ -42,7 +42,7 @@ const PatientCaseWrite = () => {
 
                 // 의료진 목록 조회
                 const staffResponse = await axios.get(
-                    "http://localhost:80/medical-staff",
+                    "http://localhost:80/medical-staff/list.do",
                     {
                         headers: {
                             "X-AUTH-TOKEN": token
@@ -50,7 +50,7 @@ const PatientCaseWrite = () => {
                     }
                 );
 
-                setStaffList(staffResponse.data);
+                setStaffList(staffResponse.data.list);
 
             } catch (error) {
 

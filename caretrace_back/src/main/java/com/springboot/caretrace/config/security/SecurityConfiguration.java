@@ -84,8 +84,25 @@ public class SecurityConfiguration {
                                 .permitAll()
 
                                 /*
+                                 * 의료진 목록 및 상세 조회
+                                 *
+                                 * 담당의사 선택 등에 사용되므로
+                                 * 로그인한 의료진도 조회 가능
+                                 */
+                                .requestMatchers(
+                                        HttpMethod.GET,
+                                        "/medical-staff/list.do",
+                                        "/medical-staff/view.do"
+                                )
+                                .hasAnyRole(
+                                        "ADMIN",
+                                        "MEDICAL_STAFF",
+                                        "VIEWER"
+                                )
+
+                                /*
                                  * 의료진 및 진료과 관리
-                                 * 관리자만 등록·조회·수정·삭제 가능
+                                 * 등록·수정·삭제는 관리자만 가능
                                  */
                                 .requestMatchers(
                                         "/medical-staff/**",

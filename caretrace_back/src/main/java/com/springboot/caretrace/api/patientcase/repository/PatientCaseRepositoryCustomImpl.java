@@ -1,9 +1,11 @@
 package com.springboot.caretrace.api.patientcase.repository;
 
-import com.springboot.caretrace.api.patientcase.entity.PatientCase;
-import com.springboot.caretrace.patientcase.entity.QPatientCase;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.springboot.caretrace.api.medicalstaff.entity.QMedicalStaff;
+import com.springboot.caretrace.api.patientcase.entity.QPatientCase;
+import com.springboot.caretrace.api.patientcase.vo.PatientCaseVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -17,53 +19,97 @@ public class PatientCaseRepositoryCustomImpl
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<PatientCase> searchPatientCases(
+    public List<PatientCaseVO> searchPatientCases(
             String keyword,
             String status
     ) {
 
-        QPatientCase patientCase = QPatientCase.patientCase;
+        QPatientCase patientCase =
+                QPatientCase.patientCase;
 
-        BooleanBuilder builder = new BooleanBuilder();
+        QMedicalStaff medicalStaff =
+                QMedicalStaff.medicalStaff;
+
+        BooleanBuilder builder =
+                new BooleanBuilder();
 
         // 삭제되지 않은 케이스만
-        builder.and(patientCase.isDeleted.eq("N"));
+        builder.and(
+                patientCase.isDeleted.eq("N")
+        );
 
         // 상태 검색
-        if (status != null && !status.trim().isEmpty()) {
+        if (status != null &&
+                !status.trim().isEmpty()) {
 
             builder.and(
                     patientCase.caseStatus.eq(status)
             );
         }
 
-        /*
-         * 현재 PatientCase 자체에는 환자명이나 담당의사명이
-         * 없기 때문에 여기서는 케이스 기본 검색만 처리한다.
-         *
-         * patientName / staffName까지 QueryDSL JOIN으로 검색하려면
-         * 기존 Patient, MedicalStaff의 Q클래스를 확인한 후
-         * JOIN을 추가하면 된다.
-         */
+        // 검색
+        if (keyword != null &&
+                !keyword.trim().isEmpty()) {
 
-        if (keyword != null && !keyword.trim().isEmpty()) {
-
-            String searchKeyword = keyword.trim();
+            String searchKeyword =
+                    keyword.trim();
 
             builder.and(
                     patientCase.diagnosis
                             .containsIgnoreCase(searchKeyword)
                             .or(
                                     patientCase.bodyPart
-                                            .containsIgnoreCase(searchKeyword)
+                                            .containsIgnoreCase(
+                                                    searchKeyword
+                                            )
+                            )
+                            .or(
+                                    medicalStaff.staffName
+                                            .containsIgnoreCase(
+                                                    searchKeyword
+                                            )
                             )
             );
         }
 
         return queryFactory
-                .selectFrom(patientCase)
+                .select(
+                        Projections.fields(
+                                PatientCaseVO.class,
+
+                                patientCase.caseId,
+                                patientCase.patientId,
+                                patientCase.staffNo,
+
+                                medicalStaff.staffName
+                                        .as("staffName"),
+
+                                patientCase.diagnosis,
+                                patientCase.bodyPart,
+                                patientCase.caseStatus,
+                                patientCase.startDate,
+                                patientCase.endDate,
+                                patientCase.memo,
+                                patientCase.createdAt,
+                                patientCase.updatedAt,
+                                patientCase.isDeleted
+                        )
+                )
+                .from(patientCase)
+
+                // 담당 의료진 JOIN
+                .join(medicalStaff)
+                .on(
+                        patientCase.staffNo
+                                .eq(medicalStaff.staffNo)
+                )
+
                 .where(builder)
-                .orderBy(patientCase.caseId.desc())
+
+                .orderBy(
+                        patientCase.caseId.desc()
+                )
+
                 .fetch();
     }
 }
