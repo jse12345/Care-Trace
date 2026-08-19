@@ -377,7 +377,7 @@
 
 .workflow-card {
   position: relative;
-  min-height: 210px;
+  min-height: 190px;
   padding: 22px;
   border: 1px solid var(--clinical-line);
   border-radius: 16px;
@@ -425,22 +425,6 @@
   color: var(--clinical-muted);
   font-size: 13px;
   line-height: 1.65;
-}
-
-.module-state {
-  display: inline-flex;
-  margin-top: 17px;
-  padding: 5px 9px;
-  border-radius: 999px;
-  background: #f1f4f7;
-  color: #8290a2;
-  font-size: 10px;
-  font-weight: 800;
-}
-
-.workflow-card.available .module-state {
-  background: #dff5f1;
-  color: #146f70;
 }
 
 .workflow-card-link {

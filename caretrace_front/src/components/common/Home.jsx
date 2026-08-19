@@ -6,7 +6,6 @@ const modules = [
     title: "환자 추적 관찰",
     description:
       "환자별 추적 케이스와 시기별 검사 이력을 관리합니다.",
-    available: true,
     path: "/patients",
   },
   {
@@ -14,7 +13,6 @@ const modules = [
     title: "의료영상 비교",
     description:
       "Orthanc PACS의 과거·현재 DICOM 영상을 시기별로 비교합니다.",
-    available: true,
     path: "/compare-set/list",
   },
   {
@@ -22,7 +20,6 @@ const modules = [
     title: "병변·측정 기록",
     description:
       "병변 위치와 크기, 시기별 변화 이력을 기록합니다.",
-    available: true,
     path: "/lesion/list",
   },
   {
@@ -30,7 +27,6 @@ const modules = [
     title: "협진 의견",
     description:
       "의료진 간 협진 의견을 등록하고 조회합니다.",
-    available: true,
     path: "/consultation/list",
   },
 ];
@@ -65,22 +61,6 @@ function getLoginInformation() {
 function Home() {
   const { isLoggedIn } =
     getLoginInformation();
-
-  const getModuleState = (module) => {
-    if (!module.available) {
-      return "연동 예정";
-    }
-
-    return "사용 가능";
-  };
-
-  const canAccessModule = (module) => {
-    if (!module.available) {
-      return false;
-    }
-
-    return isLoggedIn;
-  };
 
   return (
     <div className="home-page">
@@ -216,42 +196,30 @@ function Home() {
           </div>
 
           <div className="workflow-grid">
-            {modules.map((module) => {
-              const accessible =
-                canAccessModule(module);
+            {modules.map((module) => (
+              <article
+                className={`workflow-card ${
+                  isLoggedIn ? "available" : ""
+                }`}
+                key={module.number}
+              >
+                <span className="workflow-number">
+                  {module.number}
+                </span>
 
-              const moduleState =
-                getModuleState(module);
+                <h3>{module.title}</h3>
 
-              return (
-                <article
-                  className={`workflow-card ${
-                    accessible ? "available" : ""
-                  }`}
-                  key={module.number}
-                >
-                  <span className="workflow-number">
-                    {module.number}
-                  </span>
+                <p>{module.description}</p>
 
-                  <h3>{module.title}</h3>
-
-                  <p>{module.description}</p>
-
-                  <span className="module-state">
-                    {moduleState}
-                  </span>
-
-                  {accessible && (
-                    <Link
-                      className="workflow-card-link"
-                      to={module.path}
-                      aria-label={`${module.title} 이동`}
-                    />
-                  )}
-                </article>
-              );
-            })}
+                {isLoggedIn && (
+                  <Link
+                    className="workflow-card-link"
+                    to={module.path}
+                    aria-label={`${module.title} 이동`}
+                  />
+                )}
+              </article>
+            ))}
           </div>
         </section>
 
