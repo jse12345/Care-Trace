@@ -160,6 +160,17 @@ function TopNavi() {
                     협진 목록
                   </NavLink>
                 </li>
+
+                <li className="nav-item">
+                  <NavLink
+                    to="/treatmentreport/list"
+                    className="nav-link"
+                >
+                  치료반응보고서
+                </NavLink>
+
+                </li>
+                
               </>
             )}
           </ul>
