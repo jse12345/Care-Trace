@@ -343,6 +343,18 @@ const PatientCaseView = () => {
                         환자 정보
                     </button>
 
+                    {/* 병변·측정 기록으로 이동 */}
+                    <button
+                        className="view-button large"
+                        onClick={() =>
+                            navigate(
+                                `/lesion/list?caseId=${caseId}`
+                            )
+                        }
+                    >
+                        병변·측정 기록
+                    </button>
+
                     {/* 케이스 수정 */}
                     <button
                         className="edit-button large"

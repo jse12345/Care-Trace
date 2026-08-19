@@ -18,6 +18,7 @@ function LesionList() {
   const [pageObject, setPageObject] = useState(null);
   const [lesionType, setLesionType] = useState(searchParams.get("lesionType") || "");
   const [errorMessage, setErrorMessage] = useState("");
+  const [caseInfo, setCaseInfo] = useState(null);
 
   useEffect(() => {
     if (!caseId) return;
@@ -37,6 +38,25 @@ function LesionList() {
 
     return () => { active = false; };
   }, [caseId, searchParams]);
+
+  useEffect(() => {
+    if (!caseId) {
+      setCaseInfo(null);
+      return;
+    }
+
+    let active = true;
+
+    api.get(`/patient-cases/${caseId}`)
+      .then(({ data }) => {
+        if (active) setCaseInfo(data);
+      })
+      .catch(() => {
+        if (active) setCaseInfo(null);
+      });
+
+    return () => { active = false; };
+  }, [caseId]);
 
   const goToCase = (event) => {
     event.preventDefault();
@@ -59,7 +79,7 @@ function LesionList() {
           <section className="lesion-list-card">
             <h1 className="lesion-title">병변·측정 기록</h1>
             <p className="lesion-description">
-              증례(2번 검사 모듈) 연동 전까지는 증례 번호를 직접 입력해 조회합니다.
+              환자 케이스 상세에서 이동하거나, 증례 번호를 직접 입력해 조회할 수 있습니다.
             </p>
             <form className="lesion-search-bar" onSubmit={goToCase}>
               <input
@@ -82,7 +102,7 @@ function LesionList() {
         <header className="lesion-header">
           <div>
             <p className="lesion-eyebrow">CareTrace</p>
-            <h1 className="lesion-title">병변 목록 (증례 #{caseId})</h1>
+            <h1 className="lesion-title">병변 목록</h1>
             <p className="lesion-description">병변을 등록하고 시기별 측정값을 기록합니다.</p>
           </div>
           <button
@@ -92,6 +112,18 @@ function LesionList() {
             + 병변 등록
           </button>
         </header>
+
+        {caseInfo && (
+          <section className="lesion-list-card">
+            <div className="lesion-detail-grid">
+              <div className="lesion-detail-item"><span>환자</span><strong>{caseInfo.patientName || `환자 ${caseInfo.patientId}`}</strong></div>
+              <div className="lesion-detail-item"><span>담당의사</span><strong>{caseInfo.staffName || `의료진 ${caseInfo.staffNo}`}</strong></div>
+              <div className="lesion-detail-item"><span>진단명</span><strong>{caseInfo.diagnosis}</strong></div>
+              <div className="lesion-detail-item"><span>병변 부위</span><strong>{caseInfo.bodyPart || "-"}</strong></div>
+              <div className="lesion-detail-item"><span>추적 시작일</span><strong>{caseInfo.startDate}</strong></div>
+            </div>
+          </section>
+        )}
 
         {errorMessage && <div className="lesion-error-message">{errorMessage}</div>}
 
