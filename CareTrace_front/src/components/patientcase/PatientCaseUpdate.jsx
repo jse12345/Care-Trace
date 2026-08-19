@@ -27,49 +27,23 @@ const PatientCaseUpdate = () => {
 
         const getData = async () => {
 
+            const token = localStorage.getItem("token");
+
+            // =========================
+            // 1. 케이스 정보 조회
+            // =========================
             try {
 
-                const token = localStorage.getItem("token");
-
-                const [
-                    caseResponse,
-                    patientResponse,
-                    staffResponse
-                ] = await Promise.all([
-
-                    axios.get(
-                        `${API_BASE_URL}/patient-cases/${caseId}`,
-                        {
-                            headers: {
-                                "X-AUTH-TOKEN": token
-                            }
+                const caseResponse = await axios.get(
+                    `${API_BASE_URL}/patient-cases/${caseId}`,
+                    {
+                        headers: {
+                            "X-AUTH-TOKEN": token
                         }
-                    ),
-
-                    axios.get(
-                        `${API_BASE_URL}/patients`,
-                        {
-                            headers: {
-                                "X-AUTH-TOKEN": token
-                            }
-                        }
-                    ),
-
-                    axios.get(
-                        `${API_BASE_URL}/medical-staff`,
-                        {
-                            headers: {
-                                "X-AUTH-TOKEN": token
-                            }
-                        }
-                    )
-
-                ]);
+                    }
+                );
 
                 const item = caseResponse.data;
-
-                setPatients(patientResponse.data);
-                setStaffList(staffResponse.data);
 
                 setForm({
                     patientId: item.patientId || "",
@@ -95,10 +69,63 @@ const PatientCaseUpdate = () => {
 
                 navigate("/patient-cases");
 
-            } finally {
-
-                setLoading(false);
+                return;
             }
+
+
+            // =========================
+            // 2. 환자 목록 조회
+            // =========================
+            try {
+
+                const patientResponse = await axios.get(
+                    `${API_BASE_URL}/patients`,
+                    {
+                        headers: {
+                            "X-AUTH-TOKEN": token
+                        }
+                    }
+                );
+
+                setPatients(patientResponse.data);
+
+            } catch (error) {
+
+                console.error(
+                    "환자 목록 조회 실패",
+                    error
+                );
+
+            }
+
+
+            // =========================
+            // 3. 의료진 목록 조회
+            // =========================
+            try {
+
+                const staffResponse = await axios.get(
+                    `${API_BASE_URL}/medical-staff/list.do`,
+                    {
+                        headers: {
+                            "X-AUTH-TOKEN": token
+                        }
+                    }
+                );
+
+                setStaffList(staffResponse.data.list);
+
+            } catch (error) {
+
+                console.error(
+                    "의료진 목록 조회 실패",
+                    error
+                );
+
+            }
+
+
+            setLoading(false);
         };
 
         getData();
@@ -249,8 +276,7 @@ const PatientCaseUpdate = () => {
                         <div className="form-group">
 
                             <label>
-                                환자
-                                <span>*</span>
+                                환자 *
                             </label>
 
                             <select
@@ -286,10 +312,8 @@ const PatientCaseUpdate = () => {
                         <div className="form-group">
 
                             <label>
-                                담당의사
-                                <span>*</span>
+                                담당의사 *
                             </label>
-
                             <select
                                 name="staffNo"
                                 value={form.staffNo}
@@ -324,8 +348,7 @@ const PatientCaseUpdate = () => {
                         <div className="form-group">
 
                             <label>
-                                진단명
-                                <span>*</span>
+                                진단명 *
                             </label>
 
                             <input
@@ -391,8 +414,7 @@ const PatientCaseUpdate = () => {
                         <div className="form-group">
 
                             <label>
-                                추적 시작일
-                                <span>*</span>
+                                추적 시작일 *
                             </label>
 
                             <input
@@ -406,7 +428,7 @@ const PatientCaseUpdate = () => {
 
 
                         {/* 추적 종료일 */}
-                        <div className="form-group">
+                        <div className="form-group end-date-group">
 
                             <label>
                                 추적 종료일
@@ -420,7 +442,6 @@ const PatientCaseUpdate = () => {
                             />
 
                         </div>
-
 
                         {/* 메모 */}
                         <div className="form-group form-group-full">
