@@ -192,7 +192,7 @@ function ConsultationWrite() {
                   value={opinionContent} 
                   onChange={(e) => setOpinionContent(e.target.value)} 
                   required 
-                  maxLength="500" 
+                  maxLength="200" 
                   placeholder="협진을 의뢰하는 구체적인 사유와 환자의 상태, 판독이 필요한 부분 등을 상세히 작성해주세요."
                   style={{ minHeight: '150px', padding: '12px', border: '1px solid #ced4da', borderRadius: '6px', width: '100%' }}
                   disabled={!selectedCaseId} // Case가 선택되지 않으면 작성 불가
