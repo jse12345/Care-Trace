@@ -145,6 +145,15 @@ function TopNavi() {
 
                 <li className="nav-item">
                   <NavLink
+                    to="/compare-set/list"
+                    className="nav-link"
+                  >
+                    의료영상 비교
+                  </NavLink>
+                </li>
+
+                <li className="nav-item">
+                  <NavLink
                     to="/consultation/list"
                     className="nav-link"
                   >

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom"; // [수정] react-router-d -> react-router-dom 오타 교정
 import api from "../common/api";
 
@@ -16,23 +16,29 @@ function CompareSetForm() {
   const [pacsStudyList, setPacsStudyList] = useState([]);
   const [selectedTarget, setSelectedTarget] = useState(null); // 'past' 또는 'current'
 
-  // 컴포넌트가 렌더링될 때 백엔드(/examination/list.do, MariaDB에 동기화된 검사 목록)에서 목록을 미리 가져옵니다.
-  useEffect(() => {
-    const fetchExaminationList = async () => {
-      try {
-        const response = await api.get("/examination/list.do");
-        if (Array.isArray(response.data)) {
-          setPacsStudyList(response.data);
-        } else {
-          setPacsStudyList([]);
-        }
-      } catch (error) {
-        console.error("검사 목록 조회 오류 : ", error);
+  // 백엔드(/examination/list.do, MariaDB에 동기화된 검사 목록)에서 목록을 가져옵니다.
+  // patientId가 입력되어 있으면 해당 환자의 검사만 조회합니다.
+  const fetchExaminationList = async (patientId) => {
+    try {
+      const response = await api.get("/examination/list.do", {
+        params: patientId ? { patientId } : undefined
+      });
+      if (Array.isArray(response.data)) {
+        setPacsStudyList(response.data);
+      } else {
         setPacsStudyList([]);
       }
-    };
-    fetchExaminationList();
-  }, []);
+    } catch (error) {
+      console.error("검사 목록 조회 오류 : ", error);
+      setPacsStudyList([]);
+    }
+  };
+
+  // PACS 목록 조회 버튼 클릭 시, 현재 입력된 환자 ID로 목록을 필터링해서 다시 조회합니다.
+  const openStudyPicker = (target) => {
+    fetchExaminationList(formData.patientId || undefined);
+    setSelectedTarget(target);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -131,7 +137,7 @@ function CompareSetForm() {
               type="button"
               className="btn text-white px-3"
               style={{ backgroundColor: "#0f4c5c" }}
-              onClick={() => setSelectedTarget('past')}
+              onClick={() => openStudyPicker('past')}
             >
               PACS 목록 조회
             </button>
@@ -156,7 +162,7 @@ function CompareSetForm() {
               type="button"
               className="btn text-white px-3"
               style={{ backgroundColor: "#0f4c5c" }}
-              onClick={() => setSelectedTarget('current')}
+              onClick={() => openStudyPicker('current')}
             >
               PACS 목록 조회
             </button>
