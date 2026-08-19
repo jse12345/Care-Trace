@@ -13,6 +13,7 @@ import ConsultationComp from "./components/consultation/ConsultationComp";
 import TreatmentReportComp from "./components/treatmentreport/TreatmentReportComp";
 import CompareSetComp from "./components/CompareSet/CompareSetComp";
 import LesionComp from "./components/lesion/LesionComp";
+import ExaminationComp from "./components/examination/ExaminationComp";
 import PatientList from "./components/patient/PatientList";
 import PatientView from "./components/patient/PatientView";
 import PatientWrite from "./components/patient/PatientWrite";
@@ -162,6 +163,15 @@ function App() {
             element={
               <RequireLogin>
                 <LesionComp />
+              </RequireLogin>
+            }
+          />
+
+          <Route
+            path="/examination/*"
+            element={
+              <RequireLogin>
+                <ExaminationComp />
               </RequireLogin>
             }
           />

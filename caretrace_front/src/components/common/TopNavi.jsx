@@ -136,6 +136,15 @@ function TopNavi() {
 
                 <li className="nav-item">
                   <NavLink
+                    to="/examination/list"
+                    className="nav-link"
+                  >
+                    검사 목록
+                  </NavLink>
+                </li>
+
+                <li className="nav-item">
+                  <NavLink
                     to="/consultation/list"
                     className="nav-link"
                   >

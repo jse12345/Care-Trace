@@ -14,4 +14,6 @@ public interface QPatientRepository
     );
 
     boolean existsByPatientCode(String patientCode);
+
+    Optional<Patient> findByPatientCode(String patientCode);
 }

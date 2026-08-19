@@ -16,22 +16,22 @@ function CompareSetForm() {
   const [pacsStudyList, setPacsStudyList] = useState([]);
   const [selectedTarget, setSelectedTarget] = useState(null); // 'past' 또는 'current'
 
-  // 컴포넌트가 렌더링될 때 백엔드(/pacs/list.do)에서 PACS 목록을 미리 가져옵니다.
+  // 컴포넌트가 렌더링될 때 백엔드(/examination/list.do, MariaDB에 동기화된 검사 목록)에서 목록을 미리 가져옵니다.
   useEffect(() => {
-    const fetchPacsList = async () => {
+    const fetchExaminationList = async () => {
       try {
-        const response = await api.get("/pacs/list.do?");
+        const response = await api.get("/examination/list.do");
         if (Array.isArray(response.data)) {
           setPacsStudyList(response.data);
         } else {
           setPacsStudyList([]);
         }
       } catch (error) {
-        console.error("PACS 목록 조회 오류 : ", error);
+        console.error("검사 목록 조회 오류 : ", error);
         setPacsStudyList([]);
       }
     };
-    fetchPacsList();
+    fetchExaminationList();
   }, []);
 
   const handleChange = (e) => {
@@ -41,24 +41,25 @@ function CompareSetForm() {
 
   // 모달창에서 특정 PACS 영상을 선택했을 때 실행되는 함수
   const handleSelectStudy = (study) => {
-    const uid = study.studyInstanceUID;
+    const uid = study.studyInstanceUid;
     if (!uid) {
       alert("선택한 항목에 유효한 영상 UID가 없습니다.");
       return;
     }
 
     // 선택한 타겟이 과거 영상인지 현재 영상인지 판별하여 값 자동 입력
+    // study.patientId는 DICOM PatientID로 매칭된 Care-Trace 환자ID(Long)이며, 매칭 안 되었으면 null이다.
     if (selectedTarget === 'past') {
       setFormData(prev => ({
         ...prev,
         pastImageUrl: uid,
-        patientId: prev.patientId || study.patientId
+        patientId: prev.patientId || study.patientId || ""
       }));
     } else if (selectedTarget === 'current') {
       setFormData(prev => ({
         ...prev,
         currentImageUrl: uid,
-        patientId: prev.patientId || study.patientId
+        patientId: prev.patientId || study.patientId || ""
       }));
     }
     // 선택 완료 후 모달창 닫기
@@ -218,14 +219,14 @@ function CompareSetForm() {
                     {pacsStudyList.length === 0 ? (
                       <tr>
                         <td colSpan="5" className="py-5 text-secondary">
-                          조회된 PACS 데이터가 없습니다. 서버 상태를 확인해주세요.
+                          조회된 검사 데이터가 없습니다. 검사 목록 화면에서 동기화해주세요.
                         </td>
                       </tr>
                     ) : (
                       pacsStudyList.map((study) => (
                         <tr key={study.id}>
-                          <td className="fw-semibold">{study.patientId}</td>
-                          <td>{study.patientName}</td>
+                          <td className="fw-semibold">{study.dicomPatientId}</td>
+                          <td>{study.dicomPatientName}</td>
                           <td>{study.studyDate}</td>
                           <td className="text-start">{study.studyDescription || '-'}</td>
                           <td>

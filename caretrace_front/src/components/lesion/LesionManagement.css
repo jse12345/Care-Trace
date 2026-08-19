@@ -324,6 +324,16 @@
   font-size: 13px;
 }
 
+.lesion-hint-text {
+  font-weight: 400;
+  color: var(--clinical-danger);
+}
+
+.lesion-hint-text a {
+  color: inherit;
+  text-decoration: underline;
+}
+
 .lesion-slice-nav {
   display: flex;
   align-items: center;

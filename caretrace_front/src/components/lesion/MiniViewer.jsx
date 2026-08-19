@@ -35,7 +35,7 @@ function MiniViewer() {
   const imgRef = useRef(null);
   const canvasRef = useRef(null);
 
-  const [studies, setStudies] = useState([]);
+  const [examinations, setExaminations] = useState([]);
   const [seriesList, setSeriesList] = useState([]);
   const [instances, setInstances] = useState([]);
   const [selectedStudyId, setSelectedStudyId] = useState("");
@@ -54,14 +54,15 @@ function MiniViewer() {
   const [errorMessage, setErrorMessage] = useState("");
   const [saving, setSaving] = useState(false);
 
-  // 1. 검사(스터디) 목록 로딩
+  // 1. 검사(Examination) 목록 로딩 - 해당 병변의 환자로 필터링된 DB(MariaDB) 목록
   useEffect(() => {
+    if (!lesionId) return;
     let active = true;
-    api.get("/lesion/dicom/studies.do")
-      .then(({ data }) => { if (active) setStudies(Array.isArray(data) ? data : []); })
-      .catch(() => { if (active) setErrorMessage("Orthanc 검사 목록을 불러오지 못했습니다. 로컬 Orthanc(:8042) 연결을 확인해 주세요."); });
+    api.get("/examination/list.do", { params: { lesionId } })
+      .then(({ data }) => { if (active) setExaminations(Array.isArray(data) ? data : []); })
+      .catch(() => { if (active) setErrorMessage("검사 목록을 불러오지 못했습니다. 검사 목록 화면에서 동기화가 되어 있는지 확인해 주세요."); });
     return () => { active = false; };
-  }, []);
+  }, [lesionId]);
 
   // 2. 시리즈 목록 로딩
   useEffect(() => {
@@ -250,7 +251,7 @@ function MiniViewer() {
       return;
     }
     if (!examinationId) {
-      setErrorMessage("검사 번호(examinationId)를 입력해 주세요.");
+      setErrorMessage("검사를 선택해 주세요.");
       return;
     }
     if (!points.length) {
@@ -258,7 +259,8 @@ function MiniViewer() {
       return;
     }
 
-    const studyUid = studies.find((s) => s.ID === selectedStudyId)?.MainDicomTags?.StudyInstanceUID;
+    const selectedExamination = examinations.find((e) => String(e.id) === String(examinationId));
+    const studyUid = selectedExamination?.studyInstanceUid;
     const seriesUid = seriesList.find((s) => s.ID === selectedSeriesId)?.MainDicomTags?.SeriesInstanceUID;
     const sopUid = currentInstance?.MainDicomTags?.SOPInstanceUID;
 
@@ -311,11 +313,13 @@ function MiniViewer() {
 
           <div className="lesion-viewer-toolbar">
             <label>
-              검사(Study)
+              검사 선택
               <select
-                value={selectedStudyId}
+                value={examinationId}
                 onChange={(e) => {
-                  setSelectedStudyId(e.target.value);
+                  const exam = examinations.find((ex) => String(ex.id) === e.target.value);
+                  setExaminationId(e.target.value);
+                  setSelectedStudyId(exam?.orthancStudyId || "");
                   setSelectedSeriesId("");
                   setSeriesList([]);
                   setInstances([]);
@@ -326,12 +330,18 @@ function MiniViewer() {
                 }}
               >
                 <option value="">선택</option>
-                {studies.map((study) => (
-                  <option key={study.ID} value={study.ID}>
-                    {study.MainDicomTags?.StudyDate || ""} {study.MainDicomTags?.StudyDescription || study.ID}
+                {examinations.map((exam) => (
+                  <option key={exam.id} value={exam.id}>
+                    {exam.studyDate || ""} · {exam.studyDescription || "설명 없음"}
+                    {exam.seriesCount != null ? ` (Series ${exam.seriesCount})` : ""}
                   </option>
                 ))}
               </select>
+              {examinations.length === 0 && (
+                <span className="lesion-hint-text">
+                  등록된 검사가 없습니다. <a href="/examination/list" target="_blank" rel="noreferrer">검사 목록</a> 화면에서 동기화해 주세요.
+                </span>
+              )}
             </label>
 
             <label>
@@ -355,16 +365,6 @@ function MiniViewer() {
                   </option>
                 ))}
               </select>
-            </label>
-
-            <label>
-              검사 번호(examinationId, 직접 입력)
-              <input
-                type="number"
-                value={examinationId}
-                onChange={(e) => setExaminationId(e.target.value)}
-                placeholder="검사 모듈 완성 전까지 직접 입력"
-              />
             </label>
           </div>
 
