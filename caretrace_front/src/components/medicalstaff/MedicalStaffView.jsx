@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import api from "../common/api";
 
-const labels = { ADMIN: "관리자", MEDICAL_STAFF: "의료진", VIEWER: "조회자", ACTIVE: "활성", INACTIVE: "비활성", LOCKED: "잠김" };
+const labels = { ADMIN: "관리자", MEDICAL_STAFF: "의료진", ACTIVE: "활성", INACTIVE: "비활성", LOCKED: "잠김" };
 
 function MedicalStaffView() {
   const navigate = useNavigate();

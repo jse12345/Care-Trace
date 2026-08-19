@@ -3,15 +3,6 @@ import { Link } from "react-router-dom";
 const modules = [
   {
     number: "01",
-    title: "의료진·진료과 관리",
-    description:
-      "의료진 계정, 소속 진료과, 권한과 계정 상태를 관리합니다.",
-    available: true,
-    adminOnly: true,
-    path: "/medical-staff/list",
-  },
-  {
-    number: "02",
     title: "환자 추적 관찰",
     description:
       "환자별 추적 케이스와 시기별 검사 이력을 관리합니다.",
@@ -19,14 +10,15 @@ const modules = [
     path: "/patients",
   },
   {
-    number: "03",
+    number: "02",
     title: "의료영상 비교",
     description:
-      "과거·현재 DICOM 영상을 한 화면에서 비교합니다.",
-    available: false,
+      "Orthanc PACS의 과거·현재 DICOM 영상을 시기별로 비교합니다.",
+    available: true,
+    path: "/compare-set/list",
   },
   {
-    number: "04",
+    number: "03",
     title: "병변·측정 기록",
     description:
       "병변 위치와 크기, 시기별 변화 이력을 기록합니다.",
@@ -34,11 +26,12 @@ const modules = [
     path: "/lesion/list",
   },
   {
-    number: "05",
-    title: "협진·반응 보고서",
+    number: "04",
+    title: "협진 의견",
     description:
-      "의료진 의견을 공유하고 치료 반응 보고서를 작성합니다.",
-    available: false,
+      "의료진 간 협진 의견을 등록하고 조회합니다.",
+    available: true,
+    path: "/consultation/list",
   },
 ];
 
@@ -70,25 +63,12 @@ function getLoginInformation() {
 }
 
 function Home() {
-  const { isLoggedIn, login } =
+  const { isLoggedIn } =
     getLoginInformation();
-
-  const isAdmin =
-    login?.roles?.includes("ROLE_ADMIN");
-
-  const isMedicalStaff =
-    login?.roles?.includes("ROLE_MEDICAL_STAFF");
-
-  const isViewer =
-    login?.roles?.includes("ROLE_VIEWER");
 
   const getModuleState = (module) => {
     if (!module.available) {
       return "연동 예정";
-    }
-
-    if (module.adminOnly && !isAdmin) {
-      return "관리자 전용";
     }
 
     return "사용 가능";
@@ -97,10 +77,6 @@ function Home() {
   const canAccessModule = (module) => {
     if (!module.available) {
       return false;
-    }
-
-    if (module.adminOnly) {
-      return Boolean(isAdmin);
     }
 
     return isLoggedIn;
@@ -127,46 +103,16 @@ function Home() {
               기록·검토하는 임상 협업 시스템입니다.
             </p>
 
-            <div className="hero-actions">
-              {!isLoggedIn && (
-                <a
+            {!isLoggedIn && (
+              <div className="hero-actions">
+                <Link
                   className="clinical-primary-link"
-                  href="/medical-staff/login"
+                  to="/medical-staff/login"
                 >
                   포털 로그인
-                </a>
-              )}
-
-              {isLoggedIn && isAdmin && (
-                <>
-                  <Link
-                    className="clinical-primary-link"
-                    to="/medical-staff/list"
-                  >
-                    의료진 관리
-                  </Link>
-
-                  <Link
-                    className="clinical-secondary-link"
-                    to="/medical-staff/department/list"
-                  >
-                    진료과 관리
-                  </Link>
-                </>
-              )}
-
-              {isLoggedIn && isMedicalStaff && (
-                <span className="clinical-secondary-link">
-                  임상 업무 모듈 연동 예정
-                </span>
-              )}
-
-              {isLoggedIn && isViewer && (
-                <span className="clinical-secondary-link">
-                  조회 업무 모듈 연동 예정
-                </span>
-              )}
-            </div>
+                </Link>
+              </div>
+            )}
           </div>
 
           <div
@@ -239,13 +185,13 @@ function Home() {
               <div className="monitor-metric">
                 <span>영상 저장</span>
                 <strong>
-                  Orthanc PACS 연동 예정
+                  Orthanc PACS 연동
                 </strong>
               </div>
 
               <div className="monitor-metric">
                 <span>비교 방식</span>
-                <strong>시기별 추적 설계</strong>
+                <strong>시기별 영상 비교</strong>
               </div>
 
               <div className="monitor-metric">

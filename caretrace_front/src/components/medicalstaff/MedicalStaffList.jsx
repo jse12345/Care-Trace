@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import PageNation from "../common/PageNation";
 import api from "../common/api";
 
-const roleNames = { ADMIN: "관리자", MEDICAL_STAFF: "의료진", VIEWER: "조회자" };
+const roleNames = { ADMIN: "관리자", MEDICAL_STAFF: "의료진" };
 const statusNames = { ACTIVE: "활성", INACTIVE: "비활성", LOCKED: "잠김" };
 
 function MedicalStaffList() {

@@ -13,7 +13,7 @@ function MedicalStaffForm({ form, setForm, departments, createMode, onSubmit, su
       <label>면허번호<input name="licenseNo" value={form.licenseNo} onChange={change} /></label>
       <label>이메일<input type="email" name="email" value={form.email} onChange={change} required /></label>
       <label>연락처<input name="phone" value={form.phone} onChange={change} /></label>
-      {createMode && <label>권한<select name="role" value={form.role} onChange={change}><option value="ADMIN">관리자</option><option value="MEDICAL_STAFF">의료진</option><option value="VIEWER">조회자</option></select></label>}
+      {createMode && <label>권한<select name="role" value={form.role} onChange={change}><option value="ADMIN">관리자</option><option value="MEDICAL_STAFF">의료진</option></select></label>}
     </div><div className="form-actions"><button className="primary-button">{submitLabel}</button></div></form>
   );
 }

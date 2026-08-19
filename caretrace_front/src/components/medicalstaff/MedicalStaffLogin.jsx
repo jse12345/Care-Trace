@@ -54,12 +54,7 @@ function MedicalStaffLogin() {
         `${loginInformation.name}님으로 로그인되었습니다.`,
       );
 
-      const isAdmin =
-        loginInformation.roles?.includes("ROLE_ADMIN");
-
-      window.location.href = isAdmin
-        ? "/medical-staff/list"
-        : "/";
+      window.location.href = "/";
     } catch (error) {
       setErrorMessage(
         error.response?.data?.msg

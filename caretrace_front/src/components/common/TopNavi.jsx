@@ -49,6 +49,12 @@ function TopNavi() {
     "ROLE_ADMIN",
   );
 
+  const roleLabel = isAdmin
+    ? "관리자"
+    : login?.roles?.includes("ROLE_MEDICAL_STAFF")
+      ? "의료진"
+      : "사용자";
+
   const logout = (event) => {
     event.preventDefault();
 
@@ -108,61 +114,39 @@ function TopNavi() {
               </NavLink>
             </li>
 
-            {isLoggedIn && isAdmin && (
-              <>
-                <li className="nav-item">
-                  <a
-                    href="/medical-staff/list"
-                    className="nav-link medical-admin-link"
-                  >
-                    의료진 관리
-                  </a>
-                </li>
-
-                <li className="nav-item">
-                  <a
-                    href="/medical-staff/department/list"
-                    className="nav-link medical-admin-link"
-                  >
-                    진료과 관리
-                  </a>
-                </li>
-              </>
-            )}
-
             {isLoggedIn && (
               <>
                <li className="nav-item">
-                <a
-                  href="/patients"
+                <NavLink
+                  to="/patients"
                   className="nav-link"
                 >
                   환자 목록
-                </a>
+                </NavLink>
               </li>
               <li className="nav-item">
-                <a
-                  href="/patient-cases"
+                <NavLink
+                  to="/patient-cases"
                   className="nav-link"
                 >
                   환자 추적 관찰 목록
-                </a>
+                </NavLink>
               </li>
               <li className="nav-item">
-                <a
-                  href="/lesion/list"
+                <NavLink
+                  to="/lesion/list"
                   className="nav-link"
                 >
                   병변·측정 기록
-                </a>
+                </NavLink>
               </li>
               <li className="nav-item">
-                <a
-                  href="/consultation/list"
+                <NavLink
+                  to="/consultation/list"
                   className="nav-link"
                 >
                   협진 목록
-                </a>
+                </NavLink>
               </li>
               </>
             )}
@@ -171,33 +155,63 @@ function TopNavi() {
           <ul className="navbar-nav ms-auto account-group">
             {!isLoggedIn && (
               <li className="nav-item">
-                <a
+                <NavLink
                   className="nav-link login-link-medical"
-                  href="/medical-staff/login"
+                  to="/medical-staff/login"
                 >
                   로그인
-                </a>
+                </NavLink>
               </li>
             )}
 
             {isLoggedIn && (
-              <>
-                <li className="nav-item">
-                  <span className="nav-link account-chip">
-                    {login?.name || "사용자"}
-                  </span>
-                </li>
+              <li className="nav-item dropdown account-dropdown">
+                <button
+                  className="nav-link account-chip dropdown-toggle"
+                  type="button"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  <span>{login?.name || "사용자"}</span>
+                  <span className="account-role">· {roleLabel}</span>
+                </button>
 
-                <li className="nav-item">
-                  <a
-                    className="nav-link"
-                    href="/"
-                    onClick={logout}
-                  >
-                    로그아웃
-                  </a>
-                </li>
-              </>
+                <ul className="dropdown-menu dropdown-menu-end account-menu">
+                  {isAdmin && (
+                    <>
+                      <li>
+                        <Link
+                          className="dropdown-item"
+                          to="/medical-staff/list"
+                        >
+                          의료진 관리
+                        </Link>
+                      </li>
+
+                      <li>
+                        <Link
+                          className="dropdown-item"
+                          to="/medical-staff/department/list"
+                        >
+                          진료과 관리
+                        </Link>
+                      </li>
+
+                      <li><hr className="dropdown-divider" /></li>
+                    </>
+                  )}
+
+                  <li>
+                    <button
+                      className="dropdown-item account-logout"
+                      type="button"
+                      onClick={logout}
+                    >
+                      로그아웃
+                    </button>
+                  </li>
+                </ul>
+              </li>
             )}
           </ul>
         </div>

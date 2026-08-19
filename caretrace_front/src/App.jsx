@@ -94,17 +94,8 @@ function RequireLogin({ children }) {
 
 // 로그인한 사용자가 다시 로그인 화면에 접근하는 것 방지
 function MedicalLoginRoute() {
-  const { isLoggedIn, isAdmin } =
+  const { isLoggedIn } =
     getAuthenticationInformation();
-
-  if (isLoggedIn && isAdmin) {
-    return (
-      <Navigate
-        to="/medical-staff/list"
-        replace
-      />
-    );
-  }
 
   if (isLoggedIn) {
     return <Navigate to="/" replace />;
@@ -138,16 +129,31 @@ function App() {
               </AdminRoute>
             }
           />
-          <Route path="/compare-set/*" element={<CompareSetComp />} />
-          <Route path="/CompareSet/*" element={<CompareSetComp />} />
-          <Route 
-            path="/consultation/*" 
-            element={<ConsultationComp />} 
+          <Route
+            path="/compare-set/*"
+            element={
+              <RequireLogin>
+                <CompareSetComp />
+              </RequireLogin>
+            }
+          />
+
+          <Route
+            path="/consultation/*"
+            element={
+              <RequireLogin>
+                <ConsultationComp />
+              </RequireLogin>
+            }
           />
 
           <Route
             path="/treatmentreport/*"
-            element={<TreatmentReportComp />}
+            element={
+              <RequireLogin>
+                <TreatmentReportComp />
+              </RequireLogin>
+            }
           />
 
           <Route

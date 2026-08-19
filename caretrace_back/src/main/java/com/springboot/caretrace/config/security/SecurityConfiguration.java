@@ -96,8 +96,7 @@ public class SecurityConfiguration {
                                 )
                                 .hasAnyRole(
                                         "ADMIN",
-                                        "MEDICAL_STAFF",
-                                        "VIEWER"
+                                        "MEDICAL_STAFF"
                                 )
 
                                 /*
@@ -118,9 +117,7 @@ public class SecurityConfiguration {
                                  *
                                  * 일반 의료진:
                                  * 환자·영상·병변·협진 정보 조회 가능
-                                 *
-                                 * 조회자:
-                                 * 조회 기능만 가능
+
                                  */
                                 .requestMatchers(
                                         HttpMethod.GET,
@@ -128,15 +125,13 @@ public class SecurityConfiguration {
                                 )
                                 .hasAnyRole(
                                         "ADMIN",
-                                        "MEDICAL_STAFF",
-                                        "VIEWER"
+                                        "MEDICAL_STAFF"
                                 )
 
                                 /*
                                  * 다른 팀 기능의 등록 요청
                                  *
                                  * 관리자와 일반 의료진만 가능
-                                 * 조회자는 등록할 수 없음
                                  */
                                 .requestMatchers(
                                         HttpMethod.POST,
