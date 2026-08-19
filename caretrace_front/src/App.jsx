@@ -11,7 +11,7 @@ import MedicalStaffComp from "./components/medicalstaff/MedicalStaffComp";
 import MedicalStaffLogin from "./components/medicalstaff/MedicalStaffLogin";
 import ConsultationComp from "./components/consultation/ConsultationComp";
 import TreatmentReportComp from "./components/treatmentreport/TreatmentReportComp";
-import CompareSetComp from "./components/compareSet/CompareSetComp";
+import CompareSetComp from "./components/CompareSet/CompareSetComp";
 import LesionComp from "./components/lesion/LesionComp";
 import PatientList from "./components/patient/PatientList";
 import PatientView from "./components/patient/PatientView";
@@ -69,16 +69,16 @@ function AdminRoute({ children }) {
   }
 
   if (!isAdmin) {
-
     return <Navigate to="/" replace />;
   }
 
   return children;
 }
 
-// 로그인만 필요하고 관리자 권한은 필요 없는 화면 보호(병변·측정 기록은 일반 의료진도 사용)
+// 로그인 사용자 공통 보호
 function RequireLogin({ children }) {
-  const { isLoggedIn } = getAuthenticationInformation();
+  const { isLoggedIn } =
+    getAuthenticationInformation();
 
   if (!isLoggedIn) {
     return (
@@ -92,7 +92,7 @@ function RequireLogin({ children }) {
   return children;
 }
 
-// 로그인한 사용자가 다시 로그인 화면에 접근하는 것 방지
+// 로그인한 사용자가 로그인 화면에 다시 접근하는 것 방지
 function MedicalLoginRoute() {
   const { isLoggedIn } =
     getAuthenticationInformation();
@@ -129,6 +129,7 @@ function App() {
               </AdminRoute>
             }
           />
+
           <Route
             path="/compare-set/*"
             element={
@@ -166,36 +167,81 @@ function App() {
           />
 
           <Route
+            path="/patients"
+            element={
+              <RequireLogin>
+                <PatientList />
+              </RequireLogin>
+            }
+          />
+
+          <Route
+            path="/patients/write"
+            element={
+              <RequireLogin>
+                <PatientWrite />
+              </RequireLogin>
+            }
+          />
+
+          <Route
+            path="/patients/:patientId"
+            element={
+              <RequireLogin>
+                <PatientView />
+              </RequireLogin>
+            }
+          />
+
+          <Route
+            path="/patients/:patientId/update"
+            element={
+              <RequireLogin>
+                <PatientUpdate />
+              </RequireLogin>
+            }
+          />
+
+          <Route
+            path="/patient-cases"
+            element={
+              <RequireLogin>
+                <PatientCaseList />
+              </RequireLogin>
+            }
+          />
+
+          <Route
+            path="/patient-cases/write"
+            element={
+              <RequireLogin>
+                <PatientCaseWrite />
+              </RequireLogin>
+            }
+          />
+
+          <Route
+            path="/patient-cases/:caseId"
+            element={
+              <RequireLogin>
+                <PatientCaseView />
+              </RequireLogin>
+            }
+          />
+
+          <Route
+            path="/patient-cases/:caseId/update"
+            element={
+              <RequireLogin>
+                <PatientCaseUpdate />
+              </RequireLogin>
+            }
+          />
+
+          <Route
             path="*"
             element={<NotFoundMenu />}
           />
-
-          <Route path="/patients" element={<PatientList />} />
-          <Route path="/patients/write" element={<PatientWrite />} />
-          <Route path="/patients/:patientId" element={<PatientView />} />
-          <Route path="/patients/:patientId/update" element={<PatientUpdate />} />
-
-          <Route
-              path="/patient-cases"
-              element={<PatientCaseList />}
-          />
-
-          <Route
-              path="/patient-cases/write"
-              element={<PatientCaseWrite />}
-          />
-
-          <Route
-              path="/patient-cases/:caseId"
-              element={<PatientCaseView />}
-          />
-
-          <Route
-              path="/patient-cases/:caseId/update"
-              element={<PatientCaseUpdate />}
-          />
-
-
         </Routes>
       </main>
     </div>
