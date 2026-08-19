@@ -105,49 +105,43 @@ function TopNavi() {
           id="mynavbar"
         >
           <ul className="navbar-nav me-auto">
-            <li className="nav-item">
-              <NavLink
-                to="/"
-                className="nav-link"
-              >
-                대시보드
-              </NavLink>
-            </li>
-
             {isLoggedIn && (
               <>
-               <li className="nav-item">
-                <NavLink
-                  to="/patients"
-                  className="nav-link"
-                >
-                  환자 목록
-                </NavLink>
-              </li>
-              <li className="nav-item">
-                <NavLink
-                  to="/patient-cases"
-                  className="nav-link"
-                >
-                  환자 추적 관찰 목록
-                </NavLink>
-              </li>
-              <li className="nav-item">
-                <NavLink
-                  to="/lesion/list"
-                  className="nav-link"
-                >
-                  병변·측정 기록
-                </NavLink>
-              </li>
-              <li className="nav-item">
-                <NavLink
-                  to="/consultation/list"
-                  className="nav-link"
-                >
-                  협진 목록
-                </NavLink>
-              </li>
+                <li className="nav-item">
+                  <NavLink
+                    to="/patients"
+                    className="nav-link"
+                  >
+                    환자 목록
+                  </NavLink>
+                </li>
+
+                <li className="nav-item">
+                  <NavLink
+                    to="/patient-cases"
+                    className="nav-link"
+                  >
+                    환자 추적 관찰 목록
+                  </NavLink>
+                </li>
+
+                <li className="nav-item">
+                  <NavLink
+                    to="/lesion/list"
+                    className="nav-link"
+                  >
+                    병변·측정 기록
+                  </NavLink>
+                </li>
+
+                <li className="nav-item">
+                  <NavLink
+                    to="/consultation/list"
+                    className="nav-link"
+                  >
+                    협진 목록
+                  </NavLink>
+                </li>
               </>
             )}
           </ul>
@@ -173,7 +167,9 @@ function TopNavi() {
                   aria-expanded="false"
                 >
                   <span>{login?.name || "사용자"}</span>
-                  <span className="account-role">· {roleLabel}</span>
+                  <span className="account-role">
+                    · {roleLabel}
+                  </span>
                 </button>
 
                 <ul className="dropdown-menu dropdown-menu-end account-menu">
@@ -197,7 +193,9 @@ function TopNavi() {
                         </Link>
                       </li>
 
-                      <li><hr className="dropdown-divider" /></li>
+                      <li>
+                        <hr className="dropdown-divider" />
+                      </li>
                     </>
                   )}
 
