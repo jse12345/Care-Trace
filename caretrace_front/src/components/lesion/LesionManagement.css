@@ -148,6 +148,14 @@
   text-align: center;
 }
 
+.lesion-row-clickable {
+  cursor: pointer;
+}
+
+.lesion-row-clickable:hover {
+  background: var(--clinical-mint);
+}
+
 .lesion-action-buttons {
   display: flex;
   gap: 6px;

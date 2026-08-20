@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiEye } from "react-icons/fi";
 import api from "../common/api";
 import Breadcrumb from "../common/Breadcrumb";
 
@@ -102,23 +101,26 @@ function ExaminationList() {
                   <th>검사설명</th>
                   <th>Series 수</th>
                   <th>상태</th>
-                  <th>관리</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan="9" className="examination-empty-cell">불러오는 중...</td>
+                    <td colSpan="8" className="examination-empty-cell">불러오는 중...</td>
                   </tr>
                 ) : examinations.length === 0 ? (
                   <tr>
-                    <td colSpan="9" className="examination-empty-cell">
+                    <td colSpan="8" className="examination-empty-cell">
                       조회된 검사 데이터가 없습니다. "동기화" 버튼을 눌러 Orthanc에서 가져와 주세요.
                     </td>
                   </tr>
                 ) : (
                   examinations.map((exam, index) => (
-                    <tr key={exam.id}>
+                    <tr
+                      key={exam.id}
+                      className="examination-row-clickable"
+                      onClick={() => navigate(`/examination/view?id=${exam.id}`)}
+                    >
                       <td>{index + 1}</td>
                       <td>{displayValue(exam.dicomPatientId)}</td>
                       <td>{displayValue(exam.dicomPatientName)}</td>
@@ -132,16 +134,6 @@ function ExaminationList() {
                         ) : (
                           <span className="examination-status-badge pending">대기</span>
                         )}
-                      </td>
-                      <td>
-                        <button
-                          type="button"
-                          className="examination-detail-button"
-                          title="상세"
-                          onClick={() => navigate(`/examination/view?id=${exam.id}`)}
-                        >
-                          <FiEye aria-hidden="true" /> 상세
-                        </button>
                       </td>
                     </tr>
                   ))

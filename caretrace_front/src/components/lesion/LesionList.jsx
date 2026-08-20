@@ -4,7 +4,6 @@ import { FiList } from "react-icons/fi";
 import PageNation from "../common/PageNation";
 import api from "../common/api";
 import Breadcrumb from "../common/Breadcrumb";
-import DetailButton from "../common/DetailButton";
 
 const LESION_TYPE_LABEL = {
   TARGET: "TARGET",
@@ -91,7 +90,7 @@ function LesionList() {
           <div>
             <p className="lesion-eyebrow">CareTrace</p>
             <h1 className="lesion-title">병변 목록</h1>
-            <p className="lesion-description">병변을 등록하고 시기별 측정값을 기록합니다.</p>
+            <p className="lesion-description"></p>
           </div>
           <button
             className="lesion-primary-button"
@@ -119,7 +118,7 @@ function LesionList() {
           <form className="lesion-search-bar" onSubmit={search}>
             <input
               type="number"
-              placeholder="증례 번호로 좁혀보기"
+              placeholder="case_id"
               value={caseIdInput}
               onChange={(event) => setCaseIdInput(event.target.value)}
             />
@@ -150,18 +149,24 @@ function LesionList() {
               </thead>
               <tbody>
                 {lesions.map((lesion) => (
-                  <tr key={lesion.lesionId}>
+                  <tr
+                    key={lesion.lesionId}
+                    className="lesion-row-clickable"
+                    onClick={() => navigate(`/lesion/view?lesionId=${lesion.lesionId}`)}
+                  >
                     <td>{lesion.patientName || "-"}</td>
                     <td>{lesion.lesionLabel}</td>
                     <td>{lesion.organ || "-"}</td>
                     <td>{LESION_TYPE_LABEL[lesion.lesionType] || "-"}</td>
                     <td>{lesion.isLymphNode ? "O" : "X"}</td>
                     <td className="lesion-action-buttons">
-                      <DetailButton onClick={() => navigate(`/lesion/view?lesionId=${lesion.lesionId}`)} />
                       <button
                         className="lesion-measurement-button"
                         title="측정값 목록"
-                        onClick={() => navigate(`/lesion/measurement/list?lesionId=${lesion.lesionId}`)}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          navigate(`/lesion/measurement/list?lesionId=${lesion.lesionId}`);
+                        }}
                       >
                         <FiList aria-hidden="true" /> 측정값 목록
                       </button>

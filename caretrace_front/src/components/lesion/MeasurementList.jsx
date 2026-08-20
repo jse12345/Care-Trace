@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import PageNation from "../common/PageNation";
 import api from "../common/api";
-import DetailButton from "../common/DetailButton";
 
 // mm 값이 있으면 mm으로, 없으면(PixelSpacing 정보 부재) px 값으로 대체 표시한다.
 function formatAxis(mmValue, pxValue, mmUnit, pxUnit) {
@@ -95,14 +94,17 @@ function MeasurementList() {
                   <th>단축</th>
                   <th>면적</th>
                   <th>변화율</th>
-                  <th>관리</th>
                 </tr>
               </thead>
               <tbody>
                 {measurements.map((measurement) => {
                   const trend = changeRateByMeasurementId[measurement.measurementId];
                   return (
-                    <tr key={measurement.measurementId}>
+                    <tr
+                      key={measurement.measurementId}
+                      className="lesion-row-clickable"
+                      onClick={() => navigate(`/lesion/measurement/view?measurementId=${measurement.measurementId}`)}
+                    >
                       <td>{measurement.measuredAt?.replace("T", " ").slice(0, 16)}</td>
                       <td>{measurement.roiType}</td>
                       <td>{formatAxis(measurement.longAxisMm, measurement.longAxisPx, "mm", "px")}</td>
@@ -115,14 +117,11 @@ function MeasurementList() {
                             ? `${trend.changeRatePercent > 0 ? "+" : ""}${trend.changeRatePercent}%`
                             : "-"}
                       </td>
-                      <td className="lesion-action-buttons">
-                        <DetailButton onClick={() => navigate(`/lesion/measurement/view?measurementId=${measurement.measurementId}`)} />
-                      </td>
                     </tr>
                   );
                 })}
                 {!measurements.length && (
-                  <tr><td colSpan="7" className="lesion-empty-cell">등록된 측정값이 없습니다.</td></tr>
+                  <tr><td colSpan="6" className="lesion-empty-cell">등록된 측정값이 없습니다.</td></tr>
                 )}
               </tbody>
             </table>

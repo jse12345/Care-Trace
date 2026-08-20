@@ -120,6 +120,10 @@
   background: var(--clinical-mint);
 }
 
+.examination-row-clickable {
+  cursor: pointer;
+}
+
 .examination-empty-cell {
   padding: 24px 12px;
   color: var(--clinical-muted);
