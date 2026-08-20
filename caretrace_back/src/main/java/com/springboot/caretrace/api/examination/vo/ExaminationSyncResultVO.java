@@ -17,6 +17,7 @@ public class ExaminationSyncResultVO {
     private int totalCount;
     private int savedCount;
     private int updatedCount;
+    private int deletedCount;
     private int failedCount;
 
     @Builder.Default

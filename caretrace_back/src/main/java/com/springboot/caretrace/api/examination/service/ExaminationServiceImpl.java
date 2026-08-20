@@ -24,8 +24,10 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -92,7 +94,8 @@ public class ExaminationServiceImpl implements ExaminationService {
 
     /*
      * Orthanc의 /studies 전체를 가져와 DB에 upsert한다.
-     * 전체 목록을 매번 다시 가져오되(full pull), Study/Series 단위로는 UID 기준으로 upsert한다(파괴적 재생성 아님).
+     * 전체 목록을 매번 다시 가져오되(full pull), Study/Series 단위로는 UID 기준으로 upsert한다.
+     * 이후 Orthanc에 더 이상 존재하지 않는 Study/Series는 로컬 DB에서도 삭제해 정합성을 맞춘다.
      * 긴 루프 동안 Orthanc HTTP 호출을 반복하므로 메서드 전체를 하나의 트랜잭션으로 묶지 않고
      * 각 repository.save() 호출이 개별 트랜잭션으로 처리되도록 둔다(webjjang과 동일한 방식).
      */
@@ -156,15 +159,23 @@ public class ExaminationServiceImpl implements ExaminationService {
                 }
             }
 
+            Set<String> orthancStudyIdSet = new HashSet<>(orthancStudyIds);
+            List<Examination> staleExaminations = examinationRepository.findAll().stream()
+                    .filter(examination -> !orthancStudyIdSet.contains(examination.getOrthancStudyId()))
+                    .collect(Collectors.toList());
+            int deletedCount = staleExaminations.size();
+            examinationRepository.deleteAll(staleExaminations);
+
             log.info(
-                    "[ExaminationServiceImpl.sync] 완료 - 전체 {} / 신규 {} / 갱신 {} / 실패 {}",
-                    orthancStudyIds.size(), savedCount, updatedCount, failedCount
+                    "[ExaminationServiceImpl.sync] 완료 - 전체 {} / 신규 {} / 갱신 {} / 삭제 {} / 실패 {}",
+                    orthancStudyIds.size(), savedCount, updatedCount, deletedCount, failedCount
             );
 
             return ExaminationSyncResultVO.builder()
                     .totalCount(orthancStudyIds.size())
                     .savedCount(savedCount)
                     .updatedCount(updatedCount)
+                    .deletedCount(deletedCount)
                     .failedCount(failedCount)
                     .failedStudyIds(failedStudyIds)
                     .build();
@@ -243,6 +254,15 @@ public class ExaminationServiceImpl implements ExaminationService {
     private void saveSeriesList(Map<String, Object> studyData, Examination examination) {
 
         List<String> orthancSeriesIds = getStringList(studyData, "Series");
+        Set<String> orthancSeriesIdSet = new HashSet<>(orthancSeriesIds);
+
+        if (examination.getId() != null) {
+            List<ExaminationSeries> staleSeries = examinationSeriesRepository
+                    .findAllByExamination_Id(examination.getId()).stream()
+                    .filter(series -> !orthancSeriesIdSet.contains(series.getOrthancSeriesId()))
+                    .collect(Collectors.toList());
+            examinationSeriesRepository.deleteAll(staleSeries);
+        }
 
         int totalSeriesCount = 0;
         int totalInstanceCount = 0;

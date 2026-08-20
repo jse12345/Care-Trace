@@ -34,6 +34,8 @@ function MiniViewer() {
 
   const imgRef = useRef(null);
   const canvasRef = useRef(null);
+  const imageUrlRef = useRef(null);
+  const lastGoodSelectionRef = useRef({ examinationId: "", selectedStudyId: "", selectedSeriesId: "", sliceIndex: 0 });
 
   const [examinations, setExaminations] = useState([]);
   const [seriesList, setSeriesList] = useState([]);
@@ -95,7 +97,6 @@ function MiniViewer() {
     if (!currentInstance) return;
 
     let active = true;
-    let objectUrl = null;
 
     // 함정#3: <img src>는 인증 헤더가 안 붙으므로 blob으로 받아 objectURL로 변환한다.
     api.get("/lesion/dicom/preview.do", {
@@ -103,19 +104,34 @@ function MiniViewer() {
       responseType: "blob",
     }).then(({ data }) => {
       if (!active) return;
-      objectUrl = URL.createObjectURL(data);
-      setImageUrl(objectUrl);
-    }).catch(() => { if (active) setErrorMessage("영상 미리보기를 불러오지 못했습니다."); });
+      const newUrl = URL.createObjectURL(data);
+      if (imageUrlRef.current) URL.revokeObjectURL(imageUrlRef.current);
+      imageUrlRef.current = newUrl;
+      setImageUrl(newUrl);
+      lastGoodSelectionRef.current = { examinationId, selectedStudyId, selectedSeriesId, sliceIndex };
+    }).catch(() => {
+      if (!active) return;
+      alert("영상을 불러오지 못했습니다.");
+      const prev = lastGoodSelectionRef.current;
+      setExaminationId(prev.examinationId);
+      setSelectedStudyId(prev.selectedStudyId);
+      setSelectedSeriesId(prev.selectedSeriesId);
+      setSliceIndex(prev.sliceIndex);
+    });
 
     api.get("/lesion/dicom/tags.do", { params: { instanceId: currentInstance.ID } })
       .then(({ data }) => { if (active) setTags(data); })
       .catch(() => { if (active) setErrorMessage("DICOM 태그 정보를 불러오지 못했습니다."); });
 
-    return () => {
-      active = false;
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
-    };
+    return () => { active = false; };
   }, [currentInstance]);
+
+  // 컴포넌트 언마운트 시 마지막 objectURL 해제
+  useEffect(() => {
+    return () => {
+      if (imageUrlRef.current) URL.revokeObjectURL(imageUrlRef.current);
+    };
+  }, []);
 
   const pixelSpacing = parsePixelSpacing(tags?.PixelSpacing);
 
