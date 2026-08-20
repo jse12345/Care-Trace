@@ -5,6 +5,9 @@ import com.springboot.caretrace.api.treatmentreport.entity.ResponseResult;
 import com.springboot.caretrace.api.treatmentreport.entity.TreatmentResponseReport;
 import com.springboot.caretrace.api.treatmentreport.repository.TreatmentResponseReportRepositoryCustom;
 import com.springboot.caretrace.api.treatmentreport.vo.TreatmentResponseReportVO;
+import com.springboot.caretrace.api.patientcase.repository.QPatientCaseRepository;
+import com.springboot.caretrace.api.patient.repository.QPatientRepository;
+import com.springboot.caretrace.api.medicalstaff.repository.QMedicalStaffRepository;
 import com.springboot.caretrace.page.PageObject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -23,6 +26,9 @@ import java.util.List;
 public class TreatmentResponseReportServiceImpl implements TreatmentResponseReportService {
 
     private final TreatmentResponseReportRepositoryCustom repositoryCustom;
+    private final QPatientCaseRepository patientCaseRepository;
+    private final QPatientRepository patientRepository;
+    private final QMedicalStaffRepository medicalStaffRepository;
 
     @Override
     public List<TreatmentResponseReportVO> list(PageObject pageObject, Long caseId, LocalDate evaluationDate, ResponseResult responseResult) {
@@ -41,10 +47,10 @@ public class TreatmentResponseReportServiceImpl implements TreatmentResponseRepo
     @Override
     @Transactional
     public TreatmentResponseReportVO write(TreatmentResponseReportVO vo) {
-        // 요구사항 2-2: 평가 보고서 등록 (초기 상태 DRAFT 지정)[cite: 4]
         TreatmentResponseReport report = TreatmentResponseReport.builder()
                 .caseId(requiredLong(vo.getCaseId()))
                 .staffId(requiredLong(vo.getStaffId()))
+                // patientName, diagnosisName, staffName 은 엔티티에 없으므로 제거!
                 .evaluationCriteria(requiredString(vo.getEvaluationCriteria()))
                 .evaluationDate(vo.getEvaluationDate() != null ? vo.getEvaluationDate() : LocalDate.now())
                 .responseResult(vo.getResponseResult())
@@ -53,13 +59,13 @@ public class TreatmentResponseReportServiceImpl implements TreatmentResponseRepo
                 .status(ReportStatus.DRAFT)
                 .isDeleted("n")
                 .build();
+
         return entityToVO(repositoryCustom.saveReport(report));
     }
 
     @Override
     @Transactional
     public Long update(TreatmentResponseReportVO vo) {
-        // 요구사항 2-3: 치료 반응 보고서 내용 수정 및 확정 (CONFIRMED) 변경[cite: 4]
         TreatmentResponseReport report = findActiveReport(vo.getReportId());
 
         report.updateReport(
@@ -76,7 +82,6 @@ public class TreatmentResponseReportServiceImpl implements TreatmentResponseRepo
     @Override
     @Transactional
     public Long delete(Long reportId) {
-        // 요구사항 2-4: 보고서 삭제 처리 (is_deleted 'y', 상태 'ARCHIVED')[cite: 4]
         TreatmentResponseReport report = findActiveReport(reportId);
         report.softDelete();
         repositoryCustom.saveReport(report);
@@ -91,7 +96,7 @@ public class TreatmentResponseReportServiceImpl implements TreatmentResponseRepo
     }
 
     private TreatmentResponseReportVO entityToVO(TreatmentResponseReport entity) {
-        return TreatmentResponseReportVO.builder()
+        TreatmentResponseReportVO vo = TreatmentResponseReportVO.builder()
                 .reportId(entity.getReportId())
                 .caseId(entity.getCaseId())
                 .staffId(entity.getStaffId())
@@ -104,6 +109,25 @@ public class TreatmentResponseReportServiceImpl implements TreatmentResponseRepo
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .build();
+
+        // 작성 의료진 이름 세팅
+        if (entity.getStaffId() != null) {
+            medicalStaffRepository.findById(entity.getStaffId())
+                    .ifPresent(staff -> vo.setStaffName(staff.getStaffName()));
+        }
+
+        // 환자명 및 증례명 세팅
+        if (entity.getCaseId() != null) {
+            patientCaseRepository.findById(entity.getCaseId())
+                    .ifPresent(pCase -> {
+                        vo.setDiagnosisName(pCase.getDiagnosis()); // 증례명(진단명)
+
+                        patientRepository.findById(pCase.getPatientId())
+                                .ifPresent(patient -> vo.setPatientName(patient.getPatientName())); // 환자명
+                    });
+        }
+
+        return vo;
     }
 
     private Long requiredLong(Long value) {

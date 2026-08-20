@@ -17,17 +17,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/treatment-response")
+@RequestMapping("/treatment-report")
 @RequiredArgsConstructor
 @Log4j2
-public class TreatmentResponseReportRestController {
+public class TreatmentReportRestController {
 
     private final TreatmentResponseReportService service;
 
     @GetMapping("/list.do")
     public ResponseEntity<Map<String, Object>> list(
             HttpServletRequest request,
-            @RequestParam(required = true) Long caseId,
+            @RequestParam(required = false) Long caseId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate evaluationDate,
             @RequestParam(required = false) ResponseResult responseResult
     ) throws Exception {

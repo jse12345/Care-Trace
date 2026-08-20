@@ -19,6 +19,11 @@ public class TreatmentResponseReportVO {
     private Long reportId;
     private Long caseId;
     private Long staffId;
+
+    private String patientName;
+    private String diagnosisName;
+    private String staffName;
+
     private String evaluationCriteria;
     private LocalDate evaluationDate;
     private ResponseResult responseResult;

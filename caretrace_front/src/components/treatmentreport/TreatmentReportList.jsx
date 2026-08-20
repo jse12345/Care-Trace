@@ -7,7 +7,7 @@ function TreatmentReportList() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   
-  // 1. URL에서 caseId 추출 (백엔드 400 에러 방지)
+  // URL에서 caseId 추출 (없을 경우 null)
   const caseId = searchParams.get("caseId"); 
   
   const [reports, setReports] = useState([]);
@@ -16,12 +16,18 @@ function TreatmentReportList() {
   const [responseResult, setResponseResult] = useState(searchParams.get("responseResult") || "");
   const [errorMessage, setErrorMessage] = useState("");
 
+  const badgeClassMap = {
+    DRAFT: "treatment",    // 주황색 (환자 케이스의 '치료 중' 색상 차용)
+    CONFIRMED: "active",   // 초록색 (의료진/진료과의 '활성' 색상 차용)
+    ARCHIVED: "inactive"   // 회색 (의료진/진료과의 '비활성' 색상 차용)
+  };
+
   useEffect(() => {
     let active = true;
     const params = Object.fromEntries(searchParams.entries());
     
-    // caseId가 포함된 params 객체가 백엔드로 전달됩니다.
-    api.get("/treatment-response/list.do", { params })
+    // API 경로를 백엔드 컨트롤러에 맞게 수정 (/treatment-response/list.do)
+    api.get("/treatment-report/list.do", { params })
       .then(({ data }) => {
         if (!active) return;
         setReports(data.list || []);
@@ -35,17 +41,25 @@ function TreatmentReportList() {
 
   const search = (event) => {
     event.preventDefault();
-    const params = new URLSearchParams({ caseId });
+    const params = new URLSearchParams();
+    
+    // caseId가 존재할 때만 파라미터에 추가 (null 값이 문자열로 들어가는 것 방지)
+    if (caseId) params.set("caseId", caseId); 
     if (dateWord) params.set("evaluationDate", dateWord);
     if (responseResult) params.set("responseResult", responseResult);
-    navigate(`/medical-staff/treatment-response/list?${params}`);
+    
+    navigate(`/treatmentreport/list?${params.toString()}`);
   };
 
   const reset = () => {
     setDateWord("");
     setResponseResult("");
-    // 초기화 시에도 caseId 유지
-    navigate(`/medical-staff/treatment-response/list?caseId=${caseId}`);
+    // caseId 유무에 따라 라우팅 분기
+    if (caseId) {
+      navigate(`/treatmentreport/list?caseId=${caseId}`);
+    } else {
+      navigate(`/treatmentreport/list`);
+    }
   };
 
   return (
@@ -55,9 +69,16 @@ function TreatmentReportList() {
           <div>
             <p className="department-eyebrow">CareTrace Report</p>
             <h1 className="department-title">치료 반응 보고서 목록</h1>
-            <p className="department-description">증례별 치료 반응 평가 결과를 확인합니다.</p>
+            <p className="department-description">
+              {caseId 
+                ? `증례(Case ID: ${caseId})에 대한 치료 반응 평가 결과를 확인합니다.` 
+                : "전체 치료 반응 평가 결과를 확인합니다."}
+            </p>
           </div>
-          <button className="primary-button" onClick={() => navigate(`/medical-staff/treatment-response/write?caseId=${caseId}`)}>
+          <button 
+            className="primary-button" 
+            onClick={() => navigate(caseId ? `/treatmentreport/write?caseId=${caseId}` : `/treatmentreport/write`)}
+          >
             + 보고서 등록
           </button>
         </header>
@@ -83,6 +104,8 @@ function TreatmentReportList() {
               <thead>
                 <tr>
                   <th>보고서 번호</th>
+                  {!caseId && <th>환자명</th>}
+                  {!caseId && <th>증례 번호</th>}
                   <th>평가 기준일</th>
                   <th>평가 기준</th>
                   <th>치료 반응 결과</th>
@@ -95,29 +118,30 @@ function TreatmentReportList() {
                 {reports.map((report) => (
                   <tr key={report.reportId}>
                     <td className="code-cell">{report.reportId}</td>
+                    {!caseId && <td>{report.patientName || "-"}</td>}
+                    {!caseId && <td>{report.caseId}</td>}
                     <td>{report.evaluationDate}</td>
                     <td>{report.evaluationCriteria}</td>
                     <td>{report.responseResult}</td>
-                    {/* 데이터 바인딩 오류 방지를 위한 방어 코드 추가 */}
                     <td>{report.staffName || "이름 없음"}</td>
                     <td>
-                      {/* CSS 클래스와 매핑되도록 badge- 접두사 추가 */}
-                      <span className={`status-badge badge-${report.status?.toLowerCase()}`}>
+                      <span className={`status-badge ${badgeClassMap[report.status?.toUpperCase()] || ""}`}>
                         {report.status?.toUpperCase()}
                       </span>
                     </td>
                     <td className="action-buttons">
-                      <button className="detail-button" onClick={() => navigate(`/medical-staff/treatment-response/view?reportId=${report.reportId}`)}>조회</button>
+                      <button className="detail-button" onClick={() => navigate(`/treatmentreport/view?reportId=${report.reportId}`)}>조회</button>
                     </td>
                   </tr>
                 ))}
-                {!reports.length && <tr><td colSpan="7" className="empty-cell">등록된 치료 반응 보고서가 없습니다.</td></tr>}
+                
+                {!reports.length && <tr><td colSpan={caseId ? "7" : "9"} className="empty-cell">등록된 치료 반응 보고서가 없습니다.</td></tr>}
               </tbody>
             </table>
           </div>
           
           {pageObject && (
-            <PageNation pageObject={pageObject} listPath="/medical-staff/treatment-response/list" />
+            <PageNation pageObject={pageObject} listPath="/treatmentreport/list" />
           )}
         </section>
       </div>

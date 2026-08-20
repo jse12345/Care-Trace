@@ -12,7 +12,7 @@ function TreatmentReportUpdate() {
 
   useEffect(() => {
     let active = true;
-    api.get("/treatment-response/view.do", { params: { reportId } })
+    api.get("/treatmentreport/view.do", { params: { reportId } })
       .then(({ data }) => {
         if (active) setForm(data);
       })
@@ -23,9 +23,9 @@ function TreatmentReportUpdate() {
   const submit = async (event) => {
     event.preventDefault();
     try {
-      await api.post("/treatment-response/update.do", form);
+      await api.post("/treatmentreport/update.do", form);
       alert("보고서가 성공적으로 수정/확정되었습니다.");
-      navigate(`/treatment-response/view?reportId=${reportId}`);
+      navigate(`/treatmentreport/view?reportId=${reportId}`);
     } catch (error) {
       setErrorMessage(error.response?.data?.message || "수정 중 오류가 발생했습니다.");
     }

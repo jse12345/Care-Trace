@@ -584,7 +584,21 @@
   min-width: 76px;
   text-transform: uppercase;
 }
+/* 치료 반응 보고서 상태 뱃지 색상 (추가) */
+.badge-draft {
+  background: #fff6e5;
+  color: #a36a00;
+}
 
+.badge-confirmed {
+  background: #e3f6ef;
+  color: #167459;
+}
+
+.badge-archived {
+  background: #edf1f4;
+  color: #667387;
+}
 /* --- 1. 구분 (Type) --- */
 /* REQUEST (요청): 기본 회색 톤 (.module-state 기본 스타일 차용) */
 .badge-request {

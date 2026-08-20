@@ -38,8 +38,8 @@ function TreatmentReportForm({ form, setForm, onSubmit, submitLabel, isUpdate = 
         {isUpdate && (
           <label> 보고서 상태
             <select name="status" value={form.status} onChange={change} required>
-              <option value="draft">DRAFT (임시저장)</option>
-              <option value="confirmed">CONFIRMED (확정)</option>
+              <option value="DRAFT">DRAFT (임시저장)</option>
+              <option value="CONFIRMED">CONFIRMED (확정)</option>
             </select>
           </label>
         )}
