@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import api from "../common/api";
 import {
@@ -35,12 +35,11 @@ function MiniViewer() {
   const imgRef = useRef(null);
   const canvasRef = useRef(null);
   const imageUrlRef = useRef(null);
-  const lastGoodSelectionRef = useRef({ examinationId: "", selectedStudyId: "", selectedSeriesId: "", sliceIndex: 0 });
+  const lastGoodSelectionRef = useRef({ examinationId: "", selectedSeriesId: "", sliceIndex: 0 });
 
   const [examinations, setExaminations] = useState([]);
   const [seriesList, setSeriesList] = useState([]);
   const [instances, setInstances] = useState([]);
-  const [selectedStudyId, setSelectedStudyId] = useState("");
   const [selectedSeriesId, setSelectedSeriesId] = useState("");
   const [sliceIndex, setSliceIndex] = useState(0);
 
@@ -56,6 +55,33 @@ function MiniViewer() {
   const [errorMessage, setErrorMessage] = useState("");
   const [saving, setSaving] = useState(false);
 
+  // 수정 모드에서 등록 당시 선택했던 검사/시리즈/슬라이스/ROI를 순차적으로 복원하기 위한 대기값.
+  // 각 단계는 이전 단계의 비동기 로딩 결과에 의존하는 cascade 구조라, ref에 담아두고
+  // 해당 데이터의 fetch 완료 콜백에서 소비한다.
+  const pendingSeriesUidRef = useRef(null);
+  const pendingInstanceRef = useRef(null);
+  const pendingToolRef = useRef(null);
+  const pendingPointsRef = useRef(null);
+  const pendingMemoRef = useRef(null);
+
+  // 0. 수정 모드: 기존 측정값 조회 후 검사 선택부터 순차 복원 시작
+  useEffect(() => {
+    if (!isEditMode) return;
+    let active = true;
+    api.get("/lesion-measurement/view.do", { params: { measurementId } })
+      .then(({ data }) => {
+        if (!active || !data) return;
+        pendingSeriesUidRef.current = data.seriesInstanceUid || null;
+        pendingInstanceRef.current = { sopUid: data.sopInstanceUid || null, instanceNumber: data.instanceNumber ?? null };
+        pendingToolRef.current = data.roiType || null;
+        pendingPointsRef.current = Array.isArray(data.roiPoints) ? data.roiPoints : null;
+        pendingMemoRef.current = data.memo ?? null;
+        setExaminationId(String(data.examinationId ?? ""));
+      })
+      .catch(() => { if (active) setErrorMessage("측정값 정보를 불러오지 못했습니다."); });
+    return () => { active = false; };
+  }, [isEditMode, measurementId]);
+
   // 1. 검사(Examination) 목록 로딩 - 해당 병변의 환자로 필터링된 DB(MariaDB) 목록
   useEffect(() => {
     if (!lesionId) return;
@@ -66,12 +92,28 @@ function MiniViewer() {
     return () => { active = false; };
   }, [lesionId]);
 
+  // examinationId가 세팅되면(수동 선택 또는 수정모드 복원) studyId를 유도
+  const selectedStudyId = useMemo(() => {
+    const exam = examinations.find((e) => String(e.id) === String(examinationId));
+    return exam?.orthancStudyId || "";
+  }, [examinationId, examinations]);
+
   // 2. 시리즈 목록 로딩
   useEffect(() => {
     if (!selectedStudyId) return;
     let active = true;
     api.get("/lesion/dicom/series.do", { params: { studyId: selectedStudyId } })
-      .then(({ data }) => { if (active) setSeriesList(Array.isArray(data) ? data : []); })
+      .then(({ data }) => {
+        if (!active) return;
+        const list = Array.isArray(data) ? data : [];
+        setSeriesList(list);
+        // 수정모드 복원: 시리즈 목록이 로딩되면 저장된 SeriesInstanceUID와 매칭
+        if (pendingSeriesUidRef.current) {
+          const match = list.find((s) => s.MainDicomTags?.SeriesInstanceUID === pendingSeriesUidRef.current);
+          pendingSeriesUidRef.current = null;
+          if (match) setSelectedSeriesId(match.ID);
+        }
+      })
       .catch(() => { if (active) setErrorMessage("시리즈 목록을 불러오지 못했습니다."); });
     return () => { active = false; };
   }, [selectedStudyId]);
@@ -83,8 +125,21 @@ function MiniViewer() {
     api.get("/lesion/dicom/instances.do", { params: { seriesId: selectedSeriesId } })
       .then(({ data }) => {
         if (!active) return;
-        setInstances(Array.isArray(data) ? data : []);
-        setSliceIndex(0);
+        const list = Array.isArray(data) ? data : [];
+        setInstances(list);
+
+        // 수정모드 복원: 인스턴스 목록이 로딩되면 저장된 SOPInstanceUID/InstanceNumber와 매칭
+        let idx = 0;
+        if (pendingInstanceRef.current) {
+          const pending = pendingInstanceRef.current;
+          pendingInstanceRef.current = null;
+          const foundIdx = list.findIndex((inst) =>
+            (pending.sopUid && inst.MainDicomTags?.SOPInstanceUID === pending.sopUid) ||
+            (pending.instanceNumber != null && firstNumeric(inst.MainDicomTags?.InstanceNumber) === pending.instanceNumber)
+          );
+          if (foundIdx >= 0) idx = foundIdx;
+        }
+        setSliceIndex(idx);
       })
       .catch(() => { if (active) setErrorMessage("슬라이스 목록을 불러오지 못했습니다."); });
     return () => { active = false; };
@@ -108,13 +163,22 @@ function MiniViewer() {
       if (imageUrlRef.current) URL.revokeObjectURL(imageUrlRef.current);
       imageUrlRef.current = newUrl;
       setImageUrl(newUrl);
-      lastGoodSelectionRef.current = { examinationId, selectedStudyId, selectedSeriesId, sliceIndex };
+      lastGoodSelectionRef.current = { examinationId, selectedSeriesId, sliceIndex };
+
+      // 수정모드 복원: 이미지 로딩이 끝난 뒤 저장된 ROI/메모를 한 번만 적용
+      if (pendingToolRef.current || pendingPointsRef.current || pendingMemoRef.current) {
+        if (pendingToolRef.current) setTool(pendingToolRef.current);
+        if (pendingPointsRef.current) setPoints(pendingPointsRef.current);
+        if (pendingMemoRef.current) setMemo(pendingMemoRef.current);
+        pendingToolRef.current = null;
+        pendingPointsRef.current = null;
+        pendingMemoRef.current = null;
+      }
     }).catch(() => {
       if (!active) return;
       alert("영상을 불러오지 못했습니다.");
       const prev = lastGoodSelectionRef.current;
       setExaminationId(prev.examinationId);
-      setSelectedStudyId(prev.selectedStudyId);
       setSelectedSeriesId(prev.selectedSeriesId);
       setSliceIndex(prev.sliceIndex);
     });
@@ -333,9 +397,7 @@ function MiniViewer() {
               <select
                 value={examinationId}
                 onChange={(e) => {
-                  const exam = examinations.find((ex) => String(ex.id) === e.target.value);
                   setExaminationId(e.target.value);
-                  setSelectedStudyId(exam?.orthancStudyId || "");
                   setSelectedSeriesId("");
                   setSeriesList([]);
                   setInstances([]);
