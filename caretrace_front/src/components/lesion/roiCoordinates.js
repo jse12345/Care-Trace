@@ -35,12 +35,16 @@ export function toDisplayPoint(dicomX, dicomY, img) {
 
 // DICOM PixelSpacing 태그는 "row\\column" 순서(Y, X 순)로 내려온다.
 // X, Y 순서로 착각하기 쉬운 지점이므로 별도 유틸로 분리했다.
-export function parsePixelSpacing(pixelSpacingTagValue) {
-  if (!pixelSpacingTagValue) {
+// PixelSpacing이 없는 모달리티(CR/DX, Secondary Capture 등)는 ImagerPixelSpacing만
+// 가지고 있는 경우가 있어 두 번째 인자로 폴백을 받는다.
+export function parsePixelSpacing(pixelSpacingTagValue, imagerPixelSpacingTagValue) {
+  const raw = pixelSpacingTagValue || imagerPixelSpacingTagValue;
+
+  if (!raw) {
     return { x: null, y: null };
   }
 
-  const parts = String(pixelSpacingTagValue).split("\\");
+  const parts = String(raw).split("\\");
   if (parts.length < 2) {
     return { x: null, y: null };
   }

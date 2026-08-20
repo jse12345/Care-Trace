@@ -33,6 +33,9 @@ public class LesionMeasurementVO {
     private BigDecimal longAxisMm;
     private BigDecimal shortAxisMm;
     private BigDecimal areaMm2;
+    private BigDecimal longAxisPx;
+    private BigDecimal shortAxisPx;
+    private BigDecimal areaPx2;
     private Integer windowCenter;
     private Integer windowWidth;
     private String memo;

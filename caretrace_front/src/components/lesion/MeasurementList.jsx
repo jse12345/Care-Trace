@@ -3,6 +3,13 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import PageNation from "../common/PageNation";
 import api from "../common/api";
 
+// mm 값이 있으면 mm으로, 없으면(PixelSpacing 정보 부재) px 값으로 대체 표시한다.
+function formatAxis(mmValue, pxValue, mmUnit, pxUnit) {
+  if (mmValue != null) return `${mmValue} ${mmUnit}`;
+  if (pxValue != null) return `${pxValue} ${pxUnit}`;
+  return "-";
+}
+
 function MeasurementList() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -83,9 +90,9 @@ function MeasurementList() {
                 <tr>
                   <th>측정 일시</th>
                   <th>ROI 유형</th>
-                  <th>장축(mm)</th>
-                  <th>단축(mm)</th>
-                  <th>면적(mm²)</th>
+                  <th>장축</th>
+                  <th>단축</th>
+                  <th>면적</th>
                   <th>변화율</th>
                   <th>관리</th>
                 </tr>
@@ -97,9 +104,9 @@ function MeasurementList() {
                     <tr key={measurement.measurementId}>
                       <td>{measurement.measuredAt?.replace("T", " ").slice(0, 16)}</td>
                       <td>{measurement.roiType}</td>
-                      <td>{measurement.longAxisMm ?? "-"}</td>
-                      <td>{measurement.shortAxisMm ?? "-"}</td>
-                      <td>{measurement.areaMm2 ?? "-"}</td>
+                      <td>{formatAxis(measurement.longAxisMm, measurement.longAxisPx, "mm", "px")}</td>
+                      <td>{formatAxis(measurement.shortAxisMm, measurement.shortAxisPx, "mm", "px")}</td>
+                      <td>{formatAxis(measurement.areaMm2, measurement.areaPx2, "mm²", "px²")}</td>
                       <td>
                         {trend?.baseline
                           ? "기준값"

@@ -99,6 +99,9 @@ public class LesionMeasurementServiceImpl implements LesionMeasurementService {
                 .longAxisMm(result.longAxisMm())
                 .shortAxisMm(result.shortAxisMm())
                 .areaMm2(result.areaMm2())
+                .longAxisPx(result.longAxisPx())
+                .shortAxisPx(result.shortAxisPx())
+                .areaPx2(result.areaPx2())
                 .windowCenter(vo.getWindowCenter())
                 .windowWidth(vo.getWindowWidth())
                 .memo(optional(vo.getMemo()))
@@ -134,6 +137,9 @@ public class LesionMeasurementServiceImpl implements LesionMeasurementService {
                 result.longAxisMm(),
                 result.shortAxisMm(),
                 result.areaMm2(),
+                result.longAxisPx(),
+                result.shortAxisPx(),
+                result.areaPx2(),
                 vo.getWindowCenter(),
                 vo.getWindowWidth(),
                 optional(vo.getMemo()),
@@ -248,6 +254,9 @@ public class LesionMeasurementServiceImpl implements LesionMeasurementService {
                 .longAxisMm(measurement.getLongAxisMm())
                 .shortAxisMm(measurement.getShortAxisMm())
                 .areaMm2(measurement.getAreaMm2())
+                .longAxisPx(measurement.getLongAxisPx())
+                .shortAxisPx(measurement.getShortAxisPx())
+                .areaPx2(measurement.getAreaPx2())
                 .windowCenter(measurement.getWindowCenter())
                 .windowWidth(measurement.getWindowWidth())
                 .memo(measurement.getMemo())

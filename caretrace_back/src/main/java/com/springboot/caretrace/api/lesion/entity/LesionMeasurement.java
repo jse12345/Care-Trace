@@ -76,6 +76,15 @@ public class LesionMeasurement {
     @Column(name = "area_mm2", precision = 10, scale = 2)
     private BigDecimal areaMm2;
 
+    @Column(name = "long_axis_px", precision = 10, scale = 2)
+    private BigDecimal longAxisPx;
+
+    @Column(name = "short_axis_px", precision = 10, scale = 2)
+    private BigDecimal shortAxisPx;
+
+    @Column(name = "area_px2", precision = 10, scale = 2)
+    private BigDecimal areaPx2;
+
     @Column(name = "window_center")
     private Integer windowCenter;
 
@@ -114,6 +123,9 @@ public class LesionMeasurement {
             BigDecimal longAxisMm,
             BigDecimal shortAxisMm,
             BigDecimal areaMm2,
+            BigDecimal longAxisPx,
+            BigDecimal shortAxisPx,
+            BigDecimal areaPx2,
             Integer windowCenter,
             Integer windowWidth,
             String memo,
@@ -132,6 +144,9 @@ public class LesionMeasurement {
         this.longAxisMm = longAxisMm;
         this.shortAxisMm = shortAxisMm;
         this.areaMm2 = areaMm2;
+        this.longAxisPx = longAxisPx;
+        this.shortAxisPx = shortAxisPx;
+        this.areaPx2 = areaPx2;
         this.windowCenter = windowCenter;
         this.windowWidth = windowWidth;
         this.memo = memo;

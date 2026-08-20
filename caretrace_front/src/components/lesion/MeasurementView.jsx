@@ -3,6 +3,13 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import api from "../common/api";
 import { resizeCanvasToImage, toDisplayPoint } from "./roiCoordinates";
 
+// mm 값이 있으면 mm으로, 없으면(PixelSpacing 정보 부재) px 값으로 대체 표시한다.
+function formatAxis(mmValue, pxValue, mmUnit, pxUnit) {
+  if (mmValue != null) return `${mmValue} ${mmUnit}`;
+  if (pxValue != null) return `${pxValue} ${pxUnit}`;
+  return "-";
+}
+
 function MeasurementView() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -122,9 +129,15 @@ function MeasurementView() {
               <div className="lesion-detail-grid">
                 <div className="lesion-detail-item"><span>측정 일시</span><strong>{measurement.measuredAt?.replace("T", " ").slice(0, 16)}</strong></div>
                 <div className="lesion-detail-item"><span>ROI 유형</span><strong>{measurement.roiType}</strong></div>
-                <div className="lesion-detail-item"><span>장축(mm)</span><strong>{measurement.longAxisMm ?? "-"}</strong></div>
-                <div className="lesion-detail-item"><span>단축(mm)</span><strong>{measurement.shortAxisMm ?? "-"}</strong></div>
-                <div className="lesion-detail-item"><span>면적(mm²)</span><strong>{measurement.areaMm2 ?? "-"}</strong></div>
+                <div className="lesion-detail-item"><span>장축</span><strong>{formatAxis(measurement.longAxisMm, measurement.longAxisPx, "mm", "px")}</strong></div>
+                <div className="lesion-detail-item"><span>단축</span><strong>{formatAxis(measurement.shortAxisMm, measurement.shortAxisPx, "mm", "px")}</strong></div>
+                <div className="lesion-detail-item"><span>면적</span><strong>{formatAxis(measurement.areaMm2, measurement.areaPx2, "mm²", "px²")}</strong></div>
+                {measurement.longAxisMm == null && measurement.shortAxisMm == null && measurement.areaMm2 == null
+                  && (measurement.longAxisPx != null || measurement.shortAxisPx != null || measurement.areaPx2 != null) && (
+                  <div className="lesion-detail-item lesion-full-width">
+                    <span className="lesion-hint-text">이 영상에는 픽셀 간격(PixelSpacing) 정보가 없어 실제 크기(mm) 대신 픽셀(px) 값으로 표시됩니다.</span>
+                  </div>
+                )}
                 <div className="lesion-detail-item lesion-full-width"><span>메모</span><strong>{measurement.memo || "-"}</strong></div>
               </div>
 

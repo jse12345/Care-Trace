@@ -197,7 +197,7 @@ function MiniViewer() {
     };
   }, []);
 
-  const pixelSpacing = parsePixelSpacing(tags?.PixelSpacing);
+  const pixelSpacing = parsePixelSpacing(tags?.PixelSpacing, tags?.ImagerPixelSpacing);
 
   // 캔버스를 이미지 표시 크기에 맞춰 재설정
   const handleImageLoad = () => {
