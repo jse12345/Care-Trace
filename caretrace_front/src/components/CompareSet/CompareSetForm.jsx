@@ -121,7 +121,7 @@ function CompareSetForm() {
 
         {/* 과거 영상 경로 + 검색 버튼 */}
         <div className="mb-3">
-          <label className="form-label fw-semibold">과거 영상 경로 (StudyInstanceUID)</label>
+          <label className="form-label fw-semibold">과거 영상 경로 </label>
           <div className="input-group">
             <input
               type="text"
@@ -146,7 +146,7 @@ function CompareSetForm() {
 
         {/* 현재 영상 경로 + 검색 버튼 */}
         <div className="mb-3">
-          <label className="form-label fw-semibold">현재 영상 경로 (StudyInstanceUID)</label>
+          <label className="form-label fw-semibold">현재 영상 경로 </label>
           <div className="input-group">
             <input
               type="text"
@@ -199,7 +199,6 @@ function CompareSetForm() {
         </div>
       </form>
 
-      {/* PACS Study 선택 모달창 (리스트 띄우기) */}
       {selectedTarget && (
         <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <div className="modal-dialog modal-xl modal-dialog-scrollable">
