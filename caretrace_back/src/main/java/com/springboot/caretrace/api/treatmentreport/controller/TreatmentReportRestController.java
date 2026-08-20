@@ -28,12 +28,13 @@ public class TreatmentReportRestController {
     public ResponseEntity<Map<String, Object>> list(
             HttpServletRequest request,
             @RequestParam(required = false) Long caseId,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate evaluationDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @RequestParam(required = false) ResponseResult responseResult
     ) throws Exception {
         PageObject pageObject = PageObject.getInstance(request);
         Map<String, Object> map = new HashMap<>();
-        map.put("list", service.list(pageObject, caseId, evaluationDate, responseResult));
+        map.put("list", service.list(pageObject, caseId, startDate, endDate, responseResult));
         map.put("pageObject", pageObject);
         return ResponseEntity.status(HttpStatus.OK).body(map);
     }

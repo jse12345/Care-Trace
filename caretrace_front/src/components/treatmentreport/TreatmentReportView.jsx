@@ -54,9 +54,8 @@ function TreatmentReportView() {
     }
   };
 
-  const isAuthor = currentStaffNo && report && 
+const isAuthor = currentStaffNo && report && 
     (Number(currentStaffNo) === Number(report.staffNo) || Number(currentStaffNo) === Number(report.staffId));
-
   return (
     <main className="department-page">
       <div className="department-container">
@@ -94,10 +93,20 @@ function TreatmentReportView() {
           )}
           
           <div className="form-actions">
-            {isAuthor && (
+            {isAuthor && report?.status?.toUpperCase() === "DRAFT" && (
               <>
-                <button className="edit-button" onClick={() => navigate(`/treatmentreport/update?reportId=${reportId}`)}>수정/확정하기</button>
-                <button className="delete-button" onClick={handleDelete}>삭제(철회)</button>
+                <button 
+                  className="edit-button" 
+                  onClick={() => navigate(`/treatmentreport/update?reportId=${reportId}`)}
+                >
+                  수정/확정하기
+                </button>
+                <button 
+                  className="delete-button" 
+                  onClick={handleDelete}
+                >
+                  삭제(철회)
+                </button>
               </>
             )}
             <button className="secondary-button" onClick={() => navigate("/treatmentreport/list")}>목록</button>

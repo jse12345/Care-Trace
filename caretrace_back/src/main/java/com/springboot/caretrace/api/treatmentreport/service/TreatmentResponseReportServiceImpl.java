@@ -31,9 +31,9 @@ public class TreatmentResponseReportServiceImpl implements TreatmentResponseRepo
     private final QMedicalStaffRepository medicalStaffRepository;
 
     @Override
-    public List<TreatmentResponseReportVO> list(PageObject pageObject, Long caseId, LocalDate evaluationDate, ResponseResult responseResult) {
-        pageObject.setTotalRow(repositoryCustom.getCount(pageObject, caseId, evaluationDate, responseResult));
-        return repositoryCustom.getList(pageObject, caseId, evaluationDate, responseResult)
+    public List<TreatmentResponseReportVO> list(PageObject pageObject, Long caseId, LocalDate startDate, LocalDate endDate, ResponseResult responseResult) {
+        pageObject.setTotalRow(repositoryCustom.getCount(pageObject, caseId, startDate, endDate, responseResult));
+        return repositoryCustom.getList(pageObject, caseId, startDate, endDate, responseResult)
                 .stream()
                 .map(this::entityToVO)
                 .toList();

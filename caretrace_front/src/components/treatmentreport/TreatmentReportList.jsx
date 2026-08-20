@@ -12,21 +12,25 @@ function TreatmentReportList() {
   
   const [reports, setReports] = useState([]);
   const [pageObject, setPageObject] = useState(null);
-  const [dateWord, setDateWord] = useState(searchParams.get("evaluationDate") || "");
-  const [responseResult, setResponseResult] = useState(searchParams.get("responseResult") || "");
   const [errorMessage, setErrorMessage] = useState("");
 
+  // ✅ 변경/추가된 검색 조건 상태들
+  const [startDate, setStartDate] = useState(searchParams.get("startDate") || "");
+  const [endDate, setEndDate] = useState(searchParams.get("endDate") || "");
+  const [responseResult, setResponseResult] = useState(searchParams.get("responseResult") || "");
+  const [searchKey, setSearchKey] = useState(searchParams.get("key") || "");
+  const [searchWord, setSearchWord] = useState(searchParams.get("word") || "");
+
   const badgeClassMap = {
-    DRAFT: "treatment",    // 주황색 (환자 케이스의 '치료 중' 색상 차용)
-    CONFIRMED: "active",   // 초록색 (의료진/진료과의 '활성' 색상 차용)
-    ARCHIVED: "inactive"   // 회색 (의료진/진료과의 '비활성' 색상 차용)
+    DRAFT: "treatment",    // 주황색
+    CONFIRMED: "active",   // 초록색
+    ARCHIVED: "inactive"   // 회색
   };
 
   useEffect(() => {
     let active = true;
     const params = Object.fromEntries(searchParams.entries());
     
-    // API 경로를 백엔드 컨트롤러에 맞게 수정 (/treatment-response/list.do)
     api.get("/treatment-report/list.do", { params })
       .then(({ data }) => {
         if (!active) return;
@@ -39,27 +43,31 @@ function TreatmentReportList() {
     return () => { active = false; };
   }, [searchParams]);
 
+  // ✅ 검색 폼 제출 함수 (새로운 파라미터 매핑)
   const search = (event) => {
     event.preventDefault();
     const params = new URLSearchParams();
     
-    // caseId가 존재할 때만 파라미터에 추가 (null 값이 문자열로 들어가는 것 방지)
     if (caseId) params.set("caseId", caseId); 
-    if (dateWord) params.set("evaluationDate", dateWord);
+    if (startDate) params.set("startDate", startDate);
+    if (endDate) params.set("endDate", endDate);
     if (responseResult) params.set("responseResult", responseResult);
+    if (searchWord.trim()) {
+      params.set("word", searchWord.trim());
+      if (searchKey) params.set("key", searchKey);
+    }
     
     navigate(`/treatmentreport/list?${params.toString()}`);
   };
 
+  // ✅ 검색 조건 초기화 함수
   const reset = () => {
-    setDateWord("");
+    setStartDate("");
+    setEndDate("");
     setResponseResult("");
-    // caseId 유무에 따라 라우팅 분기
-    if (caseId) {
-      navigate(`/treatmentreport/list?caseId=${caseId}`);
-    } else {
-      navigate(`/treatmentreport/list`);
-    }
+    setSearchKey("");
+    setSearchWord("");
+    navigate(caseId ? `/treatmentreport/list?caseId=${caseId}` : `/treatmentreport/list`);
   };
 
   return (
@@ -86,16 +94,65 @@ function TreatmentReportList() {
         {errorMessage && <div className="error-message">{errorMessage}</div>}
 
         <section className="list-card">
-          <form className="search-bar" onSubmit={search}>
-            <input type="date" value={dateWord} onChange={(e) => setDateWord(e.target.value)} placeholder="평가 기준일 검색" />
-            <select value={responseResult} onChange={(e) => setResponseResult(e.target.value)}>
+          {/* ✅ 검색 폼 구조 변경 (기존 CSS 유지 + Flexbox로 유연한 배치) */}
+          <form 
+            className="search-bar" 
+            onSubmit={search}
+            style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "10px" }}
+          >
+            {/* 1. 기간 검색 */}
+            <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+              <input 
+                type="date" 
+                value={startDate} 
+                onChange={(e) => setStartDate(e.target.value)} 
+                title="시작일"
+                style={{ width: "135px" }}
+              />
+              <span style={{ color: "#7b899b", fontWeight: "bold" }}>~</span>
+              <input 
+                type="date" 
+                value={endDate} 
+                onChange={(e) => setEndDate(e.target.value)} 
+                title="종료일"
+                style={{ width: "135px" }}
+              />
+            </div>
+
+            {/* 2. 결과 필터 */}
+            <select 
+              value={responseResult} 
+              onChange={(e) => setResponseResult(e.target.value)}
+              style={{ width: "140px" }}
+            >
               <option value="">전체 결과</option>
               <option value="CR">완전관해 (CR)</option>
               <option value="PR">부분관해 (PR)</option>
               <option value="SD">안정병변 (SD)</option>
               <option value="PD">진행병변 (PD)</option>
             </select>
-            <button className="search-button">검색</button>
+
+            {/* 3. 이름 검색 (검색 대상 + 검색어) */}
+            <div style={{ display: "flex", gap: "5px", flex: 1, minWidth: "220px" }}>
+              <select 
+                value={searchKey} 
+                onChange={(e) => setSearchKey(e.target.value)} 
+                style={{ width: "110px" }}
+              >
+                <option value="">이름 통합</option>
+                <option value="p">환자명</option>
+                <option value="s">의료진명</option>
+              </select>
+              <input 
+                type="text" 
+                value={searchWord} 
+                onChange={(e) => setSearchWord(e.target.value)} 
+                placeholder="검색어 입력" 
+                style={{ flex: 1 }}
+              />
+            </div>
+
+            <button type="submit" className="search-button">검색</button>
             <button type="button" className="secondary-button" onClick={reset}>초기화</button>
           </form>
 
