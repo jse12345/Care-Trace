@@ -1,4 +1,4 @@
-function LesionForm({ form, setForm, onSubmit, submitLabel, caseIdEditable }) {
+function LesionForm({ form, setForm, onSubmit, submitLabel, caseIdEditable, caseOptions }) {
   const change = (event) => {
     const { name, value, type, checked } = event.target;
     setForm((previous) => ({
@@ -11,15 +11,34 @@ function LesionForm({ form, setForm, onSubmit, submitLabel, caseIdEditable }) {
     <form onSubmit={onSubmit}>
       <div className="lesion-form-grid">
         <label>
-          증례 번호(caseId)
-          <input
-            name="caseId"
-            type="number"
-            value={form.caseId}
-            onChange={change}
-            required
-            disabled={!caseIdEditable}
-          />
+          케이스 번호
+          {caseIdEditable ? (
+            <select
+              name="caseId"
+              value={form.caseId}
+              onChange={change}
+              required
+              disabled={!caseOptions}
+            >
+              {!caseOptions && (
+                <option value={form.caseId}>불러오는 중...</option>
+              )}
+              {caseOptions && caseOptions.map((c) => (
+                <option key={c.caseId} value={c.caseId}>
+                  #{c.caseId} · {c.diagnosis} ({c.startDate})
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input
+              name="caseId"
+              type="number"
+              value={form.caseId}
+              onChange={change}
+              required
+              disabled
+            />
+          )}
         </label>
 
         <label>
@@ -34,7 +53,7 @@ function LesionForm({ form, setForm, onSubmit, submitLabel, caseIdEditable }) {
         </label>
 
         <label>
-          장기(organ)
+          장기
           <input
             name="organ"
             value={form.organ}
@@ -60,7 +79,7 @@ function LesionForm({ form, setForm, onSubmit, submitLabel, caseIdEditable }) {
             checked={form.isLymphNode}
             onChange={change}
           />
-          림프절 여부(림프절이면 추세 계산 기준이 단축이 됩니다)
+          림프절 여부
         </label>
 
         <label className="lesion-full-width">

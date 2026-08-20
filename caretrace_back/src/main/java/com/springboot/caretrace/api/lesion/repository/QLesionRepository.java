@@ -8,13 +8,13 @@ public interface QLesionRepository
         extends JpaRepository<Lesion, Long>,
         QuerydslPredicateExecutor<Lesion> {
 
-    boolean existsByCaseIdAndLesionLabelAndIsDeleted(
+    boolean existsByPatientCase_CaseIdAndLesionLabelAndIsDeleted(
             Long caseId,
             String lesionLabel,
             String isDeleted
     );
 
-    boolean existsByCaseIdAndLesionLabelAndIsDeletedAndLesionIdNot(
+    boolean existsByPatientCase_CaseIdAndLesionLabelAndIsDeletedAndLesionIdNot(
             Long caseId,
             String lesionLabel,
             String isDeleted,

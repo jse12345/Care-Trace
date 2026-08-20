@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import api from "../common/api";
 import LesionForm from "./LesionForm";
@@ -17,6 +17,27 @@ function LesionWrite() {
     description: "",
   });
   const [errorMessage, setErrorMessage] = useState("");
+  const [caseOptions, setCaseOptions] = useState(null);
+
+  useEffect(() => {
+    if (!caseId) return;
+
+    let active = true;
+
+    api.get(`/patient-cases/${caseId}`)
+      .then(({ data }) => {
+        if (!active || !data?.patientId) return null;
+        return api.get(`/patient-cases/patient/${data.patientId}`);
+      })
+      .then((response) => {
+        if (active && response) setCaseOptions(response.data || []);
+      })
+      .catch(() => {
+        if (active) setCaseOptions([]);
+      });
+
+    return () => { active = false; };
+  }, [caseId]);
 
   const submit = async (event) => {
     event.preventDefault();
@@ -48,6 +69,7 @@ function LesionWrite() {
             onSubmit={submit}
             submitLabel="등록"
             caseIdEditable
+            caseOptions={caseOptions}
           />
         </section>
       </div>

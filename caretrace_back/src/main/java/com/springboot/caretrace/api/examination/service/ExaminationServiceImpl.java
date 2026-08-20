@@ -7,7 +7,6 @@ import com.springboot.caretrace.api.examination.repository.QExaminationSeriesRep
 import com.springboot.caretrace.api.examination.vo.ExaminationSeriesVO;
 import com.springboot.caretrace.api.examination.vo.ExaminationSyncResultVO;
 import com.springboot.caretrace.api.examination.vo.ExaminationVO;
-import com.springboot.caretrace.api.lesion.entity.Lesion;
 import com.springboot.caretrace.api.lesion.repository.QLesionRepository;
 import com.springboot.caretrace.api.patient.entity.Patient;
 import com.springboot.caretrace.api.patient.repository.QPatientRepository;
@@ -60,7 +59,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 
         if (resolvedPatientId == null && resolvedCaseId == null && lesionId != null) {
             resolvedCaseId = lesionRepository.findById(lesionId)
-                    .map(Lesion::getCaseId)
+                    .map(l -> l.getPatientCase().getCaseId())
                     .orElse(null);
         }
 

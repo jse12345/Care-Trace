@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { FiList } from "react-icons/fi";
 import PageNation from "../common/PageNation";
 import api from "../common/api";
+import Breadcrumb from "../common/Breadcrumb";
+import DetailButton from "../common/DetailButton";
 
 const LESION_TYPE_LABEL = {
   TARGET: "TARGET",
@@ -99,6 +102,15 @@ function LesionList() {
   return (
     <main className="lesion-page">
       <div className="lesion-container">
+        <Breadcrumb
+          items={[
+            {
+              label: caseInfo ? `증례 #${caseId} · ${caseInfo.patientName || `환자 ${caseInfo.patientId}`}` : `증례 #${caseId}`,
+              to: `/patient-cases/${caseId}`,
+            },
+            { label: "병변 목록" },
+          ]}
+        />
         <header className="lesion-header">
           <div>
             <p className="lesion-eyebrow">CareTrace</p>
@@ -165,23 +177,13 @@ function LesionList() {
                     <td>{LESION_TYPE_LABEL[lesion.lesionType] || "-"}</td>
                     <td>{lesion.isLymphNode ? "예" : "아니오"}</td>
                     <td className="lesion-action-buttons">
+                      <DetailButton onClick={() => navigate(`/lesion/view?lesionId=${lesion.lesionId}`)} />
                       <button
-                        className="lesion-detail-button"
-                        onClick={() => navigate(`/lesion/view?lesionId=${lesion.lesionId}`)}
+                        className="lesion-measurement-button"
+                        title="측정값 목록"
+                        onClick={() => navigate(`/lesion/measurement/list?lesionId=${lesion.lesionId}`)}
                       >
-                        상세
-                      </button>
-                      <button
-                        className="lesion-edit-button"
-                        onClick={() => navigate(`/lesion/update?lesionId=${lesion.lesionId}`)}
-                      >
-                        수정
-                      </button>
-                      <button
-                        className="lesion-delete-button"
-                        onClick={() => navigate(`/lesion/delete?lesionId=${lesion.lesionId}`)}
-                      >
-                        삭제
+                        <FiList aria-hidden="true" /> 측정값 목록
                       </button>
                     </td>
                   </tr>

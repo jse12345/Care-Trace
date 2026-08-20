@@ -7,6 +7,8 @@ import com.springboot.caretrace.api.lesion.repository.LesionMeasurementRepositor
 import com.springboot.caretrace.api.lesion.repository.LesionRepositoryCustom;
 import com.springboot.caretrace.api.lesion.repository.QLesionRepository;
 import com.springboot.caretrace.api.lesion.vo.LesionVO;
+import com.springboot.caretrace.api.patientcase.entity.PatientCase;
+import com.springboot.caretrace.api.patientcase.repository.QPatientCaseRepository;
 import com.springboot.caretrace.page.PageObject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -26,6 +28,7 @@ public class LesionServiceImpl implements LesionService {
     private final LesionRepositoryCustom lesionRepositoryCustom;
     private final QLesionRepository qLesionRepository;
     private final LesionMeasurementRepositoryCustom lesionMeasurementRepositoryCustom;
+    private final QPatientCaseRepository patientCaseRepository;
 
     @Override
     public List<LesionVO> list(
@@ -52,17 +55,17 @@ public class LesionServiceImpl implements LesionService {
     @Override
     @Transactional
     public LesionVO write(LesionVO vo, Long createdBy) {
-        Long caseId = requiredLong(vo.getCaseId());
+        PatientCase patientCase = findActivePatientCase(requiredLong(vo.getCaseId()));
         String lesionLabel = requiredString(vo.getLesionLabel());
 
-        if (qLesionRepository.existsByCaseIdAndLesionLabelAndIsDeleted(
-                caseId, lesionLabel, "N"
+        if (qLesionRepository.existsByPatientCase_CaseIdAndLesionLabelAndIsDeleted(
+                patientCase.getCaseId(), lesionLabel, "N"
         )) {
             throw conflict("이미 등록된 병변 라벨입니다.");
         }
 
         Lesion lesion = Lesion.builder()
-                .caseId(caseId)
+                .patientCase(patientCase)
                 .createdBy(createdBy)
                 .lesionLabel(lesionLabel)
                 .organ(optional(vo.getOrgan()))
@@ -81,8 +84,8 @@ public class LesionServiceImpl implements LesionService {
         Lesion lesion = findActiveLesion(vo.getLesionId());
         String lesionLabel = requiredString(vo.getLesionLabel());
 
-        if (qLesionRepository.existsByCaseIdAndLesionLabelAndIsDeletedAndLesionIdNot(
-                lesion.getCaseId(), lesionLabel, "N", lesion.getLesionId()
+        if (qLesionRepository.existsByPatientCase_CaseIdAndLesionLabelAndIsDeletedAndLesionIdNot(
+                lesion.getPatientCase().getCaseId(), lesionLabel, "N", lesion.getLesionId()
         )) {
             throw conflict("이미 등록된 병변 라벨입니다.");
         }
@@ -130,10 +133,15 @@ public class LesionServiceImpl implements LesionService {
         return lesion;
     }
 
+    private PatientCase findActivePatientCase(Long caseId) {
+        return patientCaseRepository.findByCaseIdAndIsDeleted(caseId, "N")
+                .orElseThrow(() -> notFound("존재하지 않는 증례입니다."));
+    }
+
     private LesionVO lesionToVO(Lesion lesion) {
         return LesionVO.builder()
                 .lesionId(lesion.getLesionId())
-                .caseId(lesion.getCaseId())
+                .caseId(lesion.getPatientCase().getCaseId())
                 .createdBy(lesion.getCreatedBy())
                 .lesionLabel(lesion.getLesionLabel())
                 .organ(lesion.getOrgan())

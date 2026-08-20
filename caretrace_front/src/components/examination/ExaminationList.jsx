@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { FiEye } from "react-icons/fi";
 import api from "../common/api";
+import Breadcrumb from "../common/Breadcrumb";
 
 /**
  * 검사(Examination) 목록 화면.
@@ -64,6 +66,7 @@ function ExaminationList() {
   return (
     <main className="examination-page">
       <div className="examination-container">
+        <Breadcrumb items={[{ label: "검사 목록" }]} />
         <header className="examination-header">
           <div>
             <p className="examination-eyebrow">CareTrace</p>
@@ -134,9 +137,10 @@ function ExaminationList() {
                         <button
                           type="button"
                           className="examination-detail-button"
+                          title="상세"
                           onClick={() => navigate(`/examination/view?id=${exam.id}`)}
                         >
-                          상세
+                          <FiEye aria-hidden="true" /> 상세
                         </button>
                       </td>
                     </tr>

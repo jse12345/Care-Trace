@@ -1,6 +1,15 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import {
+  FiEdit2,
+  FiTrash2,
+  FiList,
+  FiPlusCircle,
+  FiClipboard,
+  FiTrendingUp,
+} from "react-icons/fi";
 import api from "../common/api";
+import Breadcrumb from "../common/Breadcrumb";
 
 function LesionView() {
   const navigate = useNavigate();
@@ -20,6 +29,14 @@ function LesionView() {
   return (
     <main className="lesion-page">
       <div className="lesion-container">
+        <Breadcrumb
+          items={[
+            ...(lesion
+              ? [{ label: `증례 #${lesion.caseId}`, to: `/lesion/list?caseId=${lesion.caseId}` }]
+              : [{ label: "병변 목록", to: "/lesion/list" }]),
+            { label: "병변 상세" },
+          ]}
+        />
         <section className="lesion-form-card">
           <div className="lesion-form-card-header">
             <h2>병변 상세</h2>
@@ -34,36 +51,45 @@ function LesionView() {
                 <div className="lesion-detail-item"><span>병변 라벨</span><strong>{lesion.lesionLabel}</strong></div>
                 <div className="lesion-detail-item"><span>장기</span><strong>{lesion.organ || "-"}</strong></div>
                 <div className="lesion-detail-item"><span>구분</span><strong>{lesion.lesionType || "-"}</strong></div>
-                <div className="lesion-detail-item"><span>림프절 여부</span><strong>{lesion.isLymphNode ? "예" : "아니오"}</strong></div>
+                <div className="lesion-detail-item"><span>림프절 여부</span><strong>{lesion.isLymphNode ? "O" : "X"}</strong></div>
                 <div className="lesion-detail-item lesion-full-width"><span>설명</span><strong>{lesion.description || "-"}</strong></div>
               </div>
 
-              <div className="lesion-form-actions">
-                <button className="lesion-edit-button" onClick={() => navigate(`/lesion/update?lesionId=${lesionId}`)}>수정</button>
-                <button className="lesion-delete-button" onClick={() => navigate(`/lesion/delete?lesionId=${lesionId}`)}>삭제</button>
-                <button className="lesion-secondary-button" onClick={() => navigate(`/lesion/list?caseId=${lesion.caseId}`)}>목록</button>
+              <div className="lesion-action-group">
+                <h3 className="lesion-action-group-title">병변 관리</h3>
+                <div className="lesion-form-actions">
+                  <button className="lesion-edit-button" onClick={() => navigate(`/lesion/update?lesionId=${lesionId}`)}>
+                    <FiEdit2 aria-hidden="true" /> 수정
+                  </button>
+                  <button className="lesion-delete-button" onClick={() => navigate(`/lesion/delete?lesionId=${lesionId}`)}>
+                    <FiTrash2 aria-hidden="true" /> 삭제
+                  </button>
+                  <button className="lesion-secondary-button" onClick={() => navigate(`/lesion/list?caseId=${lesion.caseId}`)}>
+                    <FiList aria-hidden="true" /> 목록
+                  </button>
+                </div>
               </div>
 
               <div className="lesion-measurement-links">
-                <h3>측정값</h3>
+                <h3 className="lesion-action-group-title">측정값</h3>
                 <div className="lesion-form-actions">
                   <button
                     className="lesion-primary-button"
                     onClick={() => navigate(`/lesion/measurement/capture?lesionId=${lesionId}`)}
                   >
-                    측정값 등록(미니뷰어)
+                    <FiPlusCircle aria-hidden="true" /> 측정값 등록(미니뷰어)
                   </button>
                   <button
                     className="lesion-secondary-button"
                     onClick={() => navigate(`/lesion/measurement/list?lesionId=${lesionId}`)}
                   >
-                    측정값 목록
+                    <FiClipboard aria-hidden="true" /> 측정값 목록
                   </button>
                   <button
                     className="lesion-secondary-button"
                     onClick={() => navigate(`/lesion/measurement/trend?lesionId=${lesionId}`)}
                   >
-                    변화 추세 보기
+                    <FiTrendingUp aria-hidden="true" /> 변화 추세 보기
                   </button>
                 </div>
               </div>

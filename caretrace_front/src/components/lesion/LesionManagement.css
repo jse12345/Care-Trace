@@ -54,7 +54,7 @@
   padding: 12px 16px;
   border: 1px solid var(--clinical-danger);
   border-radius: 10px;
-  background: rgb(199 62 77 / 8%);
+  background: rgb(199 62 77 / 16%);
   color: var(--clinical-danger);
   font-size: 13px;
 }
@@ -156,16 +156,30 @@
 .lesion-primary-button,
 .lesion-secondary-button,
 .lesion-detail-button,
+.lesion-measurement-button,
 .lesion-edit-button,
 .lesion-delete-button,
 .lesion-search-button,
 .lesion-tool-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   padding: 8px 14px;
   border: 1px solid transparent;
   border-radius: 8px;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
+}
+
+.lesion-primary-button svg,
+.lesion-secondary-button svg,
+.lesion-detail-button svg,
+.lesion-measurement-button svg,
+.lesion-edit-button svg,
+.lesion-delete-button svg {
+  flex-shrink: 0;
+  font-size: 15px;
 }
 
 .lesion-primary-button,
@@ -177,9 +191,15 @@
 
 .lesion-secondary-button,
 .lesion-detail-button {
-  border-color: var(--clinical-line);
+  border: 2px solid var(--clinical-navy);
   background: #fff;
-  color: var(--clinical-ink);
+  color: var(--clinical-navy);
+}
+
+.lesion-measurement-button {
+  border-color: #0e7490;
+  background: #0e7490;
+  color: #fff;
 }
 
 .lesion-edit-button {
@@ -286,16 +306,23 @@
   font-weight: 700;
 }
 
+.lesion-action-group {
+  margin-top: 20px;
+}
+
 .lesion-measurement-links {
   margin-top: 24px;
   padding-top: 20px;
   border-top: 1px solid var(--clinical-line);
 }
 
-.lesion-measurement-links h3 {
+.lesion-action-group-title {
   margin: 0 0 12px;
   color: var(--clinical-navy);
-  font-size: 15px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
 }
 
 /* 미니 뷰어 */
@@ -422,6 +449,36 @@
 .lesion-trend-chart svg {
   width: 100%;
   height: auto;
+}
+
+.lesion-trend-legend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 8px 0 0;
+  color: var(--clinical-ink);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.lesion-trend-legend-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-left: 12px;
+  border-radius: 50%;
+}
+
+.lesion-trend-legend-dot:first-child {
+  margin-left: 0;
+}
+
+.lesion-trend-legend-dot.baseline {
+  background: var(--clinical-danger);
+}
+
+.lesion-trend-legend-dot.compare {
+  background: var(--clinical-blue);
 }
 
 @media (max-width: 720px) {

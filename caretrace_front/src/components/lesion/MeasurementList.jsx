@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import PageNation from "../common/PageNation";
 import api from "../common/api";
+import DetailButton from "../common/DetailButton";
 
 // mm 값이 있으면 mm으로, 없으면(PixelSpacing 정보 부재) px 값으로 대체 표시한다.
 function formatAxis(mmValue, pxValue, mmUnit, pxUnit) {
@@ -115,9 +116,7 @@ function MeasurementList() {
                             : "-"}
                       </td>
                       <td className="lesion-action-buttons">
-                        <button className="lesion-detail-button" onClick={() => navigate(`/lesion/measurement/view?measurementId=${measurement.measurementId}`)}>상세</button>
-                        <button className="lesion-edit-button" onClick={() => navigate(`/lesion/measurement/capture?lesionId=${lesionId}&measurementId=${measurement.measurementId}`)}>수정</button>
-                        <button className="lesion-delete-button" onClick={() => navigate(`/lesion/measurement/delete?measurementId=${measurement.measurementId}&lesionId=${lesionId}`)}>삭제</button>
+                        <DetailButton onClick={() => navigate(`/lesion/measurement/view?measurementId=${measurement.measurementId}`)} />
                       </td>
                     </tr>
                   );

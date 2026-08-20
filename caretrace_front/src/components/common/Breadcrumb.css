@@ -1,0 +1,37 @@
+.ct-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 12px;
+  font-size: 13px;
+}
+
+.ct-breadcrumb-item {
+  display: inline-flex;
+  align-items: center;
+}
+
+.ct-breadcrumb-link {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--clinical-muted);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ct-breadcrumb-link:hover {
+  color: var(--clinical-blue);
+  text-decoration: underline;
+}
+
+.ct-breadcrumb-current {
+  color: var(--clinical-navy);
+  font-weight: 700;
+}
+
+.ct-breadcrumb-separator {
+  margin: 0 8px;
+  color: var(--clinical-line);
+}

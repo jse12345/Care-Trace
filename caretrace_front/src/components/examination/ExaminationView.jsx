@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { FiImage, FiList } from "react-icons/fi";
 import api from "../common/api";
+import Breadcrumb from "../common/Breadcrumb";
 
 function displayValue(value) {
   if (value === null || value === undefined) return "-";
@@ -68,10 +70,11 @@ function ExaminationView() {
     return (
       <main className="examination-page">
         <div className="examination-container">
+          <Breadcrumb items={[{ label: "검사 목록", to: "/examination/list" }, { label: "검사 상세" }]} />
           <section className="examination-form-card">
             <div className="examination-error-message">조회할 검사 id가 없습니다.</div>
             <button className="examination-secondary-button" onClick={() => navigate("/examination/list")}>
-              목록으로
+              <FiList aria-hidden="true" /> 목록으로
             </button>
           </section>
         </div>
@@ -84,6 +87,7 @@ function ExaminationView() {
   return (
     <main className="examination-page">
       <div className="examination-container">
+        <Breadcrumb items={[{ label: "검사 목록", to: "/examination/list" }, { label: "검사 상세" }]} />
         <section className="examination-form-card">
           <div className="examination-form-card-header">
             <h2>검사 상세</h2>
@@ -93,10 +97,10 @@ function ExaminationView() {
                 onClick={handleViewer}
                 disabled={!examination?.studyInstanceUid}
               >
-                영상 보기
+                <FiImage aria-hidden="true" /> 영상 보기
               </button>
               <button className="examination-secondary-button" onClick={() => navigate("/examination/list")}>
-                목록으로
+                <FiList aria-hidden="true" /> 목록으로
               </button>
             </div>
           </div>

@@ -15,6 +15,7 @@ import MeasurementTrend from "./MeasurementTrend";
 import MiniViewer from "./MiniViewer";
 
 import "./LesionManagement.css";
+import "../common/Breadcrumb.css";
 
 function LesionComp() {
   return (

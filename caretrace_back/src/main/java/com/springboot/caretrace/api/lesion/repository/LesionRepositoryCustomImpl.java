@@ -80,7 +80,7 @@ public class LesionRepositoryCustomImpl implements LesionRepositoryCustom {
         builder.and(lesion.isDeleted.eq("N"));
 
         if (caseId != null) {
-            builder.and(lesion.caseId.eq(caseId));
+            builder.and(lesion.patientCase.caseId.eq(caseId));
         }
         if (lesionType != null) {
             builder.and(lesion.lesionType.eq(lesionType));

@@ -1,5 +1,6 @@
 package com.springboot.caretrace.api.lesion.entity;
 
+import com.springboot.caretrace.api.patientcase.entity.PatientCase;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -24,8 +25,9 @@ public class Lesion {
     @Column(name = "lesion_id")
     private Long lesionId;
 
-    @Column(name = "case_id", nullable = false)
-    private Long caseId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "case_id", nullable = false, columnDefinition = "BIGINT UNSIGNED")
+    private PatientCase patientCase;
 
     @Column(name = "created_by", nullable = false)
     private Long createdBy;

@@ -52,7 +52,12 @@ function TrendChart({ list, metric }) {
 
         {points.map((p, i) => (
           <g key={p.measurementId}>
-            <circle cx={xFor(i)} cy={yFor(Number(p.trendValueMm))} r="4" fill={p.baseline ? "var(--clinical-navy)" : "var(--clinical-blue)"} />
+            <circle
+              cx={xFor(i)}
+              cy={yFor(Number(p.trendValueMm))}
+              r={p.baseline ? "5" : "4"}
+              fill={p.baseline ? "var(--clinical-danger)" : "var(--clinical-blue)"}
+            />
             <text x={xFor(i)} y={HEIGHT - PADDING.bottom + 20} textAnchor="middle" fontSize="11" fill="var(--clinical-muted)">
               {p.measuredAt ? format(new Date(p.measuredAt), "MM/dd") : ""}
             </text>
@@ -62,6 +67,10 @@ function TrendChart({ list, metric }) {
           </g>
         ))}
       </svg>
+      <p className="lesion-trend-legend">
+        <span className="lesion-trend-legend-dot baseline" aria-hidden="true" /> 기준점
+        <span className="lesion-trend-legend-dot compare" aria-hidden="true" /> 측정점
+      </p>
     </div>
   );
 }

@@ -3,6 +3,7 @@ import ExaminationList from "./ExaminationList";
 import ExaminationView from "./ExaminationView";
 import NotFoundPage from "../error/NotFoundPage";
 import "./ExaminationManagement.css";
+import "../common/Breadcrumb.css";
 
 function ExaminationComp() {
   return (
