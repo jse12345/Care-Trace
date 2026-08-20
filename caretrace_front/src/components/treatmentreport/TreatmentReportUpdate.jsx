@@ -22,10 +22,16 @@ function TreatmentReportUpdate() {
 
   const submit = async (event) => {
     event.preventDefault();
+    
+    const payload = {
+      ...form,
+      sizeChangeRate: form.sizeChangeRate ? Number(form.sizeChangeRate) : null,
+    };
+
     try {
-      await api.post("/treatment-report/update.do", form);
+      await api.post("/treatment-report/update.do", payload);
       alert("보고서가 성공적으로 수정/확정되었습니다.");
-      navigate(`/treatmentreport/view?reportId=${reportId}`); // 라우팅 주소는 하이픈 없음 (그대로 유지)
+      navigate(`/treatmentreport/view?reportId=${reportId}`); 
     } catch (error) {
       setErrorMessage(error.response?.data?.message || "수정 중 오류가 발생했습니다.");
     }
@@ -40,6 +46,8 @@ function TreatmentReportUpdate() {
             <button className="close-button" onClick={() => navigate(-1)}>×</button>
           </div>
           {errorMessage && <div className="error-message">{errorMessage}</div>}
+          
+          {/* form 데이터가 존재할 때만 렌더링되도록 보장 */}
           {form && (
             <TreatmentReportForm 
               form={form} 
