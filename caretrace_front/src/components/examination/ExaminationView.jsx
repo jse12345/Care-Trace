@@ -50,6 +50,20 @@ function ExaminationView() {
     return () => { active = false; };
   }, [id]);
 
+  const handleViewer = () => {
+    if (!examination?.studyInstanceUid) {
+      alert("StudyInstanceUID가 없습니다.");
+      return;
+    }
+
+    const viewerUrl =
+      `${import.meta.env.VITE_OHIF_BASE_URL}/viewer?StudyInstanceUIDs=${encodeURIComponent(
+        examination.studyInstanceUid
+      )}`;
+
+    window.open(viewerUrl, "_blank", "noopener,noreferrer");
+  };
+
   if (!id) {
     return (
       <main className="examination-page">
@@ -73,9 +87,18 @@ function ExaminationView() {
         <section className="examination-form-card">
           <div className="examination-form-card-header">
             <h2>검사 상세</h2>
-            <button className="examination-secondary-button" onClick={() => navigate("/examination/list")}>
-              목록으로
-            </button>
+            <div className="examination-header-actions">
+              <button
+                className="examination-primary-button"
+                onClick={handleViewer}
+                disabled={!examination?.studyInstanceUid}
+              >
+                영상 보기
+              </button>
+              <button className="examination-secondary-button" onClick={() => navigate("/examination/list")}>
+                목록으로
+              </button>
+            </div>
           </div>
 
           {errorMessage && <div className="examination-error-message">{errorMessage}</div>}

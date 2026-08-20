@@ -21,6 +21,9 @@ const PROXY_TARGET = process.env.PROXY_TARGET;
 const PROXY_DOMAIN = process.env.PROXY_DOMAIN;
 const PROXY_PATH_REWRITE_FROM = process.env.PROXY_PATH_REWRITE_FROM;
 const PROXY_PATH_REWRITE_TO = process.env.PROXY_PATH_REWRITE_TO;
+// `user:password` for targets behind HTTP Basic auth (e.g. Orthanc). The proxy
+// adds the header server-side, so the credentials never reach the browser.
+const PROXY_AUTH = process.env.PROXY_AUTH;
 const IS_COVERAGE = process.env.COVERAGE === 'true';
 
 const OHIF_PORT = Number(process.env.OHIF_PORT || 3000);
@@ -246,6 +249,11 @@ module.exports = (env, argv) => {
         pathRewrite: {
           [`^${PROXY_PATH_REWRITE_FROM}`]: PROXY_PATH_REWRITE_TO,
         },
+        ...(PROXY_AUTH && {
+          headers: {
+            Authorization: `Basic ${Buffer.from(PROXY_AUTH).toString('base64')}`,
+          },
+        }),
       },
     ];
   }
