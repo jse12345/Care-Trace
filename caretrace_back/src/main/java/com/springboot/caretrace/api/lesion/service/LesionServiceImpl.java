@@ -40,11 +40,7 @@ public class LesionServiceImpl implements LesionService {
                 lesionRepositoryCustom.getCount(pageObject, caseId, lesionType)
         );
 
-        return lesionRepositoryCustom
-                .getList(pageObject, caseId, lesionType)
-                .stream()
-                .map(this::lesionToVO)
-                .toList();
+        return lesionRepositoryCustom.getList(pageObject, caseId, lesionType);
     }
 
     @Override

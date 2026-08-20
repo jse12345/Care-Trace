@@ -27,7 +27,7 @@ public class LesionRestController {
     @GetMapping("/list.do")
     public ResponseEntity<Map<String, Object>> list(
             HttpServletRequest request,
-            @RequestParam(required = true) Long caseId,
+            @RequestParam(required = false) Long caseId,
             @RequestParam(required = false) LesionType lesionType
     ) throws Exception {
         PageObject pageObject = PageObject.getInstance(request);

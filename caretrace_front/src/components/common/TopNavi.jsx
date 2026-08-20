@@ -127,15 +127,6 @@ function TopNavi() {
 
                 <li className="nav-item">
                   <NavLink
-                    to="/lesion/list"
-                    className="nav-link"
-                  >
-                    병변·측정 기록
-                  </NavLink>
-                </li>
-
-                <li className="nav-item">
-                  <NavLink
                     to="/examination/list"
                     className="nav-link"
                   >

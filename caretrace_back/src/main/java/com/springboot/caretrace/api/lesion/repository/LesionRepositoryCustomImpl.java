@@ -1,10 +1,14 @@
 package com.springboot.caretrace.api.lesion.repository;
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.springboot.caretrace.api.lesion.entity.Lesion;
 import com.springboot.caretrace.api.lesion.entity.LesionType;
 import com.springboot.caretrace.api.lesion.entity.QLesion;
+import com.springboot.caretrace.api.lesion.vo.LesionVO;
+import com.springboot.caretrace.api.patient.entity.QPatient;
+import com.springboot.caretrace.api.patientcase.entity.QPatientCase;
 import com.springboot.caretrace.page.PageObject;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -19,15 +23,33 @@ public class LesionRepositoryCustomImpl implements LesionRepositoryCustom {
     private final QLesionRepository qLesionRepository;
 
     private final QLesion lesion = QLesion.lesion;
+    private final QPatientCase patientCase = QPatientCase.patientCase;
+    private final QPatient patient = QPatient.patient;
 
     @Override
-    public List<Lesion> getList(
+    public List<LesionVO> getList(
             PageObject pageObject,
             Long caseId,
             LesionType lesionType
     ) {
         return queryFactory
-                .selectFrom(lesion)
+                .select(Projections.fields(
+                        LesionVO.class,
+                        lesion.lesionId,
+                        lesion.patientCase.caseId.as("caseId"),
+                        lesion.createdBy,
+                        patient.patientName,
+                        lesion.lesionLabel,
+                        lesion.organ,
+                        lesion.lesionType,
+                        lesion.isLymphNode,
+                        lesion.description,
+                        lesion.regDate,
+                        lesion.updateDate
+                ))
+                .from(lesion)
+                .join(lesion.patientCase, patientCase)
+                .join(patient).on(patientCase.patientId.eq(patient.patientId))
                 .where(search(pageObject, caseId, lesionType))
                 .orderBy(lesion.regDate.desc())
                 .limit(pageObject.getPerPageNum())

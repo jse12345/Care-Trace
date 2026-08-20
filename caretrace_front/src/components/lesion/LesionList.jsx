@@ -24,8 +24,6 @@ function LesionList() {
   const [caseInfo, setCaseInfo] = useState(null);
 
   useEffect(() => {
-    if (!caseId) return;
-
     let active = true;
     const params = Object.fromEntries(searchParams.entries());
 
@@ -61,56 +59,34 @@ function LesionList() {
     return () => { active = false; };
   }, [caseId]);
 
-  const goToCase = (event) => {
-    event.preventDefault();
-    if (!caseIdInput) return;
-    navigate(`/lesion/list?caseId=${caseIdInput}`);
-  };
-
   const search = (event) => {
     event.preventDefault();
     const params = new URLSearchParams();
-    params.set("caseId", caseId);
+    if (caseIdInput) params.set("caseId", caseIdInput);
     if (lesionType) params.set("lesionType", lesionType);
     navigate(`/lesion/list?${params}`);
   };
 
-  if (!caseId) {
-    return (
-      <main className="lesion-page">
-        <div className="lesion-container">
-          <section className="lesion-list-card">
-            <h1 className="lesion-title">병변·측정 기록</h1>
-            <p className="lesion-description">
-              환자 케이스 상세에서 이동하거나, 증례 번호를 직접 입력해 조회할 수 있습니다.
-            </p>
-            <form className="lesion-search-bar" onSubmit={goToCase}>
-              <input
-                type="number"
-                placeholder="증례 번호를 입력해 주세요"
-                value={caseIdInput}
-                onChange={(event) => setCaseIdInput(event.target.value)}
-              />
-              <button className="lesion-primary-button">조회</button>
-            </form>
-          </section>
-        </div>
-      </main>
-    );
-  }
+  const clearFilters = () => {
+    setCaseIdInput("");
+    setLesionType("");
+    navigate("/lesion/list");
+  };
 
   return (
     <main className="lesion-page">
       <div className="lesion-container">
-        <Breadcrumb
-          items={[
-            {
-              label: caseInfo ? `증례 #${caseId} · ${caseInfo.patientName || `환자 ${caseInfo.patientId}`}` : `증례 #${caseId}`,
-              to: `/patient-cases/${caseId}`,
-            },
-            { label: "병변 목록" },
-          ]}
-        />
+        {caseId && (
+          <Breadcrumb
+            items={[
+              {
+                label: caseInfo ? `증례 #${caseId} · ${caseInfo.patientName || `환자 ${caseInfo.patientId}`}` : `증례 #${caseId}`,
+                to: `/patient-cases/${caseId}`,
+              },
+              { label: "병변 목록" },
+            ]}
+          />
+        )}
         <header className="lesion-header">
           <div>
             <p className="lesion-eyebrow">CareTrace</p>
@@ -119,7 +95,7 @@ function LesionList() {
           </div>
           <button
             className="lesion-primary-button"
-            onClick={() => navigate(`/lesion/write?caseId=${caseId}`)}
+            onClick={() => navigate(caseId ? `/lesion/write?caseId=${caseId}` : "/lesion/write")}
           >
             + 병변 등록
           </button>
@@ -141,6 +117,12 @@ function LesionList() {
 
         <section className="lesion-list-card">
           <form className="lesion-search-bar" onSubmit={search}>
+            <input
+              type="number"
+              placeholder="증례 번호로 좁혀보기"
+              value={caseIdInput}
+              onChange={(event) => setCaseIdInput(event.target.value)}
+            />
             <select value={lesionType} onChange={(event) => setLesionType(event.target.value)}>
               <option value="">전체 구분</option>
               <option value="TARGET">TARGET</option>
@@ -148,12 +130,8 @@ function LesionList() {
               <option value="NEW">NEW</option>
             </select>
             <button className="lesion-search-button">검색</button>
-            <button
-              type="button"
-              className="lesion-secondary-button"
-              onClick={() => navigate("/lesion/list")}
-            >
-              다른 증례 조회
+            <button type="button" className="lesion-secondary-button" onClick={clearFilters}>
+              필터 초기화
             </button>
           </form>
 
@@ -162,6 +140,7 @@ function LesionList() {
             <table className="lesion-table">
               <thead>
                 <tr>
+                  <th>환자</th>
                   <th>라벨</th>
                   <th>장기</th>
                   <th>구분</th>
@@ -172,10 +151,11 @@ function LesionList() {
               <tbody>
                 {lesions.map((lesion) => (
                   <tr key={lesion.lesionId}>
+                    <td>{lesion.patientName || "-"}</td>
                     <td>{lesion.lesionLabel}</td>
                     <td>{lesion.organ || "-"}</td>
                     <td>{LESION_TYPE_LABEL[lesion.lesionType] || "-"}</td>
-                    <td>{lesion.isLymphNode ? "예" : "아니오"}</td>
+                    <td>{lesion.isLymphNode ? "O" : "X"}</td>
                     <td className="lesion-action-buttons">
                       <DetailButton onClick={() => navigate(`/lesion/view?lesionId=${lesion.lesionId}`)} />
                       <button
@@ -190,7 +170,7 @@ function LesionList() {
                 ))}
                 {!lesions.length && (
                   <tr>
-                    <td colSpan="5" className="lesion-empty-cell">등록된 병변이 없습니다.</td>
+                    <td colSpan="6" className="lesion-empty-cell">등록된 병변이 없습니다.</td>
                   </tr>
                 )}
               </tbody>

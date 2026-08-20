@@ -17,6 +17,7 @@ public class LesionVO {
     private Long lesionId;
     private Long caseId;
     private Long createdBy;
+    private String patientName;
     private String lesionLabel;
     private String organ;
     private LesionType lesionType;
