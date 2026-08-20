@@ -176,7 +176,7 @@ function ConsultationView() {
               이 의견에 답변 달기
             </button>
           )}
-          {authorId === currentStaffId && (
+          {Number(authorId) === Number(currentStaffId) && (
             <button 
               type="button" 
               className="delete-button" 

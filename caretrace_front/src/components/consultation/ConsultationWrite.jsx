@@ -6,10 +6,8 @@ function ConsultationWrite() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   
-  // URL에서 caseId를 받아오면 초기값으로 설정
   const initialCaseId = searchParams.get("caseId") || searchParams.get("case_id");
 
-  // --- [상태 관리] 환자 및 증례 검색 ---
   const [patientKeyword, setPatientKeyword] = useState("");
   const [patientList, setPatientList] = useState([]);
   const [selectedPatientId, setSelectedPatientId] = useState("");
@@ -20,8 +18,16 @@ function ConsultationWrite() {
   const [opinionContent, setOpinionContent] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   
-  // TODO: 실제 구현 시 로그인한 사용자 정보(Redux, Context 등)에서 가져와야 함
-  const currentStaffId = 1;
+  // 로그인한 의료진 정보 파싱
+  let currentStaffId = 1; 
+  try {
+    const loginData = JSON.parse(localStorage.getItem("login"));
+    if (loginData) {
+      currentStaffId = loginData.staffNo || loginData.id || 1;
+    }
+  } catch (e) {
+    console.error("의료진 정보 확인 불가", e);
+  } 
 
   // 1. 환자 검색 로직 (실제 API 연동)
   const searchPatients = async () => {
@@ -89,14 +95,13 @@ function ConsultationWrite() {
 
     try {
       await api.post("/consultation/write.do", {
-        caseId: selectedCaseId,
+        caseId: Number(selectedCaseId),
         opinionType: "REQUEST",
         opinionContent: opinionContent,
-        staffId: currentStaffId,
+        staffId: Number(currentStaffId),
       });
 
       alert("협진 요청이 성공적으로 등록되었습니다.");
-      // 등록 완료 후 해당 증례의 협진 목록으로 이동
       navigate(`/consultation/list?caseId=${selectedCaseId}`);
     } catch (error) {
       setErrorMessage(error.response?.data?.message || "협진 요청 등록에 실패했습니다.");
