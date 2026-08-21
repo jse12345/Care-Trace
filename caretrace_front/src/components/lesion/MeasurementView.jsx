@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import api from "../common/api";
+import Breadcrumb from "../common/Breadcrumb";
 import { resizeCanvasToImage, toDisplayPoint } from "./roiCoordinates";
 
 // mm 값이 있으면 mm으로, 없으면(PixelSpacing 정보 부재) px 값으로 대체 표시한다.
@@ -21,6 +22,8 @@ function MeasurementView() {
   const [measurement, setMeasurement] = useState(null);
   const [imageUrl, setImageUrl] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
+  const [caseId, setCaseId] = useState(null);
+  const [caseInfo, setCaseInfo] = useState(null);
 
   useEffect(() => {
     let active = true;
@@ -29,6 +32,31 @@ function MeasurementView() {
       .catch(() => { if (active) setErrorMessage("측정값 정보를 불러오지 못했습니다."); });
     return () => { active = false; };
   }, [measurementId]);
+
+  useEffect(() => {
+    if (!measurement?.lesionId) return;
+    let active = true;
+    api.get("/lesion/view.do", { params: { lesionId: measurement.lesionId } })
+      .then(({ data }) => { if (active) setCaseId(data.caseId); })
+      .catch(() => { if (active) setCaseId(null); });
+    return () => { active = false; };
+  }, [measurement?.lesionId]);
+
+  useEffect(() => {
+    if (!caseId) return;
+
+    let active = true;
+
+    api.get(`/patient-cases/${caseId}`)
+      .then(({ data }) => {
+        if (active) setCaseInfo(data);
+      })
+      .catch(() => {
+        if (active) setCaseInfo(null);
+      });
+
+    return () => { active = false; };
+  }, [caseId]);
 
   // 저장된 sopInstanceUid -> 현재 Orthanc 인스턴스 ID로 변환 후 이미지 로딩
   useEffect(() => {
@@ -116,6 +144,19 @@ function MeasurementView() {
   return (
     <main className="lesion-page">
       <div className="lesion-container">
+        {caseId && (
+          <Breadcrumb
+            items={[
+              {
+                label: caseInfo ? (caseInfo.patientName || `환자 ${caseInfo.patientId}`) : `환자 #${caseId}`,
+                to: `/lesion/list?caseId=${caseId}`,
+              },
+              { label: "병변 목록", to: `/lesion/list?caseId=${caseId}` },
+              { label: "측정값 목록", to: `/lesion/measurement/list?lesionId=${measurement?.lesionId}` },
+              { label: "측정값 상세" },
+            ]}
+          />
+        )}
         <section className="lesion-viewer-card">
           <div className="lesion-form-card-header">
             <h2>측정값 상세</h2>
