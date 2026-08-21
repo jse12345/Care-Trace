@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import api from "../common/api";
 import Breadcrumb from "../common/Breadcrumb";
+import RecordActionButtons from "./RecordActionButtons";
 import { resizeCanvasToImage, toDisplayPoint } from "./roiCoordinates";
 
 // mm 값이 있으면 mm으로, 없으면(PixelSpacing 정보 부재) px 값으로 대체 표시한다.
@@ -200,24 +201,11 @@ function MeasurementView() {
               </div>
 
               <div className="lesion-form-actions">
-                <button
-                  className="lesion-edit-button"
-                  onClick={() => navigate(`/lesion/measurement/capture?lesionId=${measurement.lesionId}&measurementId=${measurementId}`)}
-                >
-                  수정
-                </button>
-                <button
-                  className="lesion-delete-button"
-                  onClick={() => navigate(`/lesion/measurement/delete?measurementId=${measurementId}&lesionId=${measurement.lesionId}`)}
-                >
-                  삭제
-                </button>
-                <button
-                  className="lesion-secondary-button"
-                  onClick={() => navigate(`/lesion/measurement/list?lesionId=${measurement.lesionId}`)}
-                >
-                  목록
-                </button>
+                <RecordActionButtons
+                  onEdit={() => navigate(`/lesion/measurement/capture?lesionId=${measurement.lesionId}&measurementId=${measurementId}`)}
+                  onDelete={() => navigate(`/lesion/measurement/delete?measurementId=${measurementId}&lesionId=${measurement.lesionId}`)}
+                  onList={() => navigate(`/lesion/measurement/list?lesionId=${measurement.lesionId}`)}
+                />
               </div>
             </>
           )}

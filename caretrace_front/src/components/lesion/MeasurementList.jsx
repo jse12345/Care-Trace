@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { FiPlusCircle, FiTrendingUp } from "react-icons/fi";
 import PageNation from "../common/PageNation";
 import api from "../common/api";
 import Breadcrumb from "../common/Breadcrumb";
@@ -20,6 +21,7 @@ function MeasurementList() {
   const [pageObject, setPageObject] = useState(null);
   const [changeRateByMeasurementId, setChangeRateByMeasurementId] = useState({});
   const [errorMessage, setErrorMessage] = useState("");
+  const [lesion, setLesion] = useState(null);
   const [caseId, setCaseId] = useState(null);
   const [caseInfo, setCaseInfo] = useState(null);
 
@@ -27,8 +29,16 @@ function MeasurementList() {
     if (!lesionId) return;
     let active = true;
     api.get("/lesion/view.do", { params: { lesionId } })
-      .then(({ data }) => { if (active) setCaseId(data.caseId); })
-      .catch(() => { if (active) setCaseId(null); });
+      .then(({ data }) => {
+        if (!active) return;
+        setLesion(data);
+        setCaseId(data.caseId);
+      })
+      .catch(() => {
+        if (!active) return;
+        setLesion(null);
+        setCaseId(null);
+      });
     return () => { active = false; };
   }, [lesionId]);
 
@@ -105,14 +115,16 @@ function MeasurementList() {
           <div>
             <p className="lesion-eyebrow">CareTrace</p>
             <h1 className="lesion-title">측정값 목록</h1>
-            <p className="lesion-description">시기별로 등록된 병변 측정값을 확인합니다.</p>
+            <p className="lesion-description">
+              {lesion?.lesionLabel ? `${lesion.lesionLabel} 병변의 시기별 측정값을 확인합니다.` : "시기별로 등록된 병변 측정값을 확인합니다."}
+            </p>
           </div>
           <div className="lesion-header-actions">
             <button className="lesion-primary-button" onClick={() => navigate(`/lesion/measurement/capture?lesionId=${lesionId}`)}>
-              + 측정값 등록
+              <FiPlusCircle aria-hidden="true" /> 측정값 등록
             </button>
             <button className="lesion-secondary-button" onClick={() => navigate(`/lesion/measurement/trend?lesionId=${lesionId}`)}>
-              변화 추세 보기
+              <FiTrendingUp aria-hidden="true" /> 변화 추세 보기
             </button>
             <button className="lesion-secondary-button" onClick={() => navigate(`/lesion/view?lesionId=${lesionId}`)}>
               병변 상세로

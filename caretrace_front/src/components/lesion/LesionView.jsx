@@ -1,15 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import {
-  FiEdit2,
-  FiTrash2,
-  FiList,
-  FiPlusCircle,
-  FiClipboard,
-  FiTrendingUp,
-} from "react-icons/fi";
 import api from "../common/api";
 import Breadcrumb from "../common/Breadcrumb";
+import RecordActionButtons from "./RecordActionButtons";
 
 function LesionView() {
   const navigate = useNavigate();
@@ -78,39 +71,11 @@ function LesionView() {
               <div className="lesion-action-group">
                 <h3 className="lesion-action-group-title">병변 관리</h3>
                 <div className="lesion-form-actions">
-                  <button className="lesion-edit-button" onClick={() => navigate(`/lesion/update?lesionId=${lesionId}`)}>
-                    <FiEdit2 aria-hidden="true" /> 수정
-                  </button>
-                  <button className="lesion-delete-button" onClick={() => navigate(`/lesion/delete?lesionId=${lesionId}`)}>
-                    <FiTrash2 aria-hidden="true" /> 삭제
-                  </button>
-                  <button className="lesion-secondary-button" onClick={() => navigate(`/lesion/list?caseId=${lesion.caseId}`)}>
-                    <FiList aria-hidden="true" /> 목록
-                  </button>
-                </div>
-              </div>
-
-              <div className="lesion-measurement-links">
-                <h3 className="lesion-action-group-title">측정값</h3>
-                <div className="lesion-form-actions">
-                  <button
-                    className="lesion-primary-button"
-                    onClick={() => navigate(`/lesion/measurement/capture?lesionId=${lesionId}`)}
-                  >
-                    <FiPlusCircle aria-hidden="true" /> 측정값 등록(미니뷰어)
-                  </button>
-                  <button
-                    className="lesion-secondary-button"
-                    onClick={() => navigate(`/lesion/measurement/list?lesionId=${lesionId}`)}
-                  >
-                    <FiClipboard aria-hidden="true" /> 측정값 목록
-                  </button>
-                  <button
-                    className="lesion-secondary-button"
-                    onClick={() => navigate(`/lesion/measurement/trend?lesionId=${lesionId}`)}
-                  >
-                    <FiTrendingUp aria-hidden="true" /> 변화 추세 보기
-                  </button>
+                  <RecordActionButtons
+                    onEdit={() => navigate(`/lesion/update?lesionId=${lesionId}`)}
+                    onDelete={() => navigate(`/lesion/delete?lesionId=${lesionId}`)}
+                    onList={() => navigate(`/lesion/list?caseId=${lesion.caseId}`)}
+                  />
                 </div>
               </div>
             </>
