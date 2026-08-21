@@ -1,13 +1,19 @@
 package com.springboot.caretrace.api.patientcase.entity;
 
+import com.springboot.caretrace.api.medicalstaff.entity.MedicalStaff;
+import com.springboot.caretrace.api.patient.entity.Patient;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Check;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "patient_case")
+@Check(constraints = "is_deleted IN ('Y','N')")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -20,11 +26,13 @@ public class PatientCase {
     @Column(name = "case_id")
     private Long caseId;
 
-    @Column(name = "patient_id", nullable = false)
-    private Long patientId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "patient_id", nullable = false)
+    private Patient patient;
 
-    @Column(name = "staff_no", nullable = false)
-    private Long staffNo;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "staff_no", nullable = false)
+    private MedicalStaff staff;
 
     @Column(name = "diagnosis", nullable = false, length = 200)
     private String diagnosis;
@@ -44,39 +52,14 @@ public class PatientCase {
     @Column(name = "memo", columnDefinition = "TEXT")
     private String memo;
 
-    @Column(name = "created_at", nullable = false)
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
     @Column(name = "is_deleted", nullable = false, length = 1)
     private String isDeleted;
-
-    @PrePersist
-    public void prePersist() {
-
-        LocalDateTime now = LocalDateTime.now();
-
-        if (createdAt == null) {
-            createdAt = now;
-        }
-
-        if (updatedAt == null) {
-            updatedAt = now;
-        }
-
-        if (isDeleted == null) {
-            isDeleted = "N";
-        }
-
-        if (caseStatus == null) {
-            caseStatus = "FOLLOW_UP";
-        }
-    }
-
-    @PreUpdate
-    public void preUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
 }

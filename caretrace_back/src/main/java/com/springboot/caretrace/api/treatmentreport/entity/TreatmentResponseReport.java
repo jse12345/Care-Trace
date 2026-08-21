@@ -1,7 +1,10 @@
 package com.springboot.caretrace.api.treatmentreport.entity;
 
+import com.springboot.caretrace.api.medicalstaff.entity.MedicalStaff;
+import com.springboot.caretrace.api.patientcase.entity.PatientCase;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Check;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -11,6 +14,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "treatment_response_report")
+@Check(constraints = "is_deleted IN ('Y','N')")
 @Getter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -22,11 +26,13 @@ public class TreatmentResponseReport {
     @Column(name = "report_id", columnDefinition = "INT UNSIGNED")
     private Long reportId;
 
-    @Column(name = "case_id", nullable = false, columnDefinition = "BIGINT UNSIGNED")
-    private Long caseId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "case_id", nullable = false)
+    private PatientCase patientCase;
 
-    @Column(name = "staff_id", nullable = false)
-    private Long staffId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "staff_id", nullable = false)
+    private MedicalStaff staff;
 
     @Column(name = "evaluation_criteria", nullable = false, length = 50)
     private String evaluationCriteria;
@@ -51,7 +57,7 @@ public class TreatmentResponseReport {
 
     @Builder.Default
     @Column(name = "is_deleted", nullable = false, length = 1)
-    private String isDeleted = "n";
+    private String isDeleted = "N";
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -71,7 +77,7 @@ public class TreatmentResponseReport {
 
     // 요구사항 2-4: 보고서 삭제 시 실제 삭제 없이 is_deleted와 상태 변경[cite: 4]
     public void softDelete() {
-        this.isDeleted = "y";
+        this.isDeleted = "Y";
         this.status = ReportStatus.ARCHIVED;
     }
 }

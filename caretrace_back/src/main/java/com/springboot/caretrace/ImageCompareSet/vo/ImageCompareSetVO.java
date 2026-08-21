@@ -21,4 +21,5 @@ public class ImageCompareSetVO {
     private String title;             // 제목
     private String description;       // 설명 / 메모
     private LocalDateTime regDate;    // 등록일시
+    private LocalDateTime updatedAt;  // 수정일시
 }

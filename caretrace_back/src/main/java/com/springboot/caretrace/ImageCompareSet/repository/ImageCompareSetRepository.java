@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface ImageCompareSetRepository extends JpaRepository<ImageCompareSet, Long> {
-    List<ImageCompareSet> findByPatientId(Long patientId);
+    List<ImageCompareSet> findByPatient_PatientId(Long patientId);
 }

@@ -1,5 +1,6 @@
 package com.springboot.caretrace.api.lesion.entity;
 
+import com.springboot.caretrace.api.medicalstaff.entity.MedicalStaff;
 import com.springboot.caretrace.api.patientcase.entity.PatientCase;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -7,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Check;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -14,6 +16,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "lesion")
+@Check(constraints = "is_deleted IN ('Y','N')")
 @Getter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -26,11 +29,12 @@ public class Lesion {
     private Long lesionId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "case_id", nullable = false, columnDefinition = "BIGINT UNSIGNED")
+    @JoinColumn(name = "case_id", nullable = false)
     private PatientCase patientCase;
 
-    @Column(name = "created_by", nullable = false)
-    private Long createdBy;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "created_by", nullable = false)
+    private MedicalStaff createdByStaff;
 
     @Column(name = "lesion_label", nullable = false, length = 50)
     private String lesionLabel;

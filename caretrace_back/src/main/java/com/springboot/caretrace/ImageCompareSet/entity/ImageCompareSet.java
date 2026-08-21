@@ -1,11 +1,14 @@
 package com.springboot.caretrace.ImageCompareSet.entity;
 
+import com.springboot.caretrace.api.medicalstaff.entity.MedicalStaff;
+import com.springboot.caretrace.api.patient.entity.Patient;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -21,11 +24,13 @@ public class ImageCompareSet {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "patient_id", nullable = false)
-    private Long patientId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "patient_id", nullable = false)
+    private Patient patient;
 
-    @Column(name = "doctor_id")
-    private Long doctorId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "doctor_id")
+    private MedicalStaff doctor;
 
     @Column(name = "past_image_url", nullable = false)
     private String pastImageUrl;
@@ -42,4 +47,8 @@ public class ImageCompareSet {
     @CreationTimestamp
     @Column(name = "reg_date", updatable = false)
     private LocalDateTime regDate;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 }

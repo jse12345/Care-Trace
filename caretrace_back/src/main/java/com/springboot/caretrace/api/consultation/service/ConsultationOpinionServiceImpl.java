@@ -6,6 +6,8 @@ import com.springboot.caretrace.api.consultation.entity.OpinionType;
 import com.springboot.caretrace.api.consultation.repository.ConsultationOpinionRepositoryCustom;
 import com.springboot.caretrace.api.consultation.repository.QConsultationOpinionRepository;
 import com.springboot.caretrace.api.consultation.vo.ConsultationOpinionVO;
+import com.springboot.caretrace.api.medicalstaff.entity.MedicalStaff;
+import com.springboot.caretrace.api.medicalstaff.repository.QMedicalStaffRepository;
 import com.springboot.caretrace.api.patient.repository.QPatientRepository;
 import com.springboot.caretrace.page.PageObject;
 
@@ -35,6 +37,7 @@ public class ConsultationOpinionServiceImpl implements ConsultationOpinionServic
 
     private final QPatientRepository patientRepository;
     private final QPatientCaseRepository patientCaseRepository;
+    private final QMedicalStaffRepository medicalStaffRepository;
 
     @Override
     public List<ConsultationOpinionVO> list(PageObject pageObject, Long caseId, OpinionType type, OpinionStatus status) {
@@ -45,13 +48,18 @@ public class ConsultationOpinionServiceImpl implements ConsultationOpinionServic
     @Override
     @Transactional
     public ConsultationOpinionVO writeRequest(ConsultationOpinionVO vo) {
+        PatientCase patientCase = patientCaseRepository.findById(requiredLong(vo.getCaseId()))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "증례를 찾을 수 없습니다."));
+        MedicalStaff staff = medicalStaffRepository.findById(requiredLong(vo.getStaffId()))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "의료진을 찾을 수 없습니다."));
+
         ConsultationOpinion opinion = ConsultationOpinion.builder()
-                .caseId(requiredLong(vo.getCaseId()))
-                .staffId(requiredLong(vo.getStaffId()))
+                .patientCase(patientCase)
+                .staff(staff)
                 .opinionContent(requiredString(vo.getOpinionContent()))
                 .opinionType(OpinionType.REQUEST)
                 .status(OpinionStatus.OPEN)
-                .isDeleted("n")
+                .isDeleted("N")
                 .build();
         return entityToVO(repositoryCustom.saveOpinion(opinion));
     }
@@ -63,14 +71,17 @@ public class ConsultationOpinionServiceImpl implements ConsultationOpinionServic
         parentOpinion.changeStatus(OpinionStatus.ANSWERED);
         repositoryCustom.saveOpinion(parentOpinion);
 
+        MedicalStaff staff = medicalStaffRepository.findById(requiredLong(vo.getStaffId()))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "의료진을 찾을 수 없습니다."));
+
         ConsultationOpinion responseOpinion = ConsultationOpinion.builder()
-                .caseId(parentOpinion.getCaseId())
-                .staffId(requiredLong(vo.getStaffId()))
-                .parentOpinionId(parentOpinion.getOpinionId())
+                .patientCase(parentOpinion.getPatientCase())
+                .staff(staff)
+                .parentOpinion(parentOpinion)
                 .opinionContent(requiredString(vo.getOpinionContent()))
                 .opinionType(OpinionType.RESPONSE)
                 .status(OpinionStatus.OPEN)
-                .isDeleted("n")
+                .isDeleted("N")
                 .build();
 
         return entityToVO(repositoryCustom.saveOpinion(responseOpinion));
@@ -111,7 +122,7 @@ public class ConsultationOpinionServiceImpl implements ConsultationOpinionServic
     @Override
     public List<Map<String, Object>> getCasesForConsultation(Long patientId) {
         // QPatientCaseRepository에 1줄 추가하신 그 메서드 활용
-        List<PatientCase> cases = patientCaseRepository.findByPatientIdAndIsDeletedOrderByCaseIdDesc(patientId, "N");
+        List<PatientCase> cases = patientCaseRepository.findByPatient_PatientIdAndIsDeletedOrderByCaseIdDesc(patientId, "N");
 
         return cases.stream()
                 .map(c -> {
@@ -142,9 +153,9 @@ public class ConsultationOpinionServiceImpl implements ConsultationOpinionServic
     private ConsultationOpinionVO entityToVO(ConsultationOpinion entity) {
         return ConsultationOpinionVO.builder()
                 .opinionId(entity.getOpinionId())
-                .caseId(entity.getCaseId())
-                .staffId(entity.getStaffId())
-                .parentOpinionId(entity.getParentOpinionId())
+                .caseId(entity.getPatientCase().getCaseId())
+                .staffId(entity.getStaff().getStaffNo())
+                .parentOpinionId(entity.getParentOpinion() != null ? entity.getParentOpinion().getOpinionId() : null)
                 .opinionType(entity.getOpinionType())
                 .opinionContent(entity.getOpinionContent())
                 .status(entity.getStatus())

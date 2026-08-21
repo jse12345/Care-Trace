@@ -8,13 +8,13 @@ public interface QLesionMeasurementRepository
         extends JpaRepository<LesionMeasurement, Long>,
         QuerydslPredicateExecutor<LesionMeasurement> {
 
-    boolean existsByLesion_LesionIdAndExaminationIdAndIsDeleted(
+    boolean existsByLesion_LesionIdAndExamination_IdAndIsDeleted(
             Long lesionId,
             Long examinationId,
             String isDeleted
     );
 
-    boolean existsByLesion_LesionIdAndExaminationIdAndIsDeletedAndMeasurementIdNot(
+    boolean existsByLesion_LesionIdAndExamination_IdAndIsDeletedAndMeasurementIdNot(
             Long lesionId,
             Long examinationId,
             String isDeleted,

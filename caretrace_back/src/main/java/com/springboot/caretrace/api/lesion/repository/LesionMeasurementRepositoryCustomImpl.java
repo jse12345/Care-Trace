@@ -87,7 +87,7 @@ public class LesionMeasurementRepositoryCustomImpl
             builder.and(measurement.lesion.lesionId.eq(lesionId));
         }
         if (examinationId != null) {
-            builder.and(measurement.examinationId.eq(examinationId));
+            builder.and(measurement.examination.id.eq(examinationId));
         }
 
         return builder;

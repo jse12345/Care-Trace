@@ -10,11 +10,11 @@ import com.springboot.caretrace.api.examination.vo.ExaminationVO;
 import com.springboot.caretrace.api.lesion.repository.QLesionRepository;
 import com.springboot.caretrace.api.patient.entity.Patient;
 import com.springboot.caretrace.api.patient.repository.QPatientRepository;
-import com.springboot.caretrace.api.patientcase.entity.PatientCase;
 import com.springboot.caretrace.api.patientcase.repository.QPatientCaseRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -65,7 +65,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 
         if (resolvedPatientId == null && resolvedCaseId != null) {
             resolvedPatientId = patientCaseRepository.findById(resolvedCaseId)
-                    .map(PatientCase::getPatientId)
+                    .map(pc -> pc.getPatient().getPatientId())
                     .orElse(null);
         }
 
@@ -162,8 +162,21 @@ public class ExaminationServiceImpl implements ExaminationService {
             List<Examination> staleExaminations = examinationRepository.findAll().stream()
                     .filter(examination -> !orthancStudyIdSet.contains(examination.getOrthancStudyId()))
                     .collect(Collectors.toList());
-            int deletedCount = staleExaminations.size();
-            examinationRepository.deleteAll(staleExaminations);
+
+            // lesion_measurement 등에서 여전히 참조 중인 검사는 FK 제약에 걸려 삭제가 실패할 수 있으므로
+            // 건별로 삭제하고, 참조 중인 건은 건너뛴 뒤 로그만 남긴다(전체 동기화가 죽지 않도록).
+            int deletedCount = 0;
+            for (Examination stale : staleExaminations) {
+                try {
+                    examinationRepository.delete(stale);
+                    deletedCount++;
+                } catch (DataIntegrityViolationException e) {
+                    log.warn(
+                            "[ExaminationServiceImpl.sync] 다른 데이터가 참조 중이라 삭제하지 않고 건너뜁니다 : {}",
+                            stale.getOrthancStudyId()
+                    );
+                }
+            }
 
             log.info(
                     "[ExaminationServiceImpl.sync] 완료 - 전체 {} / 신규 {} / 갱신 {} / 삭제 {} / 실패 {}",
@@ -222,10 +235,9 @@ public class ExaminationServiceImpl implements ExaminationService {
         Map<String, String> patientTags = getStringMap(studyData, "PatientMainDicomTags");
         String dicomPatientId = getTag(patientTags, "PatientID");
 
-        Long matchedPatientId = null;
+        Patient matchedPatient = null;
         if (dicomPatientId != null && !dicomPatientId.isBlank()) {
-            matchedPatientId = patientRepository.findByPatientCode(dicomPatientId)
-                    .map(Patient::getPatientId)
+            matchedPatient = patientRepository.findByPatientCode(dicomPatientId)
                     .orElse(null);
         }
 
@@ -236,7 +248,7 @@ public class ExaminationServiceImpl implements ExaminationService {
                 .dicomPatientName(getTag(patientTags, "PatientName"))
                 .dicomPatientSex(getTag(patientTags, "PatientSex"))
                 .dicomPatientBirthDate(getTag(patientTags, "PatientBirthDate"))
-                .patientId(matchedPatientId)
+                .patient(matchedPatient)
                 .accessionNumber(getTag(studyTags, "AccessionNumber"))
                 .studyDate(getTag(studyTags, "StudyDate"))
                 .studyTime(getTag(studyTags, "StudyTime"))
@@ -378,7 +390,7 @@ public class ExaminationServiceImpl implements ExaminationService {
                 .dicomPatientName(examination.getDicomPatientName())
                 .dicomPatientSex(examination.getDicomPatientSex())
                 .dicomPatientBirthDate(examination.getDicomPatientBirthDate())
-                .patientId(examination.getPatientId())
+                .patientId(examination.getPatient() != null ? examination.getPatient().getPatientId() : null)
                 .accessionNumber(examination.getAccessionNumber())
                 .studyDate(examination.getStudyDate())
                 .studyTime(examination.getStudyTime())

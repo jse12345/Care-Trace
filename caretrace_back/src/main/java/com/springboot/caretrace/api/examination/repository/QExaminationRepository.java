@@ -3,6 +3,7 @@ package com.springboot.caretrace.api.examination.repository;
 import com.springboot.caretrace.api.examination.entity.Examination;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,7 +16,8 @@ public interface QExaminationRepository extends JpaRepository<Examination, Long>
 
     List<Examination> findAllByOrderByIdDesc();
 
-    List<Examination> findAllByPatientIdOrderByIdDesc(Long patientId);
+    @Query("select e from Examination e where e.patient.patientId = :patientId order by e.id desc")
+    List<Examination> findAllByPatientIdOrderByIdDesc(@Param("patientId") Long patientId);
 
     @Query("select distinct e from Examination e left join fetch e.seriesList where e.id = :id")
     Optional<Examination> findDetailById(Long id);

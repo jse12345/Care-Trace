@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Check;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
@@ -19,6 +20,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "medical_staff")
+@Check(constraints = "is_deleted IN ('Y','N')")
 @Getter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

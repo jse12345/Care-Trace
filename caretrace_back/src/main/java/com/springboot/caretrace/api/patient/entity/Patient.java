@@ -2,6 +2,9 @@ package com.springboot.caretrace.api.patient.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Check;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -16,6 +19,7 @@ import java.time.LocalDateTime;
                 )
         }
 )
+@Check(constraints = "is_deleted IN ('Y','N')")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -43,38 +47,15 @@ public class Patient {
     @Column(name = "phone", length = 20)
     private String phone;
 
-    @Column(
-            name = "created_at",
-            nullable = false,
-            updatable = false
-    )
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    @Builder.Default
     @Column(name = "is_deleted", nullable = false, length = 1)
-    private String isDeleted;
-
-    @PrePersist
-    public void prePersist() {
-        LocalDateTime now = LocalDateTime.now();
-
-        if (createdAt == null) {
-            createdAt = now;
-        }
-
-        if (updatedAt == null) {
-            updatedAt = now;
-        }
-
-        if (isDeleted == null) {
-            isDeleted = "N";
-        }
-    }
-
-    @PreUpdate
-    public void preUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
+    private String isDeleted = "N";
 }
