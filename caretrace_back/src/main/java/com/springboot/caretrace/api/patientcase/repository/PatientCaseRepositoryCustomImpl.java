@@ -90,7 +90,7 @@ public class PatientCaseRepositoryCustomImpl
 
                                 patientCase.caseId,
 
-                                patientCase.patientId,
+                                patientCase.patient.patientId.as("patientId"),
 
                                 // 환자 정보
                                 patient.patientCode
@@ -100,7 +100,7 @@ public class PatientCaseRepositoryCustomImpl
                                         .as("patientName"),
 
                                 // 의료진 정보
-                                patientCase.staffNo,
+                                patientCase.staff.staffNo.as("staffNo"),
 
                                 medicalStaff.staffName
                                         .as("staffName"),
@@ -119,18 +119,10 @@ public class PatientCaseRepositoryCustomImpl
                 .from(patientCase)
 
                 // 환자 JOIN
-                .join(patient)
-                .on(
-                        patientCase.patientId
-                                .eq(patient.patientId)
-                )
+                .join(patientCase.patient, patient)
 
                 // 의료진 JOIN
-                .join(medicalStaff)
-                .on(
-                        patientCase.staffNo
-                                .eq(medicalStaff.staffNo)
-                )
+                .join(patientCase.staff, medicalStaff)
 
                 .where(builder)
 
@@ -163,7 +155,7 @@ public class PatientCaseRepositoryCustomImpl
 
                                 patientCase.caseId,
 
-                                patientCase.patientId,
+                                patientCase.patient.patientId.as("patientId"),
 
                                 // 환자 정보
                                 patient.patientCode
@@ -173,7 +165,7 @@ public class PatientCaseRepositoryCustomImpl
                                         .as("patientName"),
 
                                 // 의료진 정보
-                                patientCase.staffNo,
+                                patientCase.staff.staffNo.as("staffNo"),
 
                                 medicalStaff.staffName
                                         .as("staffName"),
@@ -192,18 +184,10 @@ public class PatientCaseRepositoryCustomImpl
                 .from(patientCase)
 
                 // 환자 JOIN
-                .join(patient)
-                .on(
-                        patientCase.patientId
-                                .eq(patient.patientId)
-                )
+                .join(patientCase.patient, patient)
 
                 // 의료진 JOIN
-                .join(medicalStaff)
-                .on(
-                        patientCase.staffNo
-                                .eq(medicalStaff.staffNo)
-                )
+                .join(patientCase.staff, medicalStaff)
 
                 .where(
                         patientCase.caseId.eq(caseId),
@@ -221,7 +205,7 @@ public class PatientCaseRepositoryCustomImpl
         return queryFactory
                 .selectFrom(patientCase)
                 .where(
-                        patientCase.patientId.eq(patientId),
+                        patientCase.patient.patientId.eq(patientId),
                         patientCase.isDeleted.eq("N")
                 )
                 .orderBy(

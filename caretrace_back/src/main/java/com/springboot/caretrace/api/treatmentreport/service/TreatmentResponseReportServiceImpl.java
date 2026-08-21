@@ -5,8 +5,9 @@ import com.springboot.caretrace.api.treatmentreport.entity.ResponseResult;
 import com.springboot.caretrace.api.treatmentreport.entity.TreatmentResponseReport;
 import com.springboot.caretrace.api.treatmentreport.repository.TreatmentResponseReportRepositoryCustom;
 import com.springboot.caretrace.api.treatmentreport.vo.TreatmentResponseReportVO;
+import com.springboot.caretrace.api.patientcase.entity.PatientCase;
 import com.springboot.caretrace.api.patientcase.repository.QPatientCaseRepository;
-import com.springboot.caretrace.api.patient.repository.QPatientRepository;
+import com.springboot.caretrace.api.medicalstaff.entity.MedicalStaff;
 import com.springboot.caretrace.api.medicalstaff.repository.QMedicalStaffRepository;
 import com.springboot.caretrace.page.PageObject;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +28,6 @@ public class TreatmentResponseReportServiceImpl implements TreatmentResponseRepo
 
     private final TreatmentResponseReportRepositoryCustom repositoryCustom;
     private final QPatientCaseRepository patientCaseRepository;
-    private final QPatientRepository patientRepository;
     private final QMedicalStaffRepository medicalStaffRepository;
 
     @Override
@@ -47,9 +47,14 @@ public class TreatmentResponseReportServiceImpl implements TreatmentResponseRepo
     @Override
     @Transactional
     public TreatmentResponseReportVO write(TreatmentResponseReportVO vo) {
+        PatientCase patientCase = patientCaseRepository.findById(requiredLong(vo.getCaseId()))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "증례를 찾을 수 없습니다."));
+        MedicalStaff staff = medicalStaffRepository.findById(requiredLong(vo.getStaffId()))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "의료진을 찾을 수 없습니다."));
+
         TreatmentResponseReport report = TreatmentResponseReport.builder()
-                .caseId(requiredLong(vo.getCaseId()))
-                .staffId(requiredLong(vo.getStaffId()))
+                .patientCase(patientCase)
+                .staff(staff)
                 // patientName, diagnosisName, staffName 은 엔티티에 없으므로 제거!
                 .evaluationCriteria(requiredString(vo.getEvaluationCriteria()))
                 .evaluationDate(vo.getEvaluationDate() != null ? vo.getEvaluationDate() : LocalDate.now())
@@ -98,8 +103,8 @@ public class TreatmentResponseReportServiceImpl implements TreatmentResponseRepo
     private TreatmentResponseReportVO entityToVO(TreatmentResponseReport entity) {
         TreatmentResponseReportVO vo = TreatmentResponseReportVO.builder()
                 .reportId(entity.getReportId())
-                .caseId(entity.getCaseId())
-                .staffId(entity.getStaffId())
+                .caseId(entity.getPatientCase().getCaseId())
+                .staffId(entity.getStaff().getStaffNo())
                 .evaluationCriteria(entity.getEvaluationCriteria())
                 .evaluationDate(entity.getEvaluationDate())
                 .responseResult(entity.getResponseResult())
@@ -111,21 +116,12 @@ public class TreatmentResponseReportServiceImpl implements TreatmentResponseRepo
                 .build();
 
         // 작성 의료진 이름 세팅
-        if (entity.getStaffId() != null) {
-            medicalStaffRepository.findById(entity.getStaffId())
-                    .ifPresent(staff -> vo.setStaffName(staff.getStaffName()));
-        }
+        vo.setStaffName(entity.getStaff().getStaffName());
 
         // 환자명 및 증례명 세팅
-        if (entity.getCaseId() != null) {
-            patientCaseRepository.findById(entity.getCaseId())
-                    .ifPresent(pCase -> {
-                        vo.setDiagnosisName(pCase.getDiagnosis()); // 증례명(진단명)
-
-                        patientRepository.findById(pCase.getPatientId())
-                                .ifPresent(patient -> vo.setPatientName(patient.getPatientName())); // 환자명
-                    });
-        }
+        PatientCase pCase = entity.getPatientCase();
+        vo.setDiagnosisName(pCase.getDiagnosis()); // 증례명(진단명)
+        vo.setPatientName(pCase.getPatient().getPatientName()); // 환자명
 
         return vo;
     }

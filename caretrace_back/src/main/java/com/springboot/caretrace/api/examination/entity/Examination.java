@@ -1,5 +1,6 @@
 package com.springboot.caretrace.api.examination.entity;
 
+import com.springboot.caretrace.api.patient.entity.Patient;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -39,9 +40,10 @@ public class Examination {
     @Column(name = "dicom_patient_birth_date", length = 20)
     private String dicomPatientBirthDate;
 
-    // Care-Trace 내부 Patient.patientId 매칭 결과 (dicomPatientId <-> Patient.patientCode). 매칭 안 되면 null.
-    @Column(name = "patient_id")
-    private Long patientId;
+    // Care-Trace 내부 Patient 매칭 결과 (dicomPatientId <-> Patient.patientCode). 매칭 안 되면 null.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "patient_id", columnDefinition = "BIGINT UNSIGNED")
+    private Patient patient;
 
     @Column(name = "accession_number", length = 64)
     private String accessionNumber;

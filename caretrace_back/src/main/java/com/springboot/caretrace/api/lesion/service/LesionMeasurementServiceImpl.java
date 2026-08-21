@@ -2,6 +2,8 @@ package com.springboot.caretrace.api.lesion.service;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.springboot.caretrace.api.examination.entity.Examination;
+import com.springboot.caretrace.api.examination.repository.QExaminationRepository;
 import com.springboot.caretrace.api.lesion.entity.Lesion;
 import com.springboot.caretrace.api.lesion.entity.LesionMeasurement;
 import com.springboot.caretrace.api.lesion.entity.RoiType;
@@ -11,6 +13,8 @@ import com.springboot.caretrace.api.lesion.repository.QLesionMeasurementReposito
 import com.springboot.caretrace.api.lesion.vo.LesionMeasurementTrendVO;
 import com.springboot.caretrace.api.lesion.vo.LesionMeasurementVO;
 import com.springboot.caretrace.api.lesion.vo.RoiPointVO;
+import com.springboot.caretrace.api.medicalstaff.entity.MedicalStaff;
+import com.springboot.caretrace.api.medicalstaff.repository.QMedicalStaffRepository;
 import com.springboot.caretrace.page.PageObject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -39,6 +43,8 @@ public class LesionMeasurementServiceImpl implements LesionMeasurementService {
     private final LesionMeasurementRepositoryCustom repositoryCustom;
     private final QLesionMeasurementRepository qLesionMeasurementRepository;
     private final LesionRepositoryCustom lesionRepositoryCustom;
+    private final QExaminationRepository examinationRepository;
+    private final QMedicalStaffRepository medicalStaffRepository;
     private final Gson gson = new Gson();
 
     @Override
@@ -68,11 +74,15 @@ public class LesionMeasurementServiceImpl implements LesionMeasurementService {
     public LesionMeasurementVO write(LesionMeasurementVO vo, Long measuredBy) {
         Lesion lesion = findActiveLesion(vo.getLesionId());
         Long examinationId = requiredLong(vo.getExaminationId());
+        Examination examination = examinationRepository.findById(examinationId)
+                .orElseThrow(() -> notFound("검사 정보를 찾을 수 없습니다."));
+        MedicalStaff measuredByStaff = medicalStaffRepository.findById(measuredBy)
+                .orElseThrow(() -> notFound("의료진 정보를 찾을 수 없습니다."));
         RoiType roiType = requiredRoiType(vo.getRoiType());
         List<RoiPointVO> points = requiredPoints(roiType, vo.getRoiPoints());
 
         if (qLesionMeasurementRepository
-                .existsByLesion_LesionIdAndExaminationIdAndIsDeleted(
+                .existsByLesion_LesionIdAndExamination_IdAndIsDeleted(
                         lesion.getLesionId(), examinationId, "N"
                 )) {
             throw conflict("해당 검사에 대한 측정값이 이미 등록되어 있습니다.");
@@ -84,8 +94,8 @@ public class LesionMeasurementServiceImpl implements LesionMeasurementService {
 
         LesionMeasurement measurement = LesionMeasurement.builder()
                 .lesion(lesion)
-                .examinationId(examinationId)
-                .measuredBy(measuredBy)
+                .examination(examination)
+                .measuredByStaff(measuredByStaff)
                 .studyInstanceUid(optional(vo.getStudyInstanceUid()))
                 .seriesInstanceUid(optional(vo.getSeriesInstanceUid()))
                 .sopInstanceUid(optional(vo.getSopInstanceUid()))
@@ -192,7 +202,7 @@ public class LesionMeasurementServiceImpl implements LesionMeasurementService {
 
             list.add(LesionMeasurementTrendVO.builder()
                     .measurementId(measurement.getMeasurementId())
-                    .examinationId(measurement.getExaminationId())
+                    .examinationId(measurement.getExamination().getId())
                     .measuredAt(measurement.getMeasuredAt())
                     .longAxisMm(measurement.getLongAxisMm())
                     .shortAxisMm(measurement.getShortAxisMm())
@@ -239,8 +249,8 @@ public class LesionMeasurementServiceImpl implements LesionMeasurementService {
         return LesionMeasurementVO.builder()
                 .measurementId(measurement.getMeasurementId())
                 .lesionId(measurement.getLesion().getLesionId())
-                .examinationId(measurement.getExaminationId())
-                .measuredBy(measurement.getMeasuredBy())
+                .examinationId(measurement.getExamination().getId())
+                .measuredBy(measurement.getMeasuredByStaff().getStaffNo())
                 .studyInstanceUid(measurement.getStudyInstanceUid())
                 .seriesInstanceUid(measurement.getSeriesInstanceUid())
                 .sopInstanceUid(measurement.getSopInstanceUid())

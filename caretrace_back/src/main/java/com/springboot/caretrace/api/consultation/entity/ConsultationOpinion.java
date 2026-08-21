@@ -1,5 +1,7 @@
 package com.springboot.caretrace.api.consultation.entity;
 
+import com.springboot.caretrace.api.medicalstaff.entity.MedicalStaff;
+import com.springboot.caretrace.api.patientcase.entity.PatientCase;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -8,6 +10,8 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "consultation_opinion")
+// DB에 이미 chk_consultation_opinion_is_deleted CHECK (is_deleted IN ('y','n')) 제약이 있어(소문자),
+// 여기서 별도 @Check를 걸면 서로 다른 값 도메인의 제약 두 개가 동시에 걸려 모든 행이 위반된다.
 @Getter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -19,14 +23,17 @@ public class ConsultationOpinion {
     @Column(name = "opinion_id", columnDefinition = "INT UNSIGNED")
     private Long opinionId;
 
-    @Column(name = "case_id", nullable = false, columnDefinition = "BIGINT UNSIGNED")
-    private Long caseId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "case_id", nullable = false, columnDefinition = "BIGINT UNSIGNED")
+    private PatientCase patientCase;
 
-    @Column(name = "staff_id", nullable = false)
-    private Long staffId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "staff_id", nullable = false)
+    private MedicalStaff staff;
 
-    @Column(name = "parent_opinion_id", columnDefinition = "INT UNSIGNED")
-    private Long parentOpinionId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_opinion_id", columnDefinition = "INT UNSIGNED")
+    private ConsultationOpinion parentOpinion;
 
     @Builder.Default
     @Enumerated(EnumType.STRING)

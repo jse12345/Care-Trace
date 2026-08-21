@@ -2,6 +2,10 @@ package com.springboot.caretrace.api.examination.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "examination_series")
@@ -39,4 +43,12 @@ public class ExaminationSeries {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "examination_id", nullable = false)
     private Examination examination;
+
+    @CreationTimestamp
+    @Column(name = "reg_date", nullable = false, updatable = false)
+    private LocalDateTime regDate;
+
+    @UpdateTimestamp
+    @Column(name = "update_date")
+    private LocalDateTime updateDate;
 }

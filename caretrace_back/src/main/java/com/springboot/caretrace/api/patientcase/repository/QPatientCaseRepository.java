@@ -14,6 +14,6 @@ public interface QPatientCaseRepository
             Long caseId,
             String isDeleted
     );
-    List<PatientCase> findByPatientIdAndIsDeletedOrderByCaseIdDesc(Long patientId, String isDeleted);
+    List<PatientCase> findByPatient_PatientIdAndIsDeletedOrderByCaseIdDesc(Long patientId, String isDeleted);
 
 }

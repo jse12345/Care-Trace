@@ -31,9 +31,9 @@ public class TreatmentResponseReportRepositoryCustomImpl implements TreatmentRes
     public List<TreatmentResponseReport> getList(PageObject pageObject, Long caseId, LocalDate startDate, LocalDate endDate, ResponseResult responseResult) {
         return queryFactory
                 .selectFrom(report)
-                .leftJoin(patientCase).on(report.caseId.eq(patientCase.caseId))
-                .leftJoin(patient).on(patientCase.patientId.eq(patient.patientId))
-                .leftJoin(medicalStaff).on(report.staffId.eq(medicalStaff.staffNo))
+                .leftJoin(report.patientCase, patientCase)
+                .leftJoin(patientCase.patient, patient)
+                .leftJoin(report.staff, medicalStaff)
                 .where(search(pageObject, caseId, startDate, endDate, responseResult))
                 .orderBy(report.evaluationDate.desc(), report.createdAt.desc())
                 .limit(pageObject.getPerPageNum())
@@ -46,9 +46,9 @@ public class TreatmentResponseReportRepositoryCustomImpl implements TreatmentRes
         Long count = queryFactory
                 .select(report.count())
                 .from(report)
-                .leftJoin(patientCase).on(report.caseId.eq(patientCase.caseId))
-                .leftJoin(patient).on(patientCase.patientId.eq(patient.patientId))
-                .leftJoin(medicalStaff).on(report.staffId.eq(medicalStaff.staffNo))
+                .leftJoin(report.patientCase, patientCase)
+                .leftJoin(patientCase.patient, patient)
+                .leftJoin(report.staff, medicalStaff)
                 .where(search(pageObject, caseId, startDate, endDate, responseResult))
                 .fetchOne();
         return count == null ? 0L : count;
@@ -70,7 +70,7 @@ public class TreatmentResponseReportRepositoryCustomImpl implements TreatmentRes
         BooleanBuilder builder = new BooleanBuilder();
         builder.and(report.isDeleted.eq("n"));
 
-        if (caseId != null) builder.and(report.caseId.eq(caseId));
+        if (caseId != null) builder.and(report.patientCase.caseId.eq(caseId));
         if (startDate != null) builder.and(report.evaluationDate.goe(startDate));
         if (endDate != null) builder.and(report.evaluationDate.loe(endDate));
         if (responseResult != null) builder.and(report.responseResult.eq(responseResult));

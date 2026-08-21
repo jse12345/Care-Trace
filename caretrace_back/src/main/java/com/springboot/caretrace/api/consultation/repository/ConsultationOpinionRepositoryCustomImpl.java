@@ -53,12 +53,12 @@ public class ConsultationOpinionRepositoryCustomImpl implements ConsultationOpin
         // 2단계: 찾아온 5개의 글이 속한 "원글(부모) ID"를 모두 수집하여 Set에 담습니다. (중복 제거)
         Set<Long> familyIds = new HashSet<>();
         for (ConsultationOpinion op : targetList) {
-            if (op.getParentOpinionId() == null) {
+            if (op.getParentOpinion() == null) {
                 // 본인이 원글(REQUEST)인 경우 본인의 ID를 담음
                 familyIds.add(op.getOpinionId());
             } else {
                 // 본인이 답글(RESPONSE)인 경우 부모의 ID를 담음
-                familyIds.add(op.getParentOpinionId());
+                familyIds.add(op.getParentOpinion().getOpinionId());
             }
         }
 
@@ -66,8 +66,8 @@ public class ConsultationOpinionRepositoryCustomImpl implements ConsultationOpin
         return queryFactory
                 .select(Projections.fields(ConsultationOpinionVO.class,
                         opinion.opinionId,
-                        opinion.caseId,
-                        opinion.parentOpinionId,
+                        opinion.patientCase.caseId.as("caseId"),
+                        opinion.parentOpinion.opinionId.as("parentOpinionId"),
                         opinion.opinionType,
                         opinion.opinionContent,
                         opinion.status,
@@ -78,15 +78,15 @@ public class ConsultationOpinionRepositoryCustomImpl implements ConsultationOpin
                         patient.patientName.as("patientName")
                 ))
                 .from(opinion)
-                .leftJoin(staff).on(opinion.staffId.eq(staff.staffNo))
-                .leftJoin(patientCase).on(opinion.caseId.eq(patientCase.caseId))
-                .leftJoin(patient).on(patientCase.patientId.eq(patient.patientId))
+                .leftJoin(opinion.staff, staff)
+                .leftJoin(opinion.patientCase, patientCase)
+                .leftJoin(patientCase.patient, patient)
                 .where(
                         // 삭제되지 않은 데이터만 가져오도록 필터링
                         opinion.isDeleted.eq("n"),
                         // 수집된 원글이거나 OR 그 원글을 부모로 두는 답글인 경우 모두 포함
                         opinion.opinionId.in(familyIds)
-                                .or(opinion.parentOpinionId.in(familyIds))
+                                .or(opinion.parentOpinion.opinionId.in(familyIds))
                 )
                 // 프론트엔드 전달을 위해 최신순 정렬
                 .orderBy(opinion.createdAt.desc())
@@ -108,8 +108,8 @@ public class ConsultationOpinionRepositoryCustomImpl implements ConsultationOpin
         return queryFactory
                 .select(Projections.fields(ConsultationOpinionVO.class,
                         opinion.opinionId,
-                        opinion.caseId,
-                        opinion.parentOpinionId,
+                        opinion.patientCase.caseId.as("caseId"),
+                        opinion.parentOpinion.opinionId.as("parentOpinionId"),
                         opinion.opinionType,
                         opinion.opinionContent,
                         opinion.status,
@@ -119,7 +119,7 @@ public class ConsultationOpinionRepositoryCustomImpl implements ConsultationOpin
                         staff.staffName.as("staffName")
                 ))
                 .from(opinion)
-                .leftJoin(staff).on(opinion.staffId.eq(staff.staffNo))
+                .leftJoin(opinion.staff, staff)
                 .where(
                         opinion.opinionId.eq(opinionId),
                         opinion.isDeleted.eq("n")
@@ -138,7 +138,7 @@ public class ConsultationOpinionRepositoryCustomImpl implements ConsultationOpin
         builder.and(opinion.isDeleted.eq("n"));
 
         if (caseId != null) {
-            builder.and(opinion.caseId.eq(caseId));
+            builder.and(opinion.patientCase.caseId.eq(caseId));
         }
         if (type != null) {
             builder.and(opinion.opinionType.eq(type));

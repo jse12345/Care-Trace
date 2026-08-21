@@ -7,6 +7,8 @@ import com.springboot.caretrace.api.lesion.repository.LesionMeasurementRepositor
 import com.springboot.caretrace.api.lesion.repository.LesionRepositoryCustom;
 import com.springboot.caretrace.api.lesion.repository.QLesionRepository;
 import com.springboot.caretrace.api.lesion.vo.LesionVO;
+import com.springboot.caretrace.api.medicalstaff.entity.MedicalStaff;
+import com.springboot.caretrace.api.medicalstaff.repository.QMedicalStaffRepository;
 import com.springboot.caretrace.api.patientcase.entity.PatientCase;
 import com.springboot.caretrace.api.patientcase.repository.QPatientCaseRepository;
 import com.springboot.caretrace.page.PageObject;
@@ -29,6 +31,7 @@ public class LesionServiceImpl implements LesionService {
     private final QLesionRepository qLesionRepository;
     private final LesionMeasurementRepositoryCustom lesionMeasurementRepositoryCustom;
     private final QPatientCaseRepository patientCaseRepository;
+    private final QMedicalStaffRepository medicalStaffRepository;
 
     @Override
     public List<LesionVO> list(
@@ -53,6 +56,8 @@ public class LesionServiceImpl implements LesionService {
     public LesionVO write(LesionVO vo, Long createdBy) {
         PatientCase patientCase = findActivePatientCase(requiredLong(vo.getCaseId()));
         String lesionLabel = requiredString(vo.getLesionLabel());
+        MedicalStaff createdByStaff = medicalStaffRepository.findById(createdBy)
+                .orElseThrow(() -> notFound("의료진 정보를 찾을 수 없습니다."));
 
         if (qLesionRepository.existsByPatientCase_CaseIdAndLesionLabelAndIsDeleted(
                 patientCase.getCaseId(), lesionLabel, "N"
@@ -62,7 +67,7 @@ public class LesionServiceImpl implements LesionService {
 
         Lesion lesion = Lesion.builder()
                 .patientCase(patientCase)
-                .createdBy(createdBy)
+                .createdByStaff(createdByStaff)
                 .lesionLabel(lesionLabel)
                 .organ(optional(vo.getOrgan()))
                 .lesionType(vo.getLesionType())
@@ -138,7 +143,7 @@ public class LesionServiceImpl implements LesionService {
         return LesionVO.builder()
                 .lesionId(lesion.getLesionId())
                 .caseId(lesion.getPatientCase().getCaseId())
-                .createdBy(lesion.getCreatedBy())
+                .createdBy(lesion.getCreatedByStaff().getStaffNo())
                 .lesionLabel(lesion.getLesionLabel())
                 .organ(lesion.getOrgan())
                 .lesionType(lesion.getLesionType())

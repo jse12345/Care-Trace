@@ -1,11 +1,17 @@
 package com.springboot.caretrace.api.patientcase.service;
 
+import com.springboot.caretrace.api.medicalstaff.entity.MedicalStaff;
+import com.springboot.caretrace.api.medicalstaff.repository.QMedicalStaffRepository;
+import com.springboot.caretrace.api.patient.entity.Patient;
+import com.springboot.caretrace.api.patient.repository.QPatientRepository;
 import com.springboot.caretrace.api.patientcase.entity.PatientCase;
 import com.springboot.caretrace.api.patientcase.repository.QPatientCaseRepository;
 import com.springboot.caretrace.api.patientcase.vo.PatientCaseVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
 
@@ -16,6 +22,8 @@ public class PatientCaseServiceImpl
         implements PatientCaseService {
 
     private final QPatientCaseRepository patientCaseRepository;
+    private final QPatientRepository patientRepository;
+    private final QMedicalStaffRepository medicalStaffRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -80,10 +88,20 @@ public class PatientCaseServiceImpl
             );
         }
 
+        Patient patient = patientRepository.findById(vo.getPatientId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "환자를 찾을 수 없습니다."
+                ));
+
+        MedicalStaff staff = medicalStaffRepository.findById(vo.getStaffNo())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "담당의사를 찾을 수 없습니다."
+                ));
+
         PatientCase patientCase =
                 PatientCase.builder()
-                        .patientId(vo.getPatientId())
-                        .staffNo(vo.getStaffNo())
+                        .patient(patient)
+                        .staff(staff)
                         .diagnosis(vo.getDiagnosis())
                         .bodyPart(vo.getBodyPart())
                         .caseStatus(
@@ -121,12 +139,18 @@ public class PatientCaseServiceImpl
                                 )
                         );
 
-        patientCase.setPatientId(
-                vo.getPatientId()
+        patientCase.setPatient(
+                patientRepository.findById(vo.getPatientId())
+                        .orElseThrow(() -> new ResponseStatusException(
+                                HttpStatus.NOT_FOUND, "환자를 찾을 수 없습니다."
+                        ))
         );
 
-        patientCase.setStaffNo(
-                vo.getStaffNo()
+        patientCase.setStaff(
+                medicalStaffRepository.findById(vo.getStaffNo())
+                        .orElseThrow(() -> new ResponseStatusException(
+                                HttpStatus.NOT_FOUND, "담당의사를 찾을 수 없습니다."
+                        ))
         );
 
         patientCase.setDiagnosis(
@@ -180,8 +204,8 @@ public class PatientCaseServiceImpl
 
         return PatientCaseVO.builder()
                 .caseId(patientCase.getCaseId())
-                .patientId(patientCase.getPatientId())
-                .staffNo(patientCase.getStaffNo())
+                .patientId(patientCase.getPatient().getPatientId())
+                .staffNo(patientCase.getStaff().getStaffNo())
                 .diagnosis(patientCase.getDiagnosis())
                 .bodyPart(patientCase.getBodyPart())
                 .caseStatus(patientCase.getCaseStatus())

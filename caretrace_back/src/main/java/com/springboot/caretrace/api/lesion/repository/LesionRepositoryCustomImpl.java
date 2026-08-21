@@ -37,7 +37,7 @@ public class LesionRepositoryCustomImpl implements LesionRepositoryCustom {
                         LesionVO.class,
                         lesion.lesionId,
                         lesion.patientCase.caseId.as("caseId"),
-                        lesion.createdBy,
+                        lesion.createdByStaff.staffNo.as("createdBy"),
                         patient.patientName,
                         lesion.lesionLabel,
                         lesion.organ,
@@ -49,7 +49,7 @@ public class LesionRepositoryCustomImpl implements LesionRepositoryCustom {
                 ))
                 .from(lesion)
                 .join(lesion.patientCase, patientCase)
-                .join(patient).on(patientCase.patientId.eq(patient.patientId))
+                .join(patientCase.patient, patient)
                 .where(search(pageObject, caseId, lesionType))
                 .orderBy(lesion.regDate.desc())
                 .limit(pageObject.getPerPageNum())
