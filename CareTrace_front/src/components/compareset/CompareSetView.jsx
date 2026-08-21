@@ -7,9 +7,7 @@ function CompareSetView() {
   const navigate = useNavigate();
   const [compareData, setCompareData] = useState(null);
 
-  // 오르탕크 서버 기본 주소 (팀 환경에 맞게 수정 필요)
   const ORTHANC_BASE_URL = "http://10.15.21.205:8042"; 
-  // 사용하는 오르탕크 뷰어 플러그인 경로 (OSIV 예시)
   const VIEWER_PATH = "/osiv/app/index.html"; 
 
   useEffect(() => {
@@ -58,7 +56,6 @@ function CompareSetView() {
         </div>
       </div>
 
-      {/* 직접 비교 뷰어 영역 (좌우 iframe 배치) */}
       <div className="row mb-4 g-4">
         {/* 과거 영상 뷰어 */}
         <div className="col-md-6">
@@ -117,7 +114,6 @@ function CompareSetView() {
         </div>
       </div>
 
-      {/* 하단 정보 및 메모 영역 */}
       <div className="card p-4 shadow-sm border-0 rounded-4 mb-4">
         <div className="mb-3">
           <label className="form-label fw-semibold text-secondary">설명 및 메모</label>

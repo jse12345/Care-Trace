@@ -1,8 +1,8 @@
 import { Routes, Route } from "react-router-dom"; 
-import CompareSetList from "./ComparetList";
+import CompareSetList from "./CompareSetList";
 import CompareSetForm from "./CompareSetForm";
-import CompareSetView from "./CompareSetView";   // 추가 필요
-import CompareSetUpdate from "./CompareSetUpdate"; // 추가 필요
+import CompareSetView from "./CompareSetView";
+import CompareSetUpdate from "./CompareSetUpdate";
 import NotFoundPage from "../error/NotFoundPage";
 
 function CompareSetComp(){
