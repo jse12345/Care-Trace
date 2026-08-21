@@ -42,7 +42,7 @@ public class Examination {
 
     // Care-Trace 내부 Patient 매칭 결과 (dicomPatientId <-> Patient.patientCode). 매칭 안 되면 null.
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "patient_id")
+    @JoinColumn(name = "patient_id", columnDefinition = "BIGINT UNSIGNED")
     private Patient patient;
 
     @Column(name = "accession_number", length = 64)

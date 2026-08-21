@@ -62,7 +62,7 @@ public class TreatmentResponseReportServiceImpl implements TreatmentResponseRepo
                 .sizeChangeRate(vo.getSizeChangeRate())
                 .reportContent(requiredString(vo.getReportContent()))
                 .status(ReportStatus.DRAFT)
-                .isDeleted("N")
+                .isDeleted("n")
                 .build();
 
         return entityToVO(repositoryCustom.saveReport(report));

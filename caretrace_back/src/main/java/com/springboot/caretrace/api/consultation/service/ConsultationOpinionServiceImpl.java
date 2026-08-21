@@ -59,7 +59,7 @@ public class ConsultationOpinionServiceImpl implements ConsultationOpinionServic
                 .opinionContent(requiredString(vo.getOpinionContent()))
                 .opinionType(OpinionType.REQUEST)
                 .status(OpinionStatus.OPEN)
-                .isDeleted("N")
+                .isDeleted("n")
                 .build();
         return entityToVO(repositoryCustom.saveOpinion(opinion));
     }
@@ -81,7 +81,7 @@ public class ConsultationOpinionServiceImpl implements ConsultationOpinionServic
                 .opinionContent(requiredString(vo.getOpinionContent()))
                 .opinionType(OpinionType.RESPONSE)
                 .status(OpinionStatus.OPEN)
-                .isDeleted("N")
+                .isDeleted("n")
                 .build();
 
         return entityToVO(repositoryCustom.saveOpinion(responseOpinion));

@@ -4,7 +4,6 @@ import com.springboot.caretrace.api.medicalstaff.entity.MedicalStaff;
 import com.springboot.caretrace.api.patient.entity.Patient;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.Check;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -13,7 +12,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "patient_case")
-@Check(constraints = "is_deleted IN ('Y','N')")
+// DB에 이미 chk_patient_case_is_deleted CHECK (is_deleted IN ('Y','N')) 제약이 있어 별도 @Check 불필요
 @Getter
 @Setter
 @NoArgsConstructor
@@ -23,11 +22,11 @@ public class PatientCase {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "case_id")
+    @Column(name = "case_id", columnDefinition = "BIGINT UNSIGNED")
     private Long caseId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "patient_id", nullable = false)
+    @JoinColumn(name = "patient_id", nullable = false, columnDefinition = "BIGINT UNSIGNED")
     private Patient patient;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

@@ -4,14 +4,14 @@ import com.springboot.caretrace.api.medicalstaff.entity.MedicalStaff;
 import com.springboot.caretrace.api.patientcase.entity.PatientCase;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.Check;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "consultation_opinion")
-@Check(constraints = "is_deleted IN ('Y','N')")
+// DB에 이미 chk_consultation_opinion_is_deleted CHECK (is_deleted IN ('y','n')) 제약이 있어(소문자),
+// 여기서 별도 @Check를 걸면 서로 다른 값 도메인의 제약 두 개가 동시에 걸려 모든 행이 위반된다.
 @Getter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -24,7 +24,7 @@ public class ConsultationOpinion {
     private Long opinionId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "case_id", nullable = false)
+    @JoinColumn(name = "case_id", nullable = false, columnDefinition = "BIGINT UNSIGNED")
     private PatientCase patientCase;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -50,7 +50,7 @@ public class ConsultationOpinion {
 
     @Builder.Default
     @Column(name = "is_deleted", nullable = false, length = 1)
-    private String isDeleted = "N";
+    private String isDeleted = "n";
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -62,7 +62,7 @@ public class ConsultationOpinion {
 
     // 요구사항 1-4: 의견 철회 시 상태 및 삭제 여부 변경[cite: 2]
     public void softDelete() {
-        this.isDeleted = "Y";
+        this.isDeleted = "y";
         this.status = OpinionStatus.CLOSED;
     }
 

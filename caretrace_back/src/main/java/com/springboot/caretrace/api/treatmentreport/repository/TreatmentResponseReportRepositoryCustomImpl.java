@@ -57,7 +57,7 @@ public class TreatmentResponseReportRepositoryCustomImpl implements TreatmentRes
     @Override
     public TreatmentResponseReport getReport(Long reportId) {
         return queryFactory.selectFrom(report)
-                .where(report.reportId.eq(reportId), report.isDeleted.eq("N"))
+                .where(report.reportId.eq(reportId), report.isDeleted.eq("n"))
                 .fetchOne();
     }
 
@@ -68,7 +68,7 @@ public class TreatmentResponseReportRepositoryCustomImpl implements TreatmentRes
 
     private BooleanBuilder search(PageObject pageObject, Long caseId, LocalDate startDate, LocalDate endDate, ResponseResult responseResult) {
         BooleanBuilder builder = new BooleanBuilder();
-        builder.and(report.isDeleted.eq("N"));
+        builder.and(report.isDeleted.eq("n"));
 
         if (caseId != null) builder.and(report.patientCase.caseId.eq(caseId));
         if (startDate != null) builder.and(report.evaluationDate.goe(startDate));

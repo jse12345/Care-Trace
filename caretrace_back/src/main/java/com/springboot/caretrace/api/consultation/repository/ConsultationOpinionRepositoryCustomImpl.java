@@ -83,7 +83,7 @@ public class ConsultationOpinionRepositoryCustomImpl implements ConsultationOpin
                 .leftJoin(patientCase.patient, patient)
                 .where(
                         // 삭제되지 않은 데이터만 가져오도록 필터링
-                        opinion.isDeleted.eq("N"),
+                        opinion.isDeleted.eq("n"),
                         // 수집된 원글이거나 OR 그 원글을 부모로 두는 답글인 경우 모두 포함
                         opinion.opinionId.in(familyIds)
                                 .or(opinion.parentOpinion.opinionId.in(familyIds))
@@ -122,7 +122,7 @@ public class ConsultationOpinionRepositoryCustomImpl implements ConsultationOpin
                 .leftJoin(opinion.staff, staff)
                 .where(
                         opinion.opinionId.eq(opinionId),
-                        opinion.isDeleted.eq("N")
+                        opinion.isDeleted.eq("n")
                 )
                 .fetchOne();
     }
@@ -135,7 +135,7 @@ public class ConsultationOpinionRepositoryCustomImpl implements ConsultationOpin
     // 요구사항 1-1: 삭제되지 않은 의견만 증례별 조회 및 구분/상태 검색
     private BooleanBuilder search(Long caseId, OpinionType type, OpinionStatus status) {
         BooleanBuilder builder = new BooleanBuilder();
-        builder.and(opinion.isDeleted.eq("N"));
+        builder.and(opinion.isDeleted.eq("n"));
 
         if (caseId != null) {
             builder.and(opinion.patientCase.caseId.eq(caseId));

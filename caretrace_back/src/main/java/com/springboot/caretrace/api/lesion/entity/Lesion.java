@@ -29,7 +29,7 @@ public class Lesion {
     private Long lesionId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "case_id", nullable = false)
+    @JoinColumn(name = "case_id", nullable = false, columnDefinition = "BIGINT UNSIGNED")
     private PatientCase patientCase;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

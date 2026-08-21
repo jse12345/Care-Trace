@@ -4,7 +4,6 @@ import com.springboot.caretrace.api.medicalstaff.entity.MedicalStaff;
 import com.springboot.caretrace.api.patientcase.entity.PatientCase;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.Check;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -14,7 +13,8 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "treatment_response_report")
-@Check(constraints = "is_deleted IN ('Y','N')")
+// DB에 이미 chk_treatment_response_report_is_deleted CHECK (is_deleted IN ('y','n')) 제약이 있어(소문자),
+// 여기서 별도 @Check를 걸면 서로 다른 값 도메인의 제약 두 개가 동시에 걸려 모든 행이 위반된다.
 @Getter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -27,7 +27,7 @@ public class TreatmentResponseReport {
     private Long reportId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "case_id", nullable = false)
+    @JoinColumn(name = "case_id", nullable = false, columnDefinition = "BIGINT UNSIGNED")
     private PatientCase patientCase;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -57,7 +57,7 @@ public class TreatmentResponseReport {
 
     @Builder.Default
     @Column(name = "is_deleted", nullable = false, length = 1)
-    private String isDeleted = "N";
+    private String isDeleted = "n";
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -77,7 +77,7 @@ public class TreatmentResponseReport {
 
     // 요구사항 2-4: 보고서 삭제 시 실제 삭제 없이 is_deleted와 상태 변경[cite: 4]
     public void softDelete() {
-        this.isDeleted = "Y";
+        this.isDeleted = "y";
         this.status = ReportStatus.ARCHIVED;
     }
 }
