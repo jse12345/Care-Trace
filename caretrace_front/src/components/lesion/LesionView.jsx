@@ -16,6 +16,7 @@ function LesionView() {
   const [searchParams] = useSearchParams();
   const lesionId = searchParams.get("lesionId");
   const [lesion, setLesion] = useState(null);
+  const [caseInfo, setCaseInfo] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
@@ -26,13 +27,32 @@ function LesionView() {
     return () => { active = false; };
   }, [lesionId]);
 
+  useEffect(() => {
+    if (!lesion?.caseId) return;
+
+    let active = true;
+
+    api.get(`/patient-cases/${lesion.caseId}`)
+      .then(({ data }) => {
+        if (active) setCaseInfo(data);
+      })
+      .catch(() => {
+        if (active) setCaseInfo(null);
+      });
+
+    return () => { active = false; };
+  }, [lesion?.caseId]);
+
   return (
     <main className="lesion-page">
       <div className="lesion-container">
         <Breadcrumb
           items={[
             ...(lesion
-              ? [{ label: `증례 #${lesion.caseId}`, to: `/lesion/list?caseId=${lesion.caseId}` }]
+              ? [{
+                  label: caseInfo ? (caseInfo.patientName || `환자 ${caseInfo.patientId}`) : `환자 #${lesion.caseId}`,
+                  to: `/lesion/list?caseId=${lesion.caseId}`,
+                }]
               : [{ label: "병변 목록", to: "/lesion/list" }]),
             { label: "병변 상세" },
           ]}

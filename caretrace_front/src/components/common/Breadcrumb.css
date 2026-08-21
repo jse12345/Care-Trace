@@ -33,5 +33,5 @@
 
 .ct-breadcrumb-separator {
   margin: 0 8px;
-  color: var(--clinical-line);
+  color: var(--clinical-muted);
 }

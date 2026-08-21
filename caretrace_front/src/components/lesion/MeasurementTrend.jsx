@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import api from "../common/api";
+import Breadcrumb from "../common/Breadcrumb";
 import TrendChart from "./TrendChart";
 
 function MeasurementTrend() {
@@ -10,6 +11,8 @@ function MeasurementTrend() {
 
   const [trend, setTrend] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
+  const [caseId, setCaseId] = useState(null);
+  const [caseInfo, setCaseInfo] = useState(null);
 
   useEffect(() => {
     if (!lesionId) return;
@@ -20,9 +23,47 @@ function MeasurementTrend() {
     return () => { active = false; };
   }, [lesionId]);
 
+  useEffect(() => {
+    if (!lesionId) return;
+    let active = true;
+    api.get("/lesion/view.do", { params: { lesionId } })
+      .then(({ data }) => { if (active) setCaseId(data.caseId); })
+      .catch(() => { if (active) setCaseId(null); });
+    return () => { active = false; };
+  }, [lesionId]);
+
+  useEffect(() => {
+    if (!caseId) return;
+
+    let active = true;
+
+    api.get(`/patient-cases/${caseId}`)
+      .then(({ data }) => {
+        if (active) setCaseInfo(data);
+      })
+      .catch(() => {
+        if (active) setCaseInfo(null);
+      });
+
+    return () => { active = false; };
+  }, [caseId]);
+
   return (
     <main className="lesion-page">
       <div className="lesion-container">
+        {caseId && (
+          <Breadcrumb
+            items={[
+              {
+                label: caseInfo ? (caseInfo.patientName || `환자 ${caseInfo.patientId}`) : `환자 #${caseId}`,
+                to: `/lesion/list?caseId=${caseId}`,
+              },
+              { label: "병변 목록", to: `/lesion/list?caseId=${caseId}` },
+              { label: "측정값 목록", to: `/lesion/measurement/list?lesionId=${lesionId}` },
+              { label: "변화 추세" },
+            ]}
+          />
+        )}
         <section className="lesion-form-card">
           <div className="lesion-form-card-header">
             <h2>병변 크기 변화 추세</h2>

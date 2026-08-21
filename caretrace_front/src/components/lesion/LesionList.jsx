@@ -76,7 +76,7 @@ function LesionList() {
           <Breadcrumb
             items={[
               {
-                label: caseInfo ? `증례 #${caseId} · ${caseInfo.patientName || `환자 ${caseInfo.patientId}`}` : `증례 #${caseId}`,
+                label: caseInfo ? (caseInfo.patientName || `환자 ${caseInfo.patientId}`) : `환자 #${caseId}`,
                 to: `/patient-cases/${caseId}`,
               },
               { label: "병변 목록" },
