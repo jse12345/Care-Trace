@@ -1,5 +1,5 @@
 import { Routes, Route } from "react-router-dom"; 
-import CompareSetList from "./comparesetList";
+import CompareSetList from "./ComparetList";
 import CompareSetForm from "./CompareSetForm";
 import CompareSetView from "./CompareSetView";   // 추가 필요
 import CompareSetUpdate from "./CompareSetUpdate"; // 추가 필요

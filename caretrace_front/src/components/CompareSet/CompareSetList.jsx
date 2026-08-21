@@ -26,7 +26,7 @@ function CompareSetList(){
   }, []);
 
   const handleDelete = async (id, e) => {
-    e.stopPropagation();
+    e.stopPropagation(); // 행 클릭 이벤트가 부모로 퍼지는 것 방지
     if (window.confirm("정말 이 비교 세트를 삭제하시겠습니까?")) {
       try {
         await api.delete(`/compare-set/delete.do/${id}`);
@@ -78,10 +78,14 @@ function CompareSetList(){
               </tr>
             ) : (
               compareList.map((item, index) => (
-                <tr key={item.id}>
+                <tr 
+                  key={item.id} 
+                  style={{ cursor: "pointer" }}
+                  onClick={() => navigate(`/compare-set/view/${item.id}`)} // 행 클릭 시 상세/비교 페이지로 이동
+                >
                   <td>{index + 1}</td>
                   <td>{item.patientId}</td>
-                  <td>{item.title}</td>
+                  <td className="fw-semibold text-primary">{item.title}</td>
                   <td className="text-truncate" style={{ maxWidth: "150px" }}>{item.pastImageUrl}</td>
                   <td className="text-truncate" style={{ maxWidth: "150px" }}>{item.currentImageUrl}</td>
                   <td>{item.regDate ? item.regDate.replace('T', ' ') : '-'}</td>
