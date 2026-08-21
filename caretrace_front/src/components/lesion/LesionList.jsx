@@ -40,10 +40,7 @@ function LesionList() {
   }, [caseId, searchParams]);
 
   useEffect(() => {
-    if (!caseId) {
-      setCaseInfo(null);
-      return;
-    }
+    if (!caseId) return;
 
     let active = true;
 
@@ -100,7 +97,7 @@ function LesionList() {
           </button>
         </header>
 
-        {caseInfo && (
+        {caseId && caseInfo && (
           <section className="lesion-list-card">
             <div className="lesion-detail-grid">
               <div className="lesion-detail-item"><span>환자</span><strong>{caseInfo.patientName || `환자 ${caseInfo.patientId}`}</strong></div>
